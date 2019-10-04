@@ -1,5 +1,5 @@
 /*
-Package cmd -
+Package docker -
 
 Copyright © 2019 Cyril Diagne <diagne.cyril@gmail.com>.
 
