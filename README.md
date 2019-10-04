@@ -1,4 +1,4 @@
-# ![](https://github.com/cyrildiagne/kuda/raw/master/docs/images/logo.png)
+![](https://github.com/cyrildiagne/kuda/raw/master/docs/images/logo.png)
 
 [![](https://circleci.com/gh/cyrildiagne/kuda/tree/master.svg?style=shield&circle-token=b14f5838ae2acabe21a8255070507f7e36ba510b)](https://circleci.com/gh/cyrildiagne/kuda)
 [![](https://goreportcard.com/badge/github.com/cyrildiagne/kuda)](https://goreportcard.com/report/github.com/cyrildiagne/kuda)
