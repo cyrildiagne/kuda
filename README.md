@@ -2,7 +2,7 @@
 
 [![](https://circleci.com/gh/cyrildiagne/kuda/tree/master.svg?style=shield&circle-token=b14f5838ae2acabe21a8255070507f7e36ba510b)](https://circleci.com/gh/cyrildiagne/kuda)
 [![](https://goreportcard.com/badge/github.com/cyrildiagne/kuda)](https://goreportcard.com/report/github.com/cyrildiagne/kuda)
-[![](https://img.shields.io/github/v/release/cyrildiagne/kuda)](https://github.com/cyrildiagne/kuda/releases)
+[![](https://img.shields.io/github/v/release/cyrildiagne/kuda?include_prereleases)](https://github.com/cyrildiagne/kuda/releases)
 
 **Develop & deploy serverless applications on remote GPUs.**
 
