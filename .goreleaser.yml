@@ -1,0 +1,35 @@
+release:
+  prerelease: auto
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - # Env
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -X github.com/cyrildiagne/kuda/cmd.version={{.Version}}
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+# brews:
+#   - # Tap
+#     github:
+#       owner: tredfield
+#       name: homebrew-tap
+#     homepage: "https://github.com/cyrildiagne/kuda"
+#     description: "Build & deploy serverless applications on remote GPUs."

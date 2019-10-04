@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build-cli:
+    docker:
+      - image: circleci/golang:1.13
+    steps:
+      - checkout
+      - run: go build main.go
+  release:
+    docker:
+      - image: circleci/golang:1.13
+    steps:
+      - checkout
+      - run: curl -sL https://git.io/goreleaser | bash
+workflows:
+  version: 2
+  any-commit:
+    jobs:
+      - build-cli:
+          filters:
+            tags:
+              ignore: /.*/
+  release:
+    jobs:
+      - release:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(-.*)*/

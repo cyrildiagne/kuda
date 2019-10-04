@@ -1,0 +1,46 @@
+FROM alpine:3.10
+ARG CLOUD_SDK_VERSION=260.0.0
+
+# Google Cloud SDK.
+ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
+ENV PATH /google-cloud-sdk/bin:$PATH
+RUN apk --no-cache add \
+  bash \
+  curl \
+  python \
+  py-crcmod \
+  libc6-compat \
+  openssh-client \
+  git \
+  gnupg \
+  && curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+  tar xzf google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+  rm google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+  gcloud config set core/disable_usage_reporting true && \
+  gcloud config set component_manager/disable_update_check true && \
+  gcloud config set metrics/environment github_docker_image && \
+  gcloud --version
+VOLUME ["/root/.config"]
+
+# Install Kubectl.
+RUN gcloud components install beta kubectl
+
+# Install Ksync.
+RUN curl https://vapor-ware.github.io/gimme-that/gimme.sh | bash
+
+# Copy the provider's commands.
+COPY . /kuda_cmd
+ENV KUDA_CMD_DIR /kuda_cmd
+RUN chmod +x /kuda_cmd/*.sh
+RUN ln -s /kuda_cmd/app_deploy.sh /usr/local/bin/kuda_app_deploy && \
+  ln -s /kuda_cmd/app_delete.sh /usr/local/bin/kuda_app_delete && \
+  ln -s /kuda_cmd/setup.sh /usr/local/bin/kuda_setup && \
+  ln -s /kuda_cmd/delete.sh /usr/local/bin/kuda_delete && \
+  ln -s /kuda_cmd/dev_start.sh /usr/local/bin/kuda_dev_start && \
+  ln -s /kuda_cmd/dev_stop.sh /usr/local/bin/kuda_dev_stop && \
+  ln -s /kuda_cmd/get.sh /usr/local/bin/kuda_get
+
+# Go to the app home.
+WORKDIR /app_home
+
+ENTRYPOINT ["/bin/bash"]
