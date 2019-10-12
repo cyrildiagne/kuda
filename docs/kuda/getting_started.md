@@ -23,11 +23,11 @@ This process can take a while since it will create a remote cluster on GKE and i
 
 ### • Initialize
 
-Retrieve an example application:
+Retrieve a simple demo application:
 
 ```bash
-git clone https://github.com/cyrildiagne/kuda
-cd kuda/examples/hello-world
+git clone https://github.com/cyrildiagne/kuda-apps
+cd kuda-apps/hello-gpu
 ```
 
 Install the example dependencies (feel free to create a virtualenv or a [remote dev session](https://docs.kuda.dev/kuda/remote_development)).
