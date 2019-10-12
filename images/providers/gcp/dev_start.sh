@@ -9,7 +9,7 @@ gcloud container clusters get-credentials $KUDA_GCP_CLUSTER_NAME
 
 # TODO: Increase the number of GPU nodes by 1 to speed up initialization.
 # gcloud container clusters resize $KUDA_GCP_CLUSTER_NAME \
-#   --node-pool $KUDA_DEFAULT_GPU \
+#   --node-pool $KUDA_GCP_GPU \
 #   --num-nodes 1 \
 #   --quiet
 

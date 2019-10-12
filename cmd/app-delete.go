@@ -58,7 +58,7 @@ func delete(app string) error {
 	volumes := []string{dir + ":/app_home"}
 
 	// Run the command.
-	dockerErr := RunDockerWithProviderEnvs(docker.CommandOption{
+	dockerErr := RunDockerWithEnvs(docker.CommandOption{
 		Image:         image,
 		Command:       command,
 		AppendVolumes: volumes,

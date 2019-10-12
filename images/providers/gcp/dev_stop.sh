@@ -18,6 +18,6 @@ kubectl delete virtualservice kuda-dev
 # Resize the GPU cluster to 0. > Not mandatory
 # since the autoscaler will automatically scale down to 0 after a while.
 # gcloud container clusters resize $KUDA_GCP_CLUSTER_NAME \
-#   --node-pool $KUDA_DEFAULT_GPU \
+#   --node-pool $KUDA_GCP_GPU \
 #   --num-nodes 0 \
 #   --quiet

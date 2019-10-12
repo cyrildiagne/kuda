@@ -50,7 +50,7 @@ func get(property string) error {
 	command := []string{"kuda_get", property}
 
 	// Run the command.
-	dockerErr := RunDockerWithProviderEnvs(docker.CommandOption{
+	dockerErr := RunDockerWithEnvs(docker.CommandOption{
 		Image:   image,
 		Command: command,
 	})

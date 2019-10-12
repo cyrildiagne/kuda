@@ -27,8 +27,7 @@ import (
 )
 
 var provider = "gcp"
-var project string
-var credentials string
+var providerVersion = "1.2.0"
 
 // gcpCmd represents the `setup gcp` command
 var gcpCmd = &cobra.Command{
@@ -45,15 +44,20 @@ var gcpCmd = &cobra.Command{
 func init() {
 	setupCmd.AddCommand(gcpCmd)
 
-	gcpCmd.PersistentFlags().StringVarP(&project, "project", "p", "",
-		"GCP Project ID")
-	gcpCmd.MarkPersistentFlagRequired("project")
-	viper.BindPFlag("gcp_project_id", gcpCmd.PersistentFlags().Lookup("project"))
+	gcpCmd.PersistentFlags().StringP("gcp_project_id", "p", "", "GCP Project ID")
+	gcpCmd.MarkPersistentFlagRequired("gcp_project_id")
 
-	gcpCmd.PersistentFlags().StringVarP(&credentials, "credentials", "c", "",
-		"Path to GCP credentials JSON")
-	gcpCmd.MarkPersistentFlagRequired("credentials")
-	viper.BindPFlag("gcp_credentials", gcpCmd.PersistentFlags().Lookup("credentials"))
+	gcpCmd.PersistentFlags().StringP("gcp_credentials", "c", "", "Path to GCP credentials JSON")
+	gcpCmd.MarkPersistentFlagRequired("gcp_credentials")
+	viper.BindPFlags(gcpCmd.PersistentFlags())
+
+	gcpCmd.Flags().String("gcp_cluster_name", "kuda", "Name of the cluster.")
+	gcpCmd.Flags().String("gcp_compute_zone", "us-central1-a", "Compute Zone for the cluster.")
+	gcpCmd.Flags().String("gcp_machine_type", "n1-standard-4", "Machine type.")
+	gcpCmd.Flags().Int("gcp_pool_num_nodes", 1, "Default number of nodes on the system pool. ")
+	gcpCmd.Flags().String("gcp_gpu", "k80", "Default GPU to use")
+	gcpCmd.Flags().Bool("gcp_use_preemptible", false, "Wether or not to use pre-emptible instances")
+	viper.BindPFlags(gcpCmd.Flags())
 }
 
 func setup() error {
@@ -61,11 +65,11 @@ func setup() error {
 	viper.Set("provider", provider)
 
 	// Setup the provider's image.
-	providerVersion := "1.2.0"
 	image := "gcr.io/kuda-project/provider-" + provider + ":" + providerVersion
 	viper.Set("image", image)
 
 	// Setup the volume mounting for the credentials.
+	credentials := viper.GetString("gcp_credentials")
 	volumeSecret := docker.VolumeMapping{
 		From: filepath.Dir(credentials),
 		To:   "/secret",

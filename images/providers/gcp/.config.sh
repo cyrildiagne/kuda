@@ -1,30 +1,25 @@
 set -e
 
+echo
+echo -e "\e[1m \e[34mKuda GCP provider \e[36mv$(cat /kuda_cmd/VERSION) \e[0m"
+echo
+
+# Make sure gcp_project_id is set.
 if [ -z "$KUDA_GCP_PROJECT_ID" ]; then
   echo "\$KUDA_GCP_PROJECT_ID is undefined."
   exit 1
 fi
 
+# Make sure gcp_credentials is set.
 if [ -z "$KUDA_GCP_CREDENTIALS" ]; then
   echo "\$KUDA_GCP_CREDENTIALS is undefined."
   exit 1
 fi
 
-echo
-echo -e "\e[1m \e[34mKuda GCP provider \e[36mv$(cat /kuda_cmd/VERSION) \e[0m"
-echo
-
+# Setup credential path to mounted volume in the docker image.
 export KUDA_GCP_CREDENTIALS=/secret/$(basename $KUDA_GCP_CREDENTIALS)
 
-# Set default config.
-export KUDA_GCP_CLUSTER_NAME="${KUDA_GCP_CLUSTER_NAME:-kuda}"
-export KUDA_GCP_COMPUTE_ZONE="${KUDA_GCP_COMPUTE_ZONE:-us-central1-a}"
-export KUDA_GCP_MACHINE_TYPE="${KUDA_GCP_MACHINE_TYPE:-n1-standard-2}"
-
-export KUDA_DEFAULT_POOL_NUM_NODES="${KUDA_DEFAULT_POOL_NUM_NODES:-1}"
-export KUDA_DEFAULT_GPU="${KUDA_DEFAULT_GPU:-k80}"
-export KUDA_DEFAULT_USE_PREEMPTIBLE="${KUDA_DEFAULT_USE_PREEMPTIBLE:-false}"
-
+# Set default Kuda Dev config.
 export KUDA_DEV_APP_NAME="${KUDA_DEV_APP_NAME:-kuda-dev}"
 export KUDA_DEV_SYNC_PATH="${KUDA_DEV_SYNC_PATH:-/app_home}"
 

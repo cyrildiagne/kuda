@@ -45,6 +45,6 @@ func Stop() error {
 	// Command to run.
 	command := []string{"kuda_dev_stop"}
 	// Run
-	err := RunDockerWithProviderEnvs(docker.CommandOption{Image: image, Command: command})
+	err := RunDockerWithEnvs(docker.CommandOption{Image: image, Command: command})
 	return err
 }

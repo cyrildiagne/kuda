@@ -58,6 +58,6 @@ func Delete() error {
 	// Command to run.
 	command := []string{"kuda_delete"}
 	// Run.
-	err := RunDockerWithProviderEnvs(docker.CommandOption{Image: image, Command: command})
+	err := RunDockerWithEnvs(docker.CommandOption{Image: image, Command: command})
 	return err
 }

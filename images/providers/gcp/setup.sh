@@ -15,7 +15,7 @@ function create_main_cluster() {
     --cluster-version=latest \
     --zone=$KUDA_GCP_COMPUTE_ZONE \
     --scopes cloud-platform \
-    --num-nodes $KUDA_DEFAULT_POOL_NUM_NODES \
+    --num-nodes $KUDA_GCP_POOL_NUM_NODES \
     --enable-stackdriver-kubernetes \
     --issue-client-certificate \
     --enable-basic-auth \
@@ -31,13 +31,13 @@ function create_main_cluster() {
 
 function create_gpu_nodepools() {
   preemptible_mode=""
-  if [ $KUDA_DEFAULT_USE_PREEMPTIBLE = true ]; then
+  if [ $KUDA_GCP_USE_PREEMPTIBLE = true ]; then
     preemptible_mode='--preemptible'
   fi
   # Create the default GPU Node pool.
-  gcloud container node-pools create $KUDA_DEFAULT_GPU \
+  gcloud container node-pools create $KUDA_GCP_GPU \
     --machine-type=$KUDA_GCP_MACHINE_TYPE \
-    --accelerator type=nvidia-tesla-$KUDA_DEFAULT_GPU,count=1 \
+    --accelerator type=nvidia-tesla-$KUDA_GCP_GPU,count=1 \
     --zone $KUDA_GCP_COMPUTE_ZONE \
     --cluster $KUDA_GCP_CLUSTER_NAME \
     --num-nodes 1 \
@@ -109,10 +109,10 @@ gcloud container clusters get-credentials $KUDA_GCP_CLUSTER_NAME
 # Check if GPU cluster exists otherwise create one.
 if gcloud container node-pools list \
   --zone $KUDA_GCP_COMPUTE_ZONE \
-  --cluster $KUDA_GCP_CLUSTER_NAME | grep -q $KUDA_DEFAULT_GPU; then
+  --cluster $KUDA_GCP_CLUSTER_NAME | grep -q $KUDA_GCP_GPU; then
   echo "GPU node pool already exists."
 else
-  echo "Creating new GPU node pool with default GPU $KUDA_DEFAULT_GPU"
+  echo "Creating new GPU node pool with default GPU $KUDA_GCP_GPU"
   create_gpu_nodepools
 fi
 

@@ -25,20 +25,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-// RunDockerWithProviderEnvs retrieves local environment variables
+// RunDockerWithEnvs retrieves local environment variables
 // that match a provider id and runs a docker image.
-func RunDockerWithProviderEnvs(opts docker.CommandOption) error {
+func RunDockerWithEnvs(opts docker.CommandOption) error {
 	// Environment variables for the Docker image.
-	// We look for all the configs that start with the provider name
-	// "gcp" and convert them in the environment variable
-	// format KUDA_GCP_*
-	provider := viper.GetString("provider")
+	// Convert all the viper configs to environment variable
+	// in the format KUDA_* where * is the config uppercased.
 	for k, e := range viper.AllSettings() {
-		if strings.HasPrefix(k, provider) {
-			key := "KUDA_" + strings.ToUpper(k)
-			value := fmt.Sprintf("%v", e)
-			opts.AppendEnv = append(opts.AppendEnv, key+"="+value)
-		}
+		key := "KUDA_" + strings.ToUpper(k)
+		value := fmt.Sprintf("%v", e)
+		opts.AppendEnv = append(opts.AppendEnv, key+"="+value)
 	}
 	return docker.RunDockerCommand(opts)
 }

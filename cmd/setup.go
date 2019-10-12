@@ -47,7 +47,7 @@ func Setup() error {
 	// Command to run.
 	command := []string{"kuda_setup"}
 	// Run
-	err := RunDockerWithProviderEnvs(docker.CommandOption{Image: image, Command: command})
+	err := RunDockerWithEnvs(docker.CommandOption{Image: image, Command: command})
 	if err != nil {
 		// Ask if we should delete the cluster.
 		fmt.Print("There was an error setting up the cluster. Do you want to delete it? (y/n) ")

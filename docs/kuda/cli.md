@@ -16,8 +16,8 @@ This command also allocates an empty GPU node that will be provisioned only when
 
 **Flags for `gcp`:**
 
-- **`[-p | --project]`**: A GCP project ID.
-- **`[-c | --credentials]`**: Path to a GCP credentials file.
+- **`[-p | --gcp_project_id]`**: An existing GCP project ID.
+- **`[-c | --gcp_credentials]`**: Path to a GCP credentials file.
 
 ### → Delete
 
