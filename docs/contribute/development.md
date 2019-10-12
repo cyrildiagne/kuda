@@ -35,7 +35,14 @@ Then:
 make provider=<provider> cmd="<command>" build-provider-and-run
 ```
 
-**Example:**
+**Examples:**
+
+To build the `gcp` provider image:
+
+- Edit the version number in `/images/providers/gcp/VERSION`
+- Then run : `make provider=gcp build-provider`
+
+Build a provider and run a command:
 
 ```bash
 export KUDA_GCP_PROJECT_ID=gpu-sh

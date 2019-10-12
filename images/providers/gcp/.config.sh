@@ -10,8 +10,8 @@ if [ -z "$KUDA_GCP_CREDENTIALS" ]; then
   exit 1
 fi
 
-echo 
-echo -e "\e[1m \e[34mKuda GCP provider \e[0m"
+echo
+echo -e "\e[1m \e[34mKuda GCP provider \e[36mv$(cat /kuda_cmd/VERSION) \e[0m"
 echo
 
 export KUDA_GCP_CREDENTIALS=/secret/$(basename $KUDA_GCP_CREDENTIALS)

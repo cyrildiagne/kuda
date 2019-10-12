@@ -61,7 +61,7 @@ func setup() error {
 	viper.Set("provider", provider)
 
 	// Setup the provider's image.
-	providerVersion := "1.1.0"
+	providerVersion := "1.2.0"
 	image := "gcr.io/kuda-project/provider-" + provider + ":" + providerVersion
 	viper.Set("image", image)
 
