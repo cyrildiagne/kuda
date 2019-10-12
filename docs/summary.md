@@ -8,7 +8,7 @@
 - [Getting Started](kuda/getting_started.md)
 - [Remote Development](kuda/remote_development.md)
 - [Reference](kuda/cli.md)
-- [Examples](https://github.com/cyrildiagne/kuda/tree/master/examples)
+- [Examples](https://github.com/cyrildiagne/kuda-apps)
 
 ## Providers
 

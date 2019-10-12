@@ -1,4 +1,4 @@
-<img src="docs/images/logo.png" width="361" height="135"/>
+<img src="docs/images/logo.png" width="241" height="90"/>
 
 [![](https://circleci.com/gh/cyrildiagne/kuda/tree/master.svg?style=shield&circle-token=b14f5838ae2acabe21a8255070507f7e36ba510b)](https://circleci.com/gh/cyrildiagne/kuda)
 [![](https://goreportcard.com/badge/github.com/cyrildiagne/kuda?v1)](https://goreportcard.com/report/github.com/cyrildiagne/kuda)
@@ -45,5 +45,5 @@
 
 - [Install](https://docs.kuda.dev/kuda/install)
 - [Getting Started](https://docs.kuda.dev/kuda/getting_started)
-- [Examples](https://github.com/cyrildiagne/kuda/tree/master/examples)
+- [Examples](https://github.com/cyrildiagne/kuda-apps)
 - [Reference](https://docs.kuda.dev/kuda/cli)
