@@ -12,7 +12,8 @@
 
 ## Providers
 
-- [GCP](../images/providers/gcp.md)
+- [GCP](../providers/gcp/README.md)
+- [AWS (WIP)](../providers/aws/README.md)
 
 ## Contribute
 
