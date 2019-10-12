@@ -1,4 +1,4 @@
-![](https://github.com/cyrildiagne/kuda/raw/master/docs/images/logo.png)
+<img src="docs/images/logo.png" width="361" height="135"/>
 
 [![](https://circleci.com/gh/cyrildiagne/kuda/tree/master.svg?style=shield&circle-token=b14f5838ae2acabe21a8255070507f7e36ba510b)](https://circleci.com/gh/cyrildiagne/kuda)
 [![](https://goreportcard.com/badge/github.com/cyrildiagne/kuda?v1)](https://goreportcard.com/report/github.com/cyrildiagne/kuda)
@@ -19,7 +19,6 @@
 
 **Serverless GPU applications**
 
-- Remote GPUs can be expensive for individuals and small teams. For prototypes and projects that receive traffic only occasionally, it's hard to justify the cost of running an expensive GPU server permanently.
 - Kuda uses [Knative](https://knative.dev) to consume billable GPUs only when there is traffic, and scales down to zero when there's no traffic.
 
 **Easy to use**
