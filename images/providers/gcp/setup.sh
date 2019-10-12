@@ -47,11 +47,6 @@ function create_gpu_nodepools() {
     --enable-autoscaling \
     --metadata disable-legacy-endpoints=false \
     $preemptible_mode
-
-  # Install Nvidia Drivers.
-  nvidia_driver_repo="https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators"
-  nvidia_driver_path="master/nvidia-driver-installer/cos/daemonset-preloaded.yaml"
-  kubectl apply -f "$nvidia_driver_repo/$nvidia_driver_path"
 }
 
 function install_knative() {
@@ -121,11 +116,16 @@ else
   create_gpu_nodepools
 fi
 
+# Make sure the Nvidia drivers are installed
+nvidia_driver_repo="https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators"
+nvidia_driver_path="master/nvidia-driver-installer/cos/daemonset-preloaded.yaml"
+kubectl apply -f "$nvidia_driver_repo/$nvidia_driver_path"
+
 # Install Knative.
-echo "Installing Knative 0.9.0..."
 if kubectl get pods --namespace knative-serving --label-columns=serving.knative.dev/release | grep v0.9.0; then
   echo "Knative v0.9.0 is already installed."
 else
+  echo "Installing Knative 0.9.0..."
   install_knative
 fi
 
