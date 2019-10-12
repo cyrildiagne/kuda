@@ -19,8 +19,10 @@ Developping on remote sessions offers many other advantages such as:
 Start a remote dev session that will be provisioned on your cluster.
 
 ```bash
-kuda dev start
+kuda dev start nvidia/cuda:10.1-base
 ```
+
+`nvidia/cuda:10.1-base` Is the docker image to use as base. It allows you to specify which version of CUDA and CuDNN you need. You can find a list of suggested images in the kuda dev [reference page](https://docs.kuda.dev/kuda/cli#dev).
 
 This command will start the remote session and synchronize the CWD \(current working directory\) with the remote instance.
 

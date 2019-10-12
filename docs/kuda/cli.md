@@ -32,16 +32,23 @@ Deletes the remote cluster.
 ### → Start
 
 ```bash
-kuda dev start
+kuda dev start [base-image]
 ```
 
 Starts a remote dev session with the current working directory.
+
+**Example:** `kuda dev start nvidia/cuda:10.1-base`
 
 This command:
 
 - Provisions a node with GPU on the cluster & install the nvidia driver
 - Starts a development pod based on the Deep Learning VM
 - Synchronise the directory provided as parameter with the remote node
+
+List of recommended `base-image`:
+
+- all images from [nvidia/cuda](https://hub.docker.com/r/nvidia/cuda/)
+- gcloud's [Deep Learning containers](https://cloud.google.com/ai-platform/deep-learning-containers/docs/choosing-container)
 
 ### → Stop
 

@@ -29,11 +29,12 @@ import (
 
 // startCmd represents the `dev start` command
 var startCmd = &cobra.Command{
-	Use:   "start",
+	Use:   "start [docker-image]",
 	Short: "Start a dev session.",
-	Long:  "Start a dev session.",
+	Long:  "Start a dev session using the provider docker image.",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := start(); err != nil {
+		if err := start(args[0]); err != nil {
 			fmt.Println("ERROR:", err)
 		}
 	},
@@ -43,12 +44,12 @@ func init() {
 	devCmd.AddCommand(startCmd)
 }
 
-func start() error {
+func start(devImage string) error {
 	fmt.Println("→ Starting a remote session...")
 	// Image to run.
 	image := viper.GetString("image")
 	// Command to run.
-	command := []string{"kuda_dev_start"}
+	command := []string{"kuda_dev_start", devImage}
 
 	// Add the CWD to the volumes mounted in Docker.
 	dir, err := os.Getwd()

@@ -13,11 +13,9 @@ gcloud container clusters get-credentials $KUDA_GCP_CLUSTER_NAME
 #   --num-nodes 1 \
 #   --quiet
 
-# TODO: Support multiple sessions.
-# tmp_uuid=$(od -x /dev/urandom | head -1 | awk '{print $2$3}')
-# KUDA_DEV_APP_NAME=kuda-dev-$tmp_uuid
-
-# exit 1
+uid=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 7)
+dev_app_name=$KUDA_DEV_APP_NAME-$uid
+dev_image=$1
 
 # Launch.
 # TODO: materialize as external yaml file and customize
@@ -26,39 +24,41 @@ cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Service
 metadata:
-  name: $KUDA_DEV_APP_NAME
+  name: $dev_app_name
   labels:
-    app: $KUDA_DEV_APP_NAME
+    app: $dev_app_name
 spec:
   ports:
   - name: http
     port: 8000
     targetPort: 80
   selector:
-    app: $KUDA_DEV_APP_NAME
+    app: $dev_app_name
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: $KUDA_DEV_APP_NAME
+  name: $dev_app_name
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: $KUDA_DEV_APP_NAME
+      app: $dev_app_name
   template:
     metadata:
       labels:
-        app: $KUDA_DEV_APP_NAME
+        app: $dev_app_name
     spec:
       containers:
-        - name: $KUDA_DEV_APP_IMAGE_NAME
-          image: $KUDA_DEV_APP_IMAGE
+        - name: kuda-dev-image
+          image: $dev_image
+          imagePullPolicy: Always
           resources:
             limits:
               nvidia.com/gpu: 1
           ports:
           - containerPort: 80
+          command: ["/bin/bash"]
           env:
             - name: POD_NAME
               valueFrom:
@@ -85,7 +85,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: $KUDA_DEV_APP_NAME-gateway
+  name: $dev_app_name-gateway
 spec:
   selector:
     istio: ingressgateway # use Istio default gateway implementation
@@ -95,17 +95,17 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "$KUDA_DEV_APP_NAME.example.com"
+    - "$dev_app_name.example.com"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: $KUDA_DEV_APP_NAME
+  name: $dev_app_name
 spec:
   hosts:
-  - "$KUDA_DEV_APP_NAME.example.com"
+  - "$dev_app_name.example.com"
   gateways:
-  - $KUDA_DEV_APP_NAME-gateway
+  - $dev_app_name-gateway
   http:
   - match:
     - uri:
@@ -114,7 +114,7 @@ spec:
     - destination:
         port:
           number: 8000
-        host: $KUDA_DEV_APP_NAME
+        host: $dev_app_name
 EOF
 
 # Initialize ksync.
@@ -149,7 +149,7 @@ sp="⣷⣯⣟⡿⢿⣻⣽⣾"
 while true; do
   printf "\b${sp:i++%${#sp}:1}"
   min=1
-  status=$(kubectl get deployment $KUDA_DEV_APP_NAME -o jsonpath={.status.availableReplicas})
+  status=$(kubectl get deployment $dev_app_name -o jsonpath={.status.availableReplicas})
   if [ ! -z "$status" ]; then
     if [ "$status" -ge 1 ]; then
       break
@@ -164,7 +164,7 @@ ksync watch --daemon=true
 
 # Watch file changes.
 ksync create \
-  --selector=app=$KUDA_DEV_APP_NAME \
+  --selector=app=$dev_app_name \
   --reload=false \
   $KUDA_DEV_SYNC_PATH \
   $KUDA_DEV_SYNC_PATH
@@ -180,5 +180,5 @@ echo "$ingress_host:$ingress_port"
 echo
 
 # Launch remote shell.
-pod_name=$(kubectl get pods -o name | grep -m1 $KUDA_DEV_APP_NAME | cut -d'/' -f 2)
+pod_name=$(kubectl get pods -o name | grep -m1 $dev_app_name | cut -d'/' -f 2)
 kubectl exec -it $pod_name -- /bin/bash

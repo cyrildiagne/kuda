@@ -26,8 +26,6 @@ export KUDA_DEFAULT_GPU="${KUDA_DEFAULT_GPU:-k80}"
 export KUDA_DEFAULT_USE_PREEMPTIBLE="${KUDA_DEFAULT_USE_PREEMPTIBLE:-false}"
 
 export KUDA_DEV_APP_NAME="${KUDA_DEV_APP_NAME:-kuda-dev}"
-export KUDA_DEV_APP_IMAGE_NAME="${KUDA_DEV_APP_IMAGE_NAME:-kuda-dev-base}"
-export KUDA_DEV_APP_IMAGE="${KUDA_DEV_APP_IMAGE:-gcr.io/kuda-project/dev:1.0.0}"
 export KUDA_DEV_SYNC_PATH="${KUDA_DEV_SYNC_PATH:-/app_home}"
 
 # Disable prompts.
