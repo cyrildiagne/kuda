@@ -59,5 +59,10 @@ func Delete() error {
 	command := []string{"kuda_delete"}
 	// Run.
 	err := RunDockerWithEnvs(docker.CommandOption{Image: image, Command: command})
+
+	// Delete config file.
+	config := viper.GetString("config")
+	os.Remove(config)
+
 	return err
 }

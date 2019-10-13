@@ -26,16 +26,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-var provider = "gcp"
-var providerVersion = "1.2.0"
-
 // gcpCmd represents the `setup gcp` command
 var gcpCmd = &cobra.Command{
 	Use:   "gcp",
 	Short: "Setup Kuda on GCP.",
 	Long:  "Setup Kuda on GCP.",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := setup(); err != nil {
+		viper.BindPFlags(cmd.Flags())
+		viper.BindPFlags(cmd.PersistentFlags())
+		if err := setupGCP(); err != nil {
 			fmt.Println("ERROR:", err)
 		}
 	},
@@ -49,7 +48,6 @@ func init() {
 
 	gcpCmd.PersistentFlags().StringP("gcp_credentials", "c", "", "Path to GCP credentials JSON")
 	gcpCmd.MarkPersistentFlagRequired("gcp_credentials")
-	viper.BindPFlags(gcpCmd.PersistentFlags())
 
 	gcpCmd.Flags().String("gcp_cluster_name", "kuda", "Name of the cluster.")
 	gcpCmd.Flags().String("gcp_compute_zone", "us-central1-a", "Compute Zone for the cluster.")
@@ -57,10 +55,12 @@ func init() {
 	gcpCmd.Flags().Int("gcp_pool_num_nodes", 1, "Default number of nodes on the system pool. ")
 	gcpCmd.Flags().String("gcp_gpu", "k80", "Default GPU to use")
 	gcpCmd.Flags().Bool("gcp_use_preemptible", false, "Wether or not to use pre-emptible instances")
-	viper.BindPFlags(gcpCmd.Flags())
 }
 
-func setup() error {
+func setupGCP() error {
+	const provider = "gcp"
+	const providerVersion = "1.2.0"
+
 	// Set provider config.
 	viper.Set("provider", provider)
 
