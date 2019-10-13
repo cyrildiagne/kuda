@@ -36,10 +36,13 @@
 - The `kuda dev` command lets you spawn a remote development session with GPU inside the cluster.
 - It uses [Ksync](https://github.com/vapor-ware/ksync) to synchronise your working directory with the remote session so you can code from your workstation while running the app on the remote session.
 
-**Compatibility**
+**Cloud provider Compatibility**
 
-- [GCP](https://cloud.google.com) provider is already implemented.
-- [AWS](https://aws.amazon.com) and [Azure](https://azure.microsoft.com) should follow soon.
+| Provider | Status |
+| - | - |
+| [GCP](providers/gcp) | ✔ |
+| [AWS](providers/aws) | In progress |
+| Azure | Not started |
 
 ## Ready?
 
