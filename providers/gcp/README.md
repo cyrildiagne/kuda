@@ -12,6 +12,18 @@ gcloud projects add-iam-policy-binding <project> \
   --role=roles/container.admin
 ```
 
+# Status
+
+| Command | Status |
+| - | - |
+| setup | ✔ |
+| delete | ✔ |
+| get | ✔ |
+| app deploy | ✔ |
+| app delete | ✔ |
+| dev start | ✔ |
+| dev stop | ✔ |
+
 # Configuration
 
 You can override the following settings by adding them as flags of the `kuda setup` command (ex: `kuda setup gcp ... --gcp_cluster_name=mycluster`).
