@@ -27,6 +27,7 @@ Hacky & bare implementation with shell scripts.
     - api
     - ec2 autoscaling
     - ecr
+    - elb
 
 # Configuration
 
@@ -38,3 +39,4 @@ You can override the following settings by adding them as flags of the `kuda set
 
 
 # Limitations
+

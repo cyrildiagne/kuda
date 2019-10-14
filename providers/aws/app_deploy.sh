@@ -40,6 +40,12 @@ metadata:
 spec:
   template:
     spec:
+      nodeSelector:
+        nvidia.com/gpu: "true"
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
       containers:
         - image: $app_image
           resources:
