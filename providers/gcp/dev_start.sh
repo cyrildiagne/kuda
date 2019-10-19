@@ -13,7 +13,7 @@ gcloud container clusters get-credentials $KUDA_GCP_CLUSTER_NAME
 #   --num-nodes 1 \
 #   --quiet
 
-uid=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 7)
+uid=$(head /dev/urandom | tr -dc a-z0-9 | head -c 7)
 dev_app_name=$KUDA_DEV_APP_NAME-$uid
 dev_image=$1
 
