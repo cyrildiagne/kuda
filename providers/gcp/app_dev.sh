@@ -26,8 +26,6 @@ spec:
     spec:
       containers:
         - image: $app_image
-          command: ["python3"]
-          args: ["app.py"]
           # resources:
           #   limits:
           #     nvidia.com/gpu: 1
@@ -38,6 +36,8 @@ spec:
           env:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /secret/$(basename $KUDA_GCP_CREDENTIALS)
+            - name: KUDA_DEV
+              value: true
       volumes:
         - name: secret
           secret:
