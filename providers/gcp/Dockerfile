@@ -39,10 +39,10 @@ COPY . /kuda_cmd
 ENV KUDA_CMD_DIR /kuda_cmd
 RUN chmod +x /kuda_cmd/*.sh
 RUN ln -s /kuda_cmd/app_deploy.sh /usr/local/bin/kuda_app_deploy && \
+  ln -s /kuda_cmd/app_dev.sh /usr/local/bin/kuda_app_dev && \
   ln -s /kuda_cmd/app_delete.sh /usr/local/bin/kuda_app_delete && \
   ln -s /kuda_cmd/setup.sh /usr/local/bin/kuda_setup && \
-  ln -s /kuda_cmd/delete.sh /usr/local/bin/kuda_delete && \
-  ln -s /kuda_cmd/get.sh /usr/local/bin/kuda_get
+  ln -s /kuda_cmd/delete.sh /usr/local/bin/kuda_delete
 
 # Go to the app home.
 WORKDIR /app_home
