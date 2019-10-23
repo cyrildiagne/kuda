@@ -39,6 +39,7 @@ to be allocated.
 
 You can then query your application using any program able to make an HTTP request.
 Here is an example using cURL:
+
 ```bash
 curl -i -H "Host: my-hello-gpu.default.example.com" http://<YOUR-CLUSTER-IP>
 ```
@@ -69,6 +70,14 @@ curl -i -H "Host: my-hello-gpu.default.example.com" http://<YOUR-CLUSTER-IP>
 The first call might need to spawn an instance which could take while. Subsequent calls should be a lot faster.
 
 ## 5 - Cleanup
+
+### • Delete the app
+
+To delete the app (the image on the registry and the knative service):
+
+```bash
+kuda app delete hello-world
+```
 
 ### • Delete the cluster
 

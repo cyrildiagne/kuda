@@ -42,8 +42,6 @@ RUN ln -s /kuda_cmd/app_deploy.sh /usr/local/bin/kuda_app_deploy && \
   ln -s /kuda_cmd/app_delete.sh /usr/local/bin/kuda_app_delete && \
   ln -s /kuda_cmd/setup.sh /usr/local/bin/kuda_setup && \
   ln -s /kuda_cmd/delete.sh /usr/local/bin/kuda_delete && \
-  ln -s /kuda_cmd/dev_start.sh /usr/local/bin/kuda_dev_start && \
-  ln -s /kuda_cmd/dev_stop.sh /usr/local/bin/kuda_dev_stop && \
   ln -s /kuda_cmd/get.sh /usr/local/bin/kuda_get
 
 # Go to the app home.

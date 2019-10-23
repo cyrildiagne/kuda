@@ -18,11 +18,8 @@ kuda_setup
 kuda_delete
 kuda_get
 
-# Remote Dev Session
-kuda_dev_start
-kuda_dev_stop
-
 # App
+kuda_app_dev
 kuda_app_deploy
 kuda_app_delete
 ```

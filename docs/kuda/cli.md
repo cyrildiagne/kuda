@@ -27,35 +27,17 @@ kuda delete
 
 Deletes the remote cluster.
 
-## DEV
-
-### → Start
-
-```bash
-kuda dev start [base-image]
-```
-
-Starts a remote dev session with the current working directory.
-
-**Example:** `kuda dev start nvidia/cuda:10.1-base`
-
-This command:
-
-- Provisions a node with GPU on the cluster & install the nvidia driver
-- Starts a development pod based on the Deep Learning VM
-- Synchronise the directory provided as parameter with the remote node
-
-You can find a list of suggested `base-image` in the [remote development](remote_development.md) documentation.
-
-### → Stop
-
-```bash
-kuda dev stop
-```
-
-Stops the remote dev session.
-
 ## APP
+
+### → Dev
+
+```bash
+kuda app dev <app-name>
+```
+
+Example: `kuda app dev my-app`
+
+Starts the application in dev mode.
 
 ### → Deploy
 
@@ -66,3 +48,13 @@ kuda app deploy <app-name:version>
 Example: `kuda app deploy my-app:1.0.0`
 
 Deploys the application as serverless API.
+
+### → Delete
+
+```bash
+kuda app delete <app-name>
+```
+
+Example: `kuda app delete my-app`
+
+Deletes the application from the cluster and container image from the registry.
