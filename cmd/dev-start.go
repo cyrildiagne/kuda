@@ -21,6 +21,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/cyrildiagne/kuda/pkg/docker"
 	"github.com/spf13/cobra"
@@ -29,12 +30,29 @@ import (
 
 // startCmd represents the `dev start` command
 var startCmd = &cobra.Command{
-	Use:   "start [docker-image]",
+	Use:   "start [docker-image] [dir]",
 	Short: "Start a dev session.",
 	Long:  "Start a dev session using the provider docker image.",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := start(args[0]); err != nil {
+		// Set current working directory from 2nd argument if provided otherwise
+		// use the current working directory.
+		dir := ""
+		if len(args) > 1 {
+			argDir, err := filepath.Abs(args[1])
+			if err != nil {
+				panic(err)
+			}
+			dir = argDir
+		} else {
+			cwd, err := os.Getwd()
+			if err != nil {
+				panic(err)
+			}
+			dir = cwd
+		}
+
+		if err := start(args[0], dir); err != nil {
 			fmt.Println("ERROR:", err)
 		}
 	},
@@ -44,7 +62,7 @@ func init() {
 	devCmd.AddCommand(startCmd)
 }
 
-func start(devImage string) error {
+func start(devImage string, folderMount string) error {
 	fmt.Println("→ Starting a remote session...")
 	// Image to run.
 	image := viper.GetString("image")
@@ -52,11 +70,7 @@ func start(devImage string) error {
 	command := []string{"kuda_dev_start", devImage}
 
 	// Add the CWD to the volumes mounted in Docker.
-	dir, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	volumes := []string{dir + ":/app_home"}
+	volumes := []string{folderMount + ":/app_home"}
 
 	// Run the command.
 	dockerErr := RunDockerWithEnvs(docker.CommandOption{

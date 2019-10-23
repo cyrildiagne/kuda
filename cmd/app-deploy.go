@@ -20,6 +20,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/cyrildiagne/kuda/pkg/docker"
 	"github.com/spf13/cobra"
@@ -28,12 +29,29 @@ import (
 
 // deployCmd represents the `app deploy` command
 var deployCmd = &cobra.Command{
-	Use:   "deploy [app-name:app-version]",
+	Use:   "deploy [app-name:app-version] [dir]",
 	Short: "Deploy an app.",
 	Long:  "Deploy an app.",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := deploy(args[0]); err != nil {
+		// Set current working directory from 2nd argument if provided otherwise
+		// use the current working directory.
+		dir := ""
+		if len(args) > 1 {
+			argDir, err := filepath.Abs(args[1])
+			if err != nil {
+				panic(err)
+			}
+			dir = argDir
+		} else {
+			cwd, err := os.Getwd()
+			if err != nil {
+				panic(err)
+			}
+			dir = cwd
+		}
+
+		if err := deploy(args[0], dir); err != nil {
 			fmt.Println("ERROR:", err)
 		}
 	},
@@ -43,19 +61,15 @@ func init() {
 	appCmd.AddCommand(deployCmd)
 }
 
-func deploy(app string) error {
+func deploy(app string, appDir string) error {
 	fmt.Println("→ Deploying app...")
 	// Image to run.
 	image := viper.GetString("image")
 	// Command to run.
 	command := []string{"kuda_app_deploy", app}
 
-	// Add the CWD to the volumes mounted in Docker.
-	dir, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	volumes := []string{dir + ":/app_home"}
+	// Add the application folder to the volumes mounted in Docker.
+	volumes := []string{appDir + ":/app_home"}
 
 	// Run the command.
 	dockerErr := RunDockerWithEnvs(docker.CommandOption{
