@@ -6,7 +6,9 @@
 
 **Develop & deploy serverless applications on remote GPUs.**
 
-[Kuda](https://kuda.dev) is a small util that consolidates the workflow of prototyping and deploying serverless [CUDA](https://developer.nvidia.com/cuda-zone)-based applications on [Kubernetes](http://kubernetes.io).
+[Kuda](https://kuda.dev) helps prototyping and deploying serverless applications that need [CUDA](https://developer.nvidia.com/cuda-zone) on [Kubernetes](http://kubernetes.io) on the major cloud providers.
+
+It is based on [Knative](https://knative.dev), [Skaffold](https://skaffold.dev) and [Kaniko](https://github.com/GoogleContainerTools/kaniko).
 
 ## Disclaimer
 
@@ -24,25 +26,22 @@
 **Easy to use**
 
 - `kuda setup <provider>` : Setup a new cluster will all the requirements on the provider's managed Kubernetes, or upgrade an existing cluster.
-- `kuda app deploy` : Builds & deploy an application as a serverless container.
+- `kuda app dev` : Deploys an application and watches your local folder so that the app reloads automatically on the cluster when you make local changes.
+- `kuda app deploy` : Deploy the application as a serverless container.
 
 **Language/Framework agnostic**
 
 - Built and deployed with [Docker](https://docker.io), applications can be written in any language and use any framework.
-- Applications deployed with Kuda are not required to import any specific library, keeping the code 100% portable.
-
-**Remote development**
-
-- The `kuda dev` command lets you spawn a remote development session with GPU inside the cluster.
-- It uses [Ksync](https://github.com/vapor-ware/ksync) to synchronise your working directory with the remote session so you can code from your workstation while running the app on the remote session.
+- Applications deployed with Kuda are not required to import any specific library, keeping their code 100% portable.
 
 **Cloud provider Compatibility**
 
-| Provider | Status |
-| - | - |
-| [GCP](providers/gcp) | ✔ |
-| [AWS](providers/aws) | In progress |
-| Azure | Not started |
+| Provider             | Status         |
+| -------------------- | -------------- |
+| [GCP](providers/gcp) | ✔              |
+| [AWS](providers/aws) | In progress... |
+| Azure                | Not started    |
+| NGC                  | Not started    |
 
 ## Ready?
 

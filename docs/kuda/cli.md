@@ -45,10 +45,7 @@ This command:
 - Starts a development pod based on the Deep Learning VM
 - Synchronise the directory provided as parameter with the remote node
 
-List of recommended `base-image`:
-
-- all images from [nvidia/cuda](https://hub.docker.com/r/nvidia/cuda/)
-- gcloud's [Deep Learning containers](https://cloud.google.com/ai-platform/deep-learning-containers/docs/choosing-container)
+You can find a list of suggested `base-image` in the [remote development](remote_development.md) documentation.
 
 ### → Stop
 

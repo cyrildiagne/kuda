@@ -1,5 +1,7 @@
 # Remote Development
 
+**⚠️ Remote development and this guide are still WIP. Following this guide probably won't work for now.**
+
 This guide will walk you through the process of developping remotely on the Kubernetes cluster.
 
 Make sure you have a cluster running with Kuda's dependencies.
@@ -25,14 +27,19 @@ cd hello-gpu
 Start a remote dev session that will be provisioned on your cluster.
 
 ```bash
-kuda dev start nvidia/cuda:10.1-base
+kuda dev start gcr.io/deeplearning-platform-release/base-cu100
 ```
 
-`nvidia/cuda:10.1-base` Is the docker image to use as base. It allows you to specify which version of CUDA and CuDNN you need. You can find a list of suggested images in the kuda dev [reference page](https://docs.kuda.dev/kuda/cli#dev).
+`gcr.io/deeplearning-platform-release/base-cu100` Is the docker image to use as base. This image is convenient if you're using Kuda for deep learning since it packages most of the softwares needed in the deeplearning development cycle. It also allows you to specify which version of CUDA and CuDNN you need.
 
 This command will start the remote session and synchronize the CWD \(current working directory\) with the remote instance.
 
 Upon started, it will also print the cluster's IP address / port to use later on. Make not of that as we'll refer to it later as `<your-dev-session-external-ip:port>`
+
+List of recommended `base-image`:
+
+- all images from [nvidia/cuda](https://hub.docker.com/r/nvidia/cuda/). These images are fairly lightweight but python must be installed manually.
+- gcloud's [Deep Learning containers](https://cloud.google.com/ai-platform/deep-learning-containers/docs/choosing-container)
 
 → For more information on the `kuda dev start` command, check the [reference](https://docs.kuda.dev/kuda/cli#dev).
 

@@ -21,8 +21,6 @@ This process can take a while since it will create a remote cluster on GKE and i
 
 ## 2 - Develop
 
-### • Initialize
-
 Retrieve a simple demo application:
 
 ```bash
@@ -30,25 +28,24 @@ git clone https://github.com/cyrildiagne/kuda-apps
 cd kuda-apps/hello-gpu
 ```
 
-Install the example dependencies (feel free to create a virtualenv or a [remote dev session](https://docs.kuda.dev/kuda/remote_development)).
-
-```bash
-pip install -r requirements.txt
-```
-
-### • Run and Test
-
 Then start the example in dev mode. It will reload automatically when you make changes from your local machine:
 
 ```bash
-export PORT=80 && python app.py
+kuda app dev my-hello-gpu
 ```
 
-Open `http://localhost` in a web browser to visit the app. Try making changes to the code and reload the page.
+Wait for the app to build and launch. This might take a while if a new node needs
+to be allocated.
+
+You can then query your application using any program able to make an HTTP request.
+Here is an example using cURL:
+```bash
+curl -i -H "Host: my-hello-gpu.default.example.com" http://<YOUR-CLUSTER-IP>
+```
 
 Press `Ctrl+C` to stop running the application.
 
-## • Deploy
+## 3 - Deploy
 
 You can then deploy the app as a serverless API. This will create an endpoint that scales down the GPU nodes to 0 when not used.
 
@@ -60,18 +57,18 @@ kuda app deploy hello-world:0.1.0
 
 → For more information on the `kuda app deploy` command, check the [reference](https://docs.kuda.dev/kuda/cli#deploy).
 
-## 3 - Call your API
+## 4 - Call your API
 
 You can then test your application by making a simple HTTP request to your cluster.
 First retrieve the IP address of your cluster by running: `kuda get status`
 
 ```bash
-curl -H "Host: hello-world.example.com" http://<cluster-ip-address>
+curl -i -H "Host: my-hello-gpu.default.example.com" http://<YOUR-CLUSTER-IP>
 ```
 
 The first call might need to spawn an instance which could take while. Subsequent calls should be a lot faster.
 
-## 4 - Cleanup
+## 5 - Cleanup
 
 ### • Delete the cluster
 
