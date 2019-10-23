@@ -33,7 +33,7 @@ function create_cluster() {
         k8s.io/cluster-autoscaler/enabled: 'true'
       labels:
         lifecycle: Ec2Spot
-        nvidia.com/gpu: 'true'
+        nvidia.com/gpu: true
         k8s.amazonaws.com/accelerator: nvidia-tesla
       taints:
         nvidia.com/gpu: "true:NoSchedule"
@@ -42,8 +42,10 @@ EOF
 }
 
 function install_nvidia_drivers() {
+  nvidia_driver_version=1.0.0-beta3
+  nvidia_driver_host="https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin"
   kubectl create \
-    -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/1.0.0-beta3/nvidia-device-plugin.yml
+    -f $nvidia_driver_host/$nvidia_driver_version/nvidia-device-plugin.yml
 }
 
 function install_istio() {
@@ -67,11 +69,12 @@ function install_istio() {
       --name istio-init \
       --namespace istio-system \
       $istio_folder/install/kubernetes/helm/istio-init
+
+      # Dirty hack to let the pods install.
+      sleep 10
   else
     echo "Istio prerequisites already installed."
   fi
-
-  sleep 3
 
   # Install Istio.
   echo "Installing Istio..."
@@ -127,18 +130,41 @@ else
 fi
 
 # Install Knative.
-if [ -z "$(kubectl -n knative-serving | grep 'webhook')" ]; then
+if [ -z "$(kubectl -n knative-serving get pods | grep 'webhook')" ]; then
   install_knative
 else
   echo "Knative is already installed."
+fi
+
+# Create credentials for skaffold.
+# https://github.com/GoogleContainerTools/skaffold/issues/1719
+if [ -z "$(kubectl get secret | grep aws-secret)" ]; then
+  kubectl create secret generic aws-secret --from-file /aws-credentials/credentials
+else
+  echo "aws-secret already configured."
+fi
+
+# Setup credential helpers in cluster for kaniko.
+if [ -z "$(kubectl get secret | grep docker-kaniko-secret)" ]; then
+  aws_account_id="$(aws sts get-caller-identity | jq -r .Account)"
+  ecr_domain="$aws_account_id.dkr.ecr.$KUDA_AWS_CLUSTER_REGION.amazonaws.com"
+  tmp_config_file="/tmp/config.json"
+  echo "{ \"credHelpers\": { \"$ecr_domain\": \"ecr-login\" }}" > $tmp_config_file
+  kubectl create secret generic docker-kaniko-secret --from-file $tmp_config_file
+  rm $tmp_config_file
+else
+  echo "docker-kaniko-secret already configured."
 fi
 
 # Install Cluster Autoscaler
 # echo "Installing cluster autoscaler"
 # kubectl apply -f /kuda_cmd/config/cluster-autoscaler.yaml
 
-echo "Retrieving hostname:"
-kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+echo
+echo "Hostname:"
+kubectl -n istio-system get service istio-ingressgateway \
+  -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+echo
 
 echo
 echo "Cluster $KUDA_AWS_CLUSTER_NAME is ready!"

@@ -1,6 +1,7 @@
 ## Amazon Web Service Provider
 
 Hacky & bare implementation with shell scripts.
+It uses [ECR](https://aws.amazon.com/ecr) to privately store the app images.
 
 # Status
 
@@ -9,23 +10,23 @@ Hacky & bare implementation with shell scripts.
 | setup | ✔ |
 | delete | ✔ |
 | get | Not Started |
+| app dev | WIP |
 | app deploy | WIP |
 | app delete | ✔ |
-| dev start | Not Started |
-| dev stop | Not Started |
+| dev start | ✗ |
+| dev stop | ✗ |
 
-# Configuration
+# Prerequisites
 
-**Prerequisites:**
 - You must have subscribed to [EKS-optimize AMI with GPU support](https://aws.amazon.com/marketplace/pp/B07GRHFXGM)
 - You must have an increased limit of at least 1 instance of type p2.xlarge. You can make requests [here](http://aws.amazon.com/contact-us/ec2-request)
 - You must have an [aws configuration](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) on your local machine in `~/.aws/` with credentials that have authorization for:
     - cloudformation
     - ec2
+    - ec2 autoscaling
     - eks
     - iam
     - api
-    - ec2 autoscaling
     - ecr
     - elb
 
