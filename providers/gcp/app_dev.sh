@@ -4,14 +4,17 @@ set -e
 
 source $KUDA_CMD_DIR/.config.sh
 
-app_name=$(echo $1 | cut -f1 -d':')
-app_version=$(echo $1 | cut -f2 -d':')
+app_name=$1
 app_image="gcr.io/$KUDA_GCP_PROJECT_ID/$app_name"
 namespace="default"
 
-# Get cluster's credentials to use kubectl.
+# Retrieve cluster token.
 gcloud container clusters get-credentials $KUDA_GCP_CLUSTER_NAME
 
+# Login Docker (needed for skaffold's sync).
+gcloud auth configure-docker --quiet
+
+# Write Knative service config.
 echo "
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service
@@ -23,9 +26,11 @@ spec:
     spec:
       containers:
         - image: $app_image
-          resources:
-            limits:
-              nvidia.com/gpu: 1
+          command: ["python3"]
+          args: ["app.py"]
+          # resources:
+          #   limits:
+          #     nvidia.com/gpu: 1
           volumeMounts:
             - name: secret
               readOnly: true
@@ -42,9 +47,7 @@ spec:
 # Cloud Build has a generous free tier is easy enough to use with Skaffold
 # So we use it rather than Kaniko.
 export GOOGLE_APPLICATION_CREDENTIALS=$KUDA_GCP_CREDENTIALS
-# Send version as env variable for Skaffold to use.
-export APP_VERSION=$app_version
-cat <<EOF | skaffold run -n $namespace -f -
+cat <<EOF | skaffold dev -n $namespace -f -
 apiVersion: skaffold/v1beta16
 kind: Config
 build:
@@ -52,9 +55,13 @@ build:
     projectId: $KUDA_GCP_PROJECT_ID
   artifacts:
     - image: $app_image
+      sync:
+        manual:
+          - src: '**/*'
+            dest: './'
   tagPolicy:
-    envTemplate:
-      template: "{{.IMAGE_NAME}}:{{.APP_VERSION}}"
+    dateTime:
+      format: "2006-01-02_15-04-05"
 deploy:
   kubectl:
     manifests:

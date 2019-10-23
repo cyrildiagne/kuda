@@ -68,7 +68,12 @@ func dev(appName string, appDir string) error {
 	// Command to run.
 	command := []string{"kuda_app_dev", appName}
 	// Add the application folder to the volumes mounted in Docker.
-	volumes := []string{appDir + ":/app_home"}
+	volumes := []string{
+		// Bind the app home directory.
+		appDir + ":/app_home",
+		// Bind docker socker for Skaffold.
+		"/var/run/docker.sock:/var/run/docker.sock",
+	}
 	// Run the command.
 	dockerErr := RunDockerWithEnvs(docker.CommandOption{
 		Image:         image,

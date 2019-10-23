@@ -59,7 +59,7 @@ func init() {
 
 func setupGCP() error {
 	const provider = "gcp"
-	const providerVersion = "1.2.0"
+	const providerVersion = "2.0.0"
 
 	// Set provider config.
 	viper.Set("provider", provider)

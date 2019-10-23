@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 source $KUDA_CMD_DIR/.config.sh
 
 # required_addons="HorizontalPodAutoscaling,HttpLoadBalancing,Istio,CloudRun"
@@ -130,18 +128,12 @@ else
 fi
 
 # Create namespaces.
-# TODO: hide the output of this command (especially if no namespace found.)
-if [ -z "$(kubectl get namespace kuda-app)" ]; then
+if [ -z "$(kubectl get namespace | grep 'kuda-app ')" ]; then
   kubectl create namespace kuda-app
 fi
-
-# if [ -z "$(kubectl get namespace kuda-dev)" ]; then
-#   kubectl create namespace kuda-dev
-#   kubectl label namespace kuda-dev istio-injection=enabled
-# fi
-
-# Enable Istio sidecar injection.
-# kubectl label namespace kuda-app istio-injection=enabled --overwrite=true
+if [ -z "$(kubectl get namespace | grep 'kuda-dev ')" ]; then
+  kubectl create namespace kuda-dev
+fi
 
 # Mount credentials.
 if kubectl get secrets | grep -q $(basename $KUDA_GCP_CREDENTIALS); then

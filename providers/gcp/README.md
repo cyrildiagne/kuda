@@ -11,12 +11,9 @@ It uses the following GCP products:
 | - | - |
 | setup | ✔ |
 | delete | ✔ |
-| get | ✔ |
 | app dev | WIP |
 | app deploy | WIP |
 | app delete | ✔ |
-| dev start | WIP |
-| dev stop | WIP |
 
 # Prerequisites
 

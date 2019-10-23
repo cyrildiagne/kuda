@@ -1,11 +1,14 @@
 FROM alpine:3.10
-ARG CLOUD_SDK_VERSION=260.0.0
 
-# Google Cloud SDK.
+ARG CLOUD_SDK_VERSION=260.0.0
+ARG SKAFFOLD_VERSION=0.40.0
+
+# Install Google Cloud SDK and Docker.
+# Docker is needed to enable Skaffold dev.
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
 ENV PATH /google-cloud-sdk/bin:$PATH
 RUN apk --no-cache add \
-  tar \
+  docker \
   bash \
   curl \
   python \
@@ -26,11 +29,8 @@ VOLUME ["/root/.config"]
 # Install Kubectl.
 RUN gcloud components install beta kubectl
 
-# Install Ksync.
-RUN curl https://vapor-ware.github.io/gimme-that/gimme.sh | bash
-
 # Install Skaffold.
-RUN curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+RUN curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v${SKAFFOLD_VERSION}/skaffold-linux-amd64 && \
   chmod +x skaffold && \
   mv skaffold /usr/local/bin
 
