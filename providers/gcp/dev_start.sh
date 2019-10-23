@@ -13,25 +13,26 @@ gcloud container clusters get-credentials $KUDA_GCP_CLUSTER_NAME
 #   --num-nodes 1 \
 #   --quiet
 
-uid=$(head /dev/urandom | tr -dc a-z0-9 | head -c 7)
-dev_app_name=$KUDA_DEV_APP_NAME-$uid
+# uid=$(head /dev/urandom | tr -dc a-z0-9 | head -c 7)
+# dev_app_name=$KUDA_DEV_APP_NAME-$uid
+dev_app_name=$KUDA_DEV_APP_NAME
 dev_image=$1
 
 # Launch.
 # TODO: materialize as external yaml file and customize
 # with Kustomize
-cat <<EOF | kubectl apply -f -
+cat <<EOF | kubectl apply -n kuda-dev -f -
 apiVersion: v1
 kind: Service
 metadata:
   name: $dev_app_name
   labels:
     app: $dev_app_name
+    service: $dev_app_name
 spec:
   ports:
   - name: http
-    port: 8000
-    targetPort: 80
+    port: 8080
   selector:
     app: $dev_app_name
 ---
@@ -57,8 +58,9 @@ spec:
             limits:
               nvidia.com/gpu: 1
           ports:
-          - containerPort: 80
+          - containerPort: 8080
           command: ["/bin/bash"]
+          args: ["-c", "sleep infinity"]
           env:
             - name: POD_NAME
               valueFrom:
@@ -81,7 +83,7 @@ spec:
 EOF
 
 # Setup Istio Ingress gateway.
-cat <<EOF | kubectl apply -f -
+cat <<EOF | kubectl apply -n kuda-dev -f -
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -112,9 +114,9 @@ spec:
         prefix: /
     route:
     - destination:
-        port:
-          number: 8000
         host: $dev_app_name
+        port:
+          number: 8080
 EOF
 
 # Initialize ksync.
@@ -149,7 +151,7 @@ sp="⣷⣯⣟⡿⢿⣻⣽⣾"
 while true; do
   printf "\b${sp:i++%${#sp}:1}"
   min=1
-  status=$(kubectl get deployment $dev_app_name -o jsonpath={.status.availableReplicas})
+  status=$(kubectl -n kuda-dev get deployment $dev_app_name -o jsonpath={.status.availableReplicas})
   if [ ! -z "$status" ]; then
     if [ "$status" -ge 1 ]; then
       break
@@ -180,5 +182,5 @@ echo "$ingress_host:$ingress_port"
 echo
 
 # Launch remote shell.
-pod_name=$(kubectl get pods -o name | grep -m1 $dev_app_name | cut -d'/' -f 2)
-kubectl exec -it $pod_name -- /bin/bash
+pod_name=$(kubectl -n kuda-dev get pods -o name | grep -m1 $dev_app_name | cut -d'/' -f 2)
+kubectl exec -n kuda-dev -it $pod_name -- /bin/bash

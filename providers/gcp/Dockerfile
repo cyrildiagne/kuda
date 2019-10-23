@@ -5,6 +5,7 @@ ARG CLOUD_SDK_VERSION=260.0.0
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
 ENV PATH /google-cloud-sdk/bin:$PATH
 RUN apk --no-cache add \
+  tar \
   bash \
   curl \
   python \
@@ -27,6 +28,11 @@ RUN gcloud components install beta kubectl
 
 # Install Ksync.
 RUN curl https://vapor-ware.github.io/gimme-that/gimme.sh | bash
+
+# Install Skaffold.
+RUN curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+  chmod +x skaffold && \
+  mv skaffold /usr/local/bin
 
 # Copy the provider's commands.
 COPY . /kuda_cmd

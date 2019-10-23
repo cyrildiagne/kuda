@@ -129,10 +129,16 @@ else
   install_knative
 fi
 
-# Create namespace.
+# Create namespaces.
+# TODO: hide the output of this command (especially if no namespace found.)
 if [ -z "$(kubectl get namespace kuda-app)" ]; then
   kubectl create namespace kuda-app
 fi
+
+# if [ -z "$(kubectl get namespace kuda-dev)" ]; then
+#   kubectl create namespace kuda-dev
+#   kubectl label namespace kuda-dev istio-injection=enabled
+# fi
 
 # Enable Istio sidecar injection.
 # kubectl label namespace kuda-app istio-injection=enabled --overwrite=true

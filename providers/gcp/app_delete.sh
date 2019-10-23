@@ -16,4 +16,4 @@ echo $app_image
 gcloud container clusters get-credentials $KUDA_GCP_CLUSTER_NAME
 
 # Launch.
-kubectl delete ksvc $app_name
+kubectl delete -n kuda-app ksvc $app_name
