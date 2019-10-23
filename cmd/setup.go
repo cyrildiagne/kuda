@@ -18,9 +18,7 @@ limitations under the License.
 package cmd
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/cyrildiagne/kuda/pkg/docker"
@@ -49,14 +47,7 @@ func Setup() error {
 	// Run
 	err := RunDockerWithEnvs(docker.CommandOption{Image: image, Command: command})
 	if err != nil {
-		// Ask if we should delete the cluster.
-		fmt.Print("There was an error setting up the cluster. Do you want to delete it? (y/n) ")
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		txt := scanner.Text()
-		if txt == "y" {
-			Delete()
-		}
+		panic(err)
 	}
 
 	// Write new config to home directory.
