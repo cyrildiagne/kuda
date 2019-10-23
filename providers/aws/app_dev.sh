@@ -99,7 +99,7 @@ build:
     - image: $app_registry
       sync:
         manual:
-          - src: './**/*'
+          - src: '**/*'
             dest: .
       kaniko:
         buildArgs:

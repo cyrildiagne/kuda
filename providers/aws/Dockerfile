@@ -7,11 +7,12 @@ ARG SKAFFOLD_VERSION=0.40.0
 ARG ISTIO_VERSION=1.3.3
 ARG HELM_VERSION=2.15.0
 
-# Install base apps.
+# Install base apps & docker.
 RUN apk add --update-cache --no-cache \
   bash \
   build-base \
   curl \
+  docker \
   python \
   python-dev \
   py-pip \

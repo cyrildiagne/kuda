@@ -13,8 +13,6 @@ It uses [ECR](https://aws.amazon.com/ecr) to privately store the app images.
 | app dev | WIP |
 | app deploy | WIP |
 | app delete | ✔ |
-| dev start | ✗ |
-| dev stop | ✗ |
 
 # Prerequisites
 
