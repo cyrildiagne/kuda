@@ -40,7 +40,7 @@ EOF
 }
 
 function install_nvidia_drivers() {
-  nvidia_driver_version=1.0.0-beta3
+  nvidia_driver_version=1.0.0-beta4
   nvidia_driver_host="https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin"
   kubectl create \
     -f $nvidia_driver_host/$nvidia_driver_version/nvidia-device-plugin.yml
@@ -69,7 +69,7 @@ function install_istio() {
       $istio_folder/install/kubernetes/helm/istio-init
 
       # Dirty hack to let the pods install.
-      sleep 10
+      sleep 15
   else
     echo "Istio prerequisites already installed."
   fi
@@ -121,11 +121,12 @@ else
 fi
 
 # Install Istio.
-if [ -z "$(helm ls --all istio | grep 'istio ')" ]; then
-  install_istio
-else
-  echo "Istio is already installed."
-fi
+install_istio
+# if [ -z "$(helm ls --all istio | grep 'istio ')" ]; then
+#   install_istio
+# else
+#   echo "Istio is already installed."
+# fi
 
 # Install Knative.
 if [ -z "$(kubectl -n knative-serving get pods | grep 'webhook')" ]; then
