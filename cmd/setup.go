@@ -47,7 +47,7 @@ func Setup() error {
 	// Run
 	err := RunDockerWithEnvs(docker.CommandOption{Image: image, Command: command})
 	if err != nil {
-		panic(err)
+		panic("There was an error setting up the cluster.")
 	}
 
 	// Write new config to home directory.

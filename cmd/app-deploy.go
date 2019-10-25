@@ -62,20 +62,17 @@ func init() {
 }
 
 func deploy(app string, appDir string) error {
-	fmt.Println("→ Deploying app...")
 	// Image to run.
 	image := viper.GetString("image")
 	// Command to run.
 	command := []string{"kuda_app_deploy", app}
-
 	// Add the application folder to the volumes mounted in Docker.
 	volumes := []string{
 		// Bind the app home directory.
 		appDir + ":/app_home",
-		// Bind docker socker for Skaffold.
+		// Bind local docker socket for Skaffold.
 		"/var/run/docker.sock:/var/run/docker.sock",
 	}
-
 	// Run the command.
 	dockerErr := RunDockerWithEnvs(docker.CommandOption{
 		Image:         image,

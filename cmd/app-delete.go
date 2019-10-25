@@ -49,14 +49,12 @@ func delete(app string) error {
 	image := viper.GetString("image")
 	// Command to run.
 	command := []string{"kuda_app_delete", app}
-
 	// Add the CWD to the volumes mounted in Docker.
 	dir, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
 	volumes := []string{dir + ":/app_home"}
-
 	// Run the command.
 	dockerErr := RunDockerWithEnvs(docker.CommandOption{
 		Image:         image,

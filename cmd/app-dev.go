@@ -61,17 +61,16 @@ func init() {
 	appCmd.AddCommand(appDevCmd)
 }
 
-func dev(appName string, appDir string) error {
-	fmt.Println("→ Start app dev...")
+func dev(app string, appDir string) error {
 	// Image to run.
 	image := viper.GetString("image")
 	// Command to run.
-	command := []string{"kuda_app_dev", appName}
+	command := []string{"kuda_app_dev", app}
 	// Add the application folder to the volumes mounted in Docker.
 	volumes := []string{
 		// Bind the app home directory.
 		appDir + ":/app_home",
-		// Bind docker socker for Skaffold.
+		// Bind local docker socket for Skaffold.
 		"/var/run/docker.sock:/var/run/docker.sock",
 	}
 	// Run the command.
