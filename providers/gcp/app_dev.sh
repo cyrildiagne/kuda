@@ -32,12 +32,12 @@ spec:
           volumeMounts:
             - name: secret
               readOnly: true
-              mountPath: "/secret"
+              mountPath: '/secret'
           env:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /secret/$(basename $KUDA_GCP_CREDENTIALS)
             - name: KUDA_DEV
-              value: true
+              value: 'true'
       volumes:
         - name: secret
           secret:
