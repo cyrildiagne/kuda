@@ -36,12 +36,12 @@ It is based on [Knative](https://knative.dev), [Skaffold](https://skaffold.dev) 
 
 **Cloud provider Compatibility**
 
-| Provider             | Status         |
-| -------------------- | -------------- |
-| [GCP](providers/gcp) | In progress... |
-| [AWS](providers/aws) | In progress... |
-| Azure                | Not started    |
-| NGC                  | Not started    |
+| Provider | Status                           |
+| -------- | -------------------------------- |
+| GCP      | [In progress...](providers/gcp) |
+| AWS      | [In progress...](providers/aws)  |
+| Azure    | Not started                      |
+| NGC      | Not started                      |
 
 ## Ready?
 
