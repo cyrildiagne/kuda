@@ -2,41 +2,40 @@
 
 source $KUDA_CMD_DIR/.config.sh
 
-function create_cluster() {
-  clusterName=$1
-  # cat <<EOF | eksctl create cluster --kubeconfig /aws-credentials/eksknative.yaml -f -
+cluster_region=$KUDA_AWS_CLUSTER_REGION
+cluster_name=$KUDA_AWS_CLUSTER_NAME
 
+function create_cluster() {
   cat <<EOF | eksctl create cluster -f -
     apiVersion: eksctl.io/v1alpha5
     kind: ClusterConfig
 
     metadata:
-      name: $clusterName
-      region: $KUDA_AWS_CLUSTER_REGION
+      name: $cluster_name
+      region: $cluster_region
 
     nodeGroups:
     - name: default
       instanceType: m5.large
       desiredCapacity: 2
-    - name: gpu
-      instanceType: p2.xlarge
-      desiredCapacity: 1
-      minSize: 0
-      iam:
-        withAddonPolicies:
-          autoScaler: true
-      tags:
-        k8s.io/cluster-autoscaler/node-template/taint/dedicated: nvidia.com/gpu=true
-        k8s.io/cluster-autoscaler/node-template/label/nvidia.com/gpu: "true"
-        k8s.io/cluster-autoscaler/enabled: "true"
-      labels:
-        lifecycle: Ec2Spot
-        nvidia.com/gpu: "true"
-        k8s.amazonaws.com/accelerator: nvidia-tesla
-      taints:
-        nvidia.com/gpu: "true:NoSchedule"
+    # - name: gpu
+    #   instanceType: p2.xlarge
+    #   desiredCapacity: 1
+    #   minSize: 0
+    #   # iam:
+    #   #   withAddonPolicies:
+    #   #     autoScaler: true
+    #   # tags:
+    #   #   k8s.io/cluster-autoscaler/node-template/taint/dedicated: nvidia.com/gpu=true
+    #   #   k8s.io/cluster-autoscaler/node-template/label/nvidia.com/gpu: "true"
+    #   #   k8s.io/cluster-autoscaler/enabled: "true"
+    #   # labels:
+    #   #   lifecycle: Ec2Spot
+    #   #   nvidia.com/gpu: "true"
+    #   #   k8s.amazonaws.com/accelerator: nvidia-tesla
+    #   # taints:
+    #   #   nvidia.com/gpu: "true:NoSchedule"
 EOF
-
 }
 
 function install_nvidia_drivers() {
@@ -49,8 +48,10 @@ function install_nvidia_drivers() {
 function install_istio() {
   # Configure Helm
   istio_folder="/istio-1.*"
-  if [ -z "$(kubectl -n kube-system get serviceaccounts | grep tiller)" ]; then
-    kubectl create -f $istio_folder/install/kubernetes/helm/helm-service-account.yaml
+  is_tiller_installed="$(kubectl -n kube-system get serviceaccounts | grep tiller)"
+  if [ -z "$is_tiller_installed" ]; then
+    kubectl create \
+      -f $istio_folder/install/kubernetes/helm/helm-service-account.yaml
     helm init --service-account tiller
   else
     echo "Helm/Tiller already installed."
@@ -61,75 +62,131 @@ function install_istio() {
     --for=condition=Ready pod -l name=tiller --timeout=300s
 
   # Install prerequisites.
-  if [ -z "$(helm ls --all istio-init | grep istio-init)" ]; then
-    helm install \
-      --wait \
-      --name istio-init \
-      --namespace istio-system \
-      $istio_folder/install/kubernetes/helm/istio-init
+  is_istio_prereq_installed="$(helm ls --all istio-init | grep istio-init)"
+  if [ -z "$is_istio_prereq_installed" ]; then
+    #   helm install \
+    #     --wait \
+    #     --name istio-init \
+    #     --namespace istio-system \
+    #     $istio_folder/install/kubernetes/helm/istio-init
+    for i in $istio_folder/install/kubernetes/helm/istio-init/files/crd*yaml; do
+      kubectl apply -f $i
+    done
 
-      # Dirty hack to let the pods install.
-      sleep 15
+    # Dirty hack to let the pods install.
+    sleep 15
   else
     echo "Istio prerequisites already installed."
   fi
 
   # Install Istio.
   echo "Installing Istio..."
-  helm install \
-    --wait \
-    --name istio \
-    --namespace istio-system \
+
+  # Create namespace
+  cat <<EOF | kubectl apply -f -
+   apiVersion: v1
+   kind: Namespace
+   metadata:
+     name: istio-system
+     labels:
+       istio-injection: disabled
+EOF
+
+  # Install Istio from a lighter template, with just pilot/gateway.
+  # Based on https://knative.dev/docs/install/installing-istio/
+  helm template --namespace=istio-system \
+    --set prometheus.enabled=false \
+    --set mixer.enabled=false \
+    --set mixer.policy.enabled=false \
+    --set mixer.telemetry.enabled=false \
+    --set pilot.sidecar=false \
+    --set pilot.resources.requests.memory=128Mi \
+    --set galley.enabled=false \
+    --set global.useMCP=false \
+    --set security.enabled=false \
+    --set global.disablePolicyChecks=true \
+    --set sidecarInjectorWebhook.enabled=false \
+    --set global.proxy.autoInject=disabled \
+    --set global.omitSidecarInjectorConfigMap=true \
+    --set gateways.istio-ingressgateway.autoscaleMin=1 \
+    --set gateways.istio-ingressgateway.autoscaleMax=1 \
+    --set pilot.traceSampling=100 \
     $istio_folder/install/kubernetes/helm/istio \
-    --values $istio_folder/install/kubernetes/helm/istio/values-istio-demo.yaml
+    >./istio-lean.yaml
+
+  kubectl apply -f istio-lean.yaml
+  rm istio-lean.yaml
+
+  # helm install \
+  #   --wait \
+  #   --name istio \
+  #   --namespace istio-system \
+  #   $istio_folder/install/kubernetes/helm/istio \
+  #   --values $istio_folder/install/kubernetes/helm/istio/values-istio-demo.yaml
 }
 
 function install_knative() {
-  # Apply crd twice as workaround to https://github.com/knative/serving/issues/5722
+  # Apply crd twice as workaround to:
+  # https://github.com/knative/serving/issues/5722
   knative_version=0.9.0
+  knative_serving_repo="https://github.com/knative/serving/releases/download"
+  knative_eventing_repo="https://github.com/knative/eventing/releases/download"
   kubectl apply --wait=true --selector knative.dev/crd-install=true \
-    --filename https://github.com/knative/serving/releases/download/v$knative_version/serving.yaml \
-    --filename https://github.com/knative/eventing/releases/download/v$knative_version/release.yaml \
-    --filename https://github.com/knative/serving/releases/download/v$knative_version/monitoring.yaml ||
+    --filename $knative_serving_repo/v$knative_version/serving.yaml \
+    --filename $knative_eventing_repo/v$knative_version/release.yaml \
+    --filename $knative_serving_repo/v$knative_version/monitoring.yaml ||
       \
       kubectl apply --wait=true --selector knative.dev/crd-install=true \
-      --filename https://github.com/knative/serving/releases/download/v$knative_version/serving.yaml \
-      --filename https://github.com/knative/eventing/releases/download/v$knative_version/release.yaml \
-      --filename https://github.com/knative/serving/releases/download/v$knative_version/monitoring.yaml
+      --filename $knative_serving_repo/v$knative_version/serving.yaml \
+      --filename $knative_eventing_repo/v$knative_version/release.yaml \
+      --filename $knative_serving_repo/v$knative_version/monitoring.yaml
 
   kubectl apply \
-    --filename https://github.com/knative/serving/releases/download/v$knative_version/serving.yaml \
-    --filename https://github.com/knative/eventing/releases/download/v$knative_version/release.yaml \
-    --filename https://github.com/knative/serving/releases/download/v$knative_version/monitoring.yaml
+    --filename $knative_serving_repo/v$knative_version/serving.yaml \
+    --filename $knative_eventing_repo/v$knative_version/release.yaml \
+    --filename $knative_serving_repo/v$knative_version/monitoring.yaml
 }
 
 # Create cluster if it doesn't exist.
-if [ -z "$(eksctl -v 0 get cluster --name $KUDA_AWS_CLUSTER_NAME --region $KUDA_AWS_CLUSTER_REGION)" ]; then
-  create_cluster $KUDA_AWS_CLUSTER_NAME
+cluster_exists=$(
+  eksctl -v 0 get cluster \
+    --name $cluster_name \
+    --region $cluster_region
+)
+
+if [ -z "$cluster_exists" ]; then
+  create_cluster
 else
-  echo "Cluster $KUDA_AWS_CLUSTER_NAME already exists."
+  echo "Cluster $cluster_name already exists."
 fi
 
 # Retrieve cluster token.
-aws eks update-kubeconfig --name $KUDA_AWS_CLUSTER_NAME --region $KUDA_AWS_CLUSTER_REGION
+aws eks update-kubeconfig \
+  --name $cluster_name \
+  --region $cluster_region
 
 # Install Nvidia drivers.
-if [ -z "$(kubectl get daemonsets -n kube-system nvidia-device-plugin-daemonset)" ]; then
+is_nvidia_installed="$(
+  kubectl get daemonsets -n kube-system |
+    grep nvidia-device-plugin-daemonset
+)"
+if [ -z "$is_nvidia_installed" ]; then
   install_nvidia_drivers
 else
   echo "Nvidia drivers already installed."
 fi
 
 # Install Istio.
-install_istio
-# if [ -z "$(helm ls --all istio | grep 'istio ')" ]; then
-#   install_istio
-# else
-#   echo "Istio is already installed."
-# fi
+is_istio_installed="$(helm ls --all istio | grep 'istio ')"
+if [ -z "$is_istio_installed" ]; then
+  install_istio
+else
+  echo "Istio is already installed."
+fi
 
 # Install Knative.
-if [ -z "$(kubectl -n knative-serving get pods | grep 'webhook')" ]; then
+is_knative_installed="$(kubectl -n knative-serving get pods | grep 'webhook')"
+if [ -z "$is_knative_installed" ]; then
   install_knative
 else
   echo "Knative is already installed."
@@ -137,8 +194,10 @@ fi
 
 # Create credentials for skaffold.
 # https://github.com/GoogleContainerTools/skaffold/issues/1719
-if [ -z "$(kubectl get secret | grep aws-secret)" ]; then
-  kubectl create secret generic aws-secret --from-file /aws-credentials/credentials
+is_aws_secret_setup="$(kubectl get secret | grep aws-secret)"
+if [ -z "$is_aws_secret_setup" ]; then
+  kubectl create secret generic aws-secret \
+    --from-file /aws-credentials/credentials
 else
   echo "aws-secret already configured."
 fi
@@ -146,10 +205,15 @@ fi
 # Setup credential helpers in cluster for kaniko.
 if [ -z "$(kubectl get secret | grep docker-kaniko-secret)" ]; then
   aws_account_id="$(aws sts get-caller-identity | jq -r .Account)"
-  ecr_domain="$aws_account_id.dkr.ecr.$KUDA_AWS_CLUSTER_REGION.amazonaws.com"
+  ecr_domain="$aws_account_id.dkr.ecr.$cluster_region.amazonaws.com"
   tmp_config_file="/tmp/config.json"
-  echo "{ \"credHelpers\": { \"$ecr_domain\": \"ecr-login\" }}" > $tmp_config_file
-  kubectl create secret generic docker-kaniko-secret --from-file $tmp_config_file
+  echo "{
+    \"credHelpers\": {
+      \"$ecr_domain\": \"ecr-login\"
+    }
+  }" >$tmp_config_file
+  kubectl create secret generic docker-kaniko-secret \
+    --from-file $tmp_config_file
   rm $tmp_config_file
 else
   echo "docker-kaniko-secret already configured."
@@ -166,4 +230,4 @@ kubectl -n istio-system get service istio-ingressgateway \
 echo
 
 echo
-echo "Cluster $KUDA_AWS_CLUSTER_NAME is ready!"
+echo "Cluster $cluster_name is ready!"

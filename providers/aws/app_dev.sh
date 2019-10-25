@@ -4,68 +4,41 @@ set -e
 
 source $KUDA_CMD_DIR/.config.sh
 
+# Config.
+cluster_name=$KUDA_AWS_CLUSTER_NAME
+aws_region=$KUDA_AWS_CLUSTER_REGION
 aws_account_id="$(aws sts get-caller-identity | jq -r .Account)"
-ecr_domain="$aws_account_id.dkr.ecr.$KUDA_AWS_CLUSTER_REGION.amazonaws.com"
-
+ecr_domain="$aws_account_id.dkr.ecr.$aws_region.amazonaws.com"
 app_name=$1
 app_registry="$ecr_domain/$app_name"
-app_image="$app_registry:$app_version"
 namespace="default"
-
 app_cache_name=$app_name-cache
 
-echo $app_image
-
-# Create Container Registry if it doesn't exists.
-if [ -z "$(aws ecr describe-repositories --region $KUDA_AWS_CLUSTER_REGION | grep $app_name)" ]; then
+# Create container registries if they doesn't exists.
+repos="$(aws ecr describe-repositories --region $aws_region)"
+if [ -z "$(echo $repos | grep $app_name)" ]; then
   aws ecr create-repository \
     --repository-name $app_name \
-    --region $KUDA_AWS_CLUSTER_REGION
+    --region $aws_region
 else
   echo "Container Registry $app_registry already exists"
 fi
-
-# Create the cache registry if it doesn't exists.
-if [ -z "$(aws ecr describe-repositories --region $KUDA_AWS_CLUSTER_REGION | grep $app_cache_name)" ]; then
+# Cache registry.
+if [ -z "$(echo $repos | grep $app_cache_name)" ]; then
   aws ecr create-repository \
     --repository-name $app_cache_name \
-    --region $KUDA_AWS_CLUSTER_REGION
+    --region $aws_region
 else
   echo "Container Registry $app_registry-cache already exists"
 fi
 
 # Retrieve cluster token.
 aws eks update-kubeconfig \
-  --name $KUDA_AWS_CLUSTER_NAME \
-  --region $KUDA_AWS_CLUSTER_REGION
+  --name $cluster_name \
+  --region $aws_region
 
 # Login Container Registry.
-# aws ecr get-login --region $KUDA_AWS_CLUSTER_REGION --no-include-email | bash
-
-#TODO: Build & Push image using Kaniko.
-
-# Write Knative service config.
-# cat <<EOF | kubectl apply -f -
-# apiVersion: serving.knative.dev/v1alpha1
-# kind: Service
-# metadata:
-#   name: $app_name
-#   namespace: default
-# spec:
-#   template:
-#     spec:
-#       nodeSelector:
-#         nvidia.com/gpu: "true"
-#       tolerations:
-#         - key: "nvidia.com/gpu"
-#           operator: "Exists"
-#           effect: "NoSchedule"
-#       containers:
-#         - image: $app_image
-#           resources:
-#             limits:
-#               nvidia.com/gpu: 1
-# EOF
+aws ecr get-login --region $aws_region --no-include-email | bash
 
 # Write Knative service config.
 echo "
@@ -78,20 +51,22 @@ spec:
   template:
     spec:
       # nodeSelector:
-      #   nvidia.com/gpu: true
+      #   nvidia.com/gpu: 'true'
       # tolerations:
-      #   - key: nvidia.com/gpu
-      #     operator: Exists
-      #     effect: NoSchedule
+      #   - key: 'nvidia.com/gpu'
+      #     operator: 'Exists'
+      #     effect: 'NoSchedule'
       containers:
         - image: $app_registry
-          resources:
-            limits:
-              nvidia.com/gpu: 1
+          # resources:
+          #   limits:
+          #     nvidia.com/gpu: 1
+          env:
+            - name: KUDA_DEV
+              value: 'true'
 " >.kuda-app.k8.yaml
 
-# cat <<EOF | skaffold dev -n $namespace -f -
-cat <<EOF | skaffold run -v debug -n $namespace -f -
+cat <<EOF | skaffold dev -n $namespace -f -
 apiVersion: skaffold/v1beta17
 kind: Config
 build:
@@ -102,8 +77,6 @@ build:
           - src: '**/*'
             dest: .
       kaniko:
-        buildArgs:
-          verbosity: debug
         buildContext:
           localDir: {}
         cache:

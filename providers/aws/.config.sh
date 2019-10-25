@@ -1,5 +1,3 @@
-set -e
-
 echo
 echo -e "\e[1m \e[34mKuda AWS provider \e[36mv$(cat /kuda_cmd/VERSION) \e[0m"
 echo

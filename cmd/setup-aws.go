@@ -47,7 +47,7 @@ func init() {
 
 func setupAWS() error {
 	const provider = "aws"
-	const providerVersion = "0.1.0"
+	const providerVersion = "2.0.0"
 
 	// Set provider config.
 	viper.Set("provider", provider)
