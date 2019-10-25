@@ -45,7 +45,7 @@ It is based on [Knative](https://knative.dev), [Skaffold](https://skaffold.dev) 
 
 ## Ready?
 
-- [Install](https://docs.kuda.dev/kuda/install)
-- [Getting Started](https://docs.kuda.dev/kuda/getting_started)
+- [Install](docs/kuda/install.md)
+- [Getting Started](docs/kuda/getting_started.md)
 - [Examples](https://github.com/cyrildiagne/kuda-apps)
-- [Reference](https://docs.kuda.dev/kuda/cli)
+- [CLI Reference](docs/kuda/cli.md)
