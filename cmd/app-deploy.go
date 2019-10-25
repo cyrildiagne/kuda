@@ -18,9 +18,11 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cyrildiagne/kuda/pkg/docker"
 	"github.com/spf13/cobra"
@@ -62,6 +64,10 @@ func init() {
 }
 
 func deploy(app string, appDir string) error {
+	// Make sure app includes a version tag.
+	if !strings.Contains(app, ":") {
+		return errors.New("Missing version tag: app-name:version-tag")
+	}
 	// Image to run.
 	image := viper.GetString("image")
 	// Command to run.
