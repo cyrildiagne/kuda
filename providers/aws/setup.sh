@@ -64,11 +64,6 @@ function install_istio() {
   # Install prerequisites.
   is_istio_prereq_installed="$(helm ls --all istio-init | grep istio-init)"
   if [ -z "$is_istio_prereq_installed" ]; then
-    #   helm install \
-    #     --wait \
-    #     --name istio-init \
-    #     --namespace istio-system \
-    #     $istio_folder/install/kubernetes/helm/istio-init
     for i in $istio_folder/install/kubernetes/helm/istio-init/files/crd*yaml; do
       kubectl apply -f $i
     done
@@ -116,13 +111,6 @@ EOF
 
   kubectl apply -f istio-lean.yaml
   rm istio-lean.yaml
-
-  # helm install \
-  #   --wait \
-  #   --name istio \
-  #   --namespace istio-system \
-  #   $istio_folder/install/kubernetes/helm/istio \
-  #   --values $istio_folder/install/kubernetes/helm/istio/values-istio-demo.yaml
 }
 
 function install_knative() {
