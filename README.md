@@ -32,13 +32,13 @@ It is based on [Knative](https://knative.dev), [Skaffold](https://skaffold.dev) 
 **Language/Framework agnostic**
 
 - Built and deployed with [Docker](https://docker.io), applications can be written in any language and use any framework.
-- Applications deployed with Kuda are not required to import any specific library, keeping their code 100% portable.
+- Applications deployed with Kuda are not required to import any specific library.
 
 **Cloud provider Compatibility**
 
 | Provider             | Status         |
 | -------------------- | -------------- |
-| [GCP](providers/gcp) | ✔              |
+| [GCP](providers/gcp) | In progress... |
 | [AWS](providers/aws) | In progress... |
 | Azure                | Not started    |
 | NGC                  | Not started    |

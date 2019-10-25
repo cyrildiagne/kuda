@@ -2,18 +2,29 @@
 
 Hacky & bare implementation with shell scripts.
 It uses the following GCP products:
+
 - [Cloud Build](https://cloud.google.com/cloud-build) to build & push the app images.
 - [Container Registry](https://cloud.google.com/container-registry) to privately store the app images.
 
 # Status
 
-| Command | Status |
-| - | - |
-| setup | ✔ |
-| delete | ✔ |
-| app dev | WIP |
-| app deploy | WIP |
-| app delete | ✔ |
+| Command      |  Status |
+| ------------ | ------- |
+| `setup`      | ✔       |
+| `delete`     | ✔       |
+| `app dev`    | ✔       |
+| `app deploy` | ✔       |
+| `app delete` | ✔       |
+
+Functionalities :
+
+| Functionalities     |  Status     |
+| ------------------- | ----------- |
+| Dev file sync       | ✔           |
+| GPU node autoscaler | ✔           |
+| Https               | Not started |
+| Dns                 | Not started |
+| Monitoring          | Not started |
 
 # Prerequisites
 
@@ -33,20 +44,18 @@ gcloud projects add-iam-policy-binding <project> \
 
 You can override the following settings by adding them as flags of the `kuda setup` command (ex: `kuda setup gcp ... --gcp_cluster_name=mycluster`).
 
-| Parameter | Default | Description |
-| - | - | - |
-| `gcp_project_id` | None (Required) | The GCP Project ID |
-| `gcp_credentials` | None (Required) | Path to the GCP Credential JSON file |
-| `gcp_cluster_name` | kuda | The new or existing cluster name |
-| `gcp_compute_zone` | us-central1-a | The GCP compute zone |
-| `gcp_machine_type` | n1-standard-4 | Default machine type for the nodes (Only evaluated during `setup`)|
-| `gcp_pool_num_nodes` | 1 | Default number of nodes of the GPU pool (Only evaluated during `setup`) |
-| `gcp_gpu` | k80 | The default GPU to use. (Only evaluated during `setup`) |
-| `gcp_use_preemptible` | false | Wether or not the GPU nodes should be preemptible. (Only evaluated during `setup`) |
-
+| Parameter             | Default          | Description                                                                        |
+| --------------------- | ---------------- | ---------------------------------------------------------------------------------- |
+| `gcp_project_id`      | None (Required)  | The GCP Project ID                                                                 |
+| `gcp_credentials`     | None (Required)  | Path to the GCP Credential JSON file                                               |
+| `gcp_cluster_name`    | kuda             | The new or existing cluster name                                                   |
+| `gcp_compute_zone`    | us-central1-a    | The GCP compute zone                                                               |
+| `gcp_machine_type`    | n1-standard-4    | Default machine type for the nodes (Only evaluated during `setup`)                 |
+| `gcp_pool_num_nodes`  | 1                | Default number of nodes of the GPU pool (Only evaluated during `setup`)            |
+| `gcp_gpu`             | k80              | The default GPU to use. (Only evaluated during `setup`)                            |
+| `gcp_use_preemptible` | false            | Wether or not the GPU nodes should be preemptible. (Only evaluated during `setup`) |
 
 # Limitations
 
 - By default, the system node and the load balancer will be kept on, incuring charges of about 45€ per months. You can manually scale down the system node to 0 to temporarily stop its associated charges or run `kuda delete` to completely delete the cluster.
 - Currently the load balancer doesn't get deleted when you delete the cluster. Make sure to delete it manually [here](https://console.cloud.google.com/net-services/loadbalancing/loadBalancers/list) after deleting a cluster to avoid extra costs.
-- You can find a list of parameters that you can override in `.config.sh`
