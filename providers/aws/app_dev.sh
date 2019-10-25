@@ -58,9 +58,9 @@ spec:
       #     effect: 'NoSchedule'
       containers:
         - image: $app_registry
-          # resources:
-          #   limits:
-          #     nvidia.com/gpu: 1
+          resources:
+            limits:
+              nvidia.com/gpu: 1
           env:
             - name: KUDA_DEV
               value: 'true'
@@ -98,3 +98,4 @@ deploy:
     manifests:
       - .kuda-app.k8.yaml
 EOF
+rm .kuda-app.k8.yaml
