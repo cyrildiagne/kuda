@@ -23,9 +23,9 @@ Functionalities:
 | Dns                 | Not started |
 | Monitoring          | Not started |
 
-Notes:
+Status Notes & current issues:
 
-- There is an issue with the nodes autoscaler
+- https://github.com/cyrildiagne/kuda/issues/11
 
 # Prerequisites
 
