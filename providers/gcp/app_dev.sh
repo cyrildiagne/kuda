@@ -26,9 +26,9 @@ spec:
     spec:
       containers:
         - image: $app_image
-          # resources:
-          #   limits:
-          #     nvidia.com/gpu: 1
+          resources:
+            limits:
+              nvidia.com/gpu: 1
           volumeMounts:
             - name: secret
               readOnly: true
