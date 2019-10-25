@@ -18,23 +18,23 @@ function create_cluster() {
     - name: default
       instanceType: m5.large
       desiredCapacity: 2
-    # - name: gpu
-    #   instanceType: p2.xlarge
-    #   desiredCapacity: 1
-    #   minSize: 0
-    #   # iam:
-    #   #   withAddonPolicies:
-    #   #     autoScaler: true
-    #   # tags:
-    #   #   k8s.io/cluster-autoscaler/node-template/taint/dedicated: nvidia.com/gpu=true
-    #   #   k8s.io/cluster-autoscaler/node-template/label/nvidia.com/gpu: "true"
-    #   #   k8s.io/cluster-autoscaler/enabled: "true"
-    #   # labels:
-    #   #   lifecycle: Ec2Spot
-    #   #   nvidia.com/gpu: "true"
-    #   #   k8s.amazonaws.com/accelerator: nvidia-tesla
-    #   # taints:
-    #   #   nvidia.com/gpu: "true:NoSchedule"
+    - name: gpu
+      instanceType: p2.xlarge
+      desiredCapacity: 1
+      minSize: 0
+      # iam:
+      #   withAddonPolicies:
+      #     autoScaler: true
+      # tags:
+      #   k8s.io/cluster-autoscaler/node-template/taint/dedicated: nvidia.com/gpu=true
+      #   k8s.io/cluster-autoscaler/node-template/label/nvidia.com/gpu: "true"
+      #   k8s.io/cluster-autoscaler/enabled: "true"
+      # labels:
+      #   lifecycle: Ec2Spot
+      #   nvidia.com/gpu: "true"
+      #   k8s.amazonaws.com/accelerator: nvidia-tesla
+      # taints:
+      #   nvidia.com/gpu: "true:NoSchedule"
 EOF
 }
 
