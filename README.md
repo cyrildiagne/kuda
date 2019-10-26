@@ -6,22 +6,22 @@
 
 **Develop & deploy serverless applications on remote GPUs.**
 
-[Kuda](https://kuda.dev) helps prototyping and deploying serverless applications that need [CUDA](https://developer.nvidia.com/cuda-zone) on [Kubernetes](http://kubernetes.io) on the major cloud providers.
+[Kuda](https://kuda.dev) helps prototyping and deploying serverless applications that need GPUs and [CUDA](https://developer.nvidia.com/cuda-zone) on [Kubernetes](http://kubernetes.io).
 
-It is based on [Knative](https://knative.dev), [Skaffold](https://skaffold.dev) and [Kaniko](https://github.com/GoogleContainerTools/kaniko).
+It is based on [Knative](https://knative.dev), [Skaffold](https://skaffold.dev) and [Kaniko](https://github.com/GoogleContainerTools/kaniko), and supports the major cloud providers.
 
 ## Disclaimer
 
 🧪 This is a **very early** and **experimental** work in progress:
 
-- Don't use it in production environments.
-- The API will change.
+- Most things won't work out of the box.
+- It might break things in the cluster. Keep it away from production resources :)
 
 ## Key Features
 
 **Serverless GPU applications**
 
-- Kuda uses [Knative](https://knative.dev) to consume billable GPUs only when there is traffic, and scales down to zero when there's no traffic.
+- Kuda uses [Knative](https://knative.dev) to consume GPUs only when there is traffic, and scales down to zero when there's no traffic.
 
 **Easy to use**
 
@@ -36,12 +36,12 @@ It is based on [Knative](https://knative.dev), [Skaffold](https://skaffold.dev) 
 
 **Cloud provider Compatibility**
 
-| Provider | Status                           |
-| -------- | -------------------------------- |
+| Provider | Status                          |
+| -------- | ------------------------------- |
 | GCP      | [In progress...](providers/gcp) |
-| AWS      | [In progress...](providers/aws)  |
-| Azure    | Not started                      |
-| NGC      | Not started                      |
+| AWS      | [In progress...](providers/aws) |
+| Azure    | Not started                     |
+| NGC      | Not started                     |
 
 ## Ready?
 
