@@ -41,6 +41,7 @@ RUN chmod +x /kuda_cmd/*.sh
 RUN ln -s /kuda_cmd/app_deploy.sh /usr/local/bin/kuda_app_deploy && \
   ln -s /kuda_cmd/app_dev.sh /usr/local/bin/kuda_app_dev && \
   ln -s /kuda_cmd/app_delete.sh /usr/local/bin/kuda_app_delete && \
+  ln -s /kuda_cmd/apply.sh /usr/local/bin/kuda_apply && \
   ln -s /kuda_cmd/setup.sh /usr/local/bin/kuda_setup && \
   ln -s /kuda_cmd/delete.sh /usr/local/bin/kuda_delete
 
