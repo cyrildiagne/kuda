@@ -40,12 +40,10 @@ func init() {
 
 // Setup is a unified setup function across all providers.
 func Setup() error {
-	// Image to run.
-	image := viper.GetString("image")
 	// Command to run.
 	command := []string{"kuda_setup"}
 	// Run
-	err := RunDockerWithEnvs(docker.CommandOption{Image: image, Command: command})
+	err := RunProviderCommand(docker.CommandOption{Command: command})
 	if err != nil {
 		panic("There was an error setting up the cluster.")
 	}

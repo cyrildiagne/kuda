@@ -23,7 +23,6 @@ import (
 
 	"github.com/cyrildiagne/kuda/pkg/docker"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // appDeleteCmd represents the `app delete` command
@@ -45,8 +44,6 @@ func init() {
 
 func delete(app string) error {
 	fmt.Println("→ Deleting app...")
-	// Image to run.
-	image := viper.GetString("image")
 	// Command to run.
 	command := []string{"kuda_app_delete", app}
 	// Add the CWD to the volumes mounted in Docker.
@@ -56,8 +53,7 @@ func delete(app string) error {
 	}
 	volumes := []string{dir + ":/app_home"}
 	// Run the command.
-	dockerErr := RunDockerWithEnvs(docker.CommandOption{
-		Image:         image,
+	dockerErr := RunProviderCommand(docker.CommandOption{
 		Command:       command,
 		AppendVolumes: volumes,
 	})

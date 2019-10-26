@@ -8,7 +8,9 @@ build-provider:
 		-t gcr.io/kuda-project/provider-$(provider):$(provider_version)
 
 run:
-	go run $(kuda_root) $(cmd)
+	go run \
+		-ldflags "-X github.com/cyrildiagne/kuda/cmd.$(provider)ProviderVersion=$(provider_version)" \
+		$(kuda_root) $(cmd)
 
 build-provider-and-run: build-provider run
 	

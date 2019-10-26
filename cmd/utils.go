@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -25,9 +26,33 @@ import (
 	"github.com/spf13/viper"
 )
 
-// RunDockerWithEnvs retrieves local environment variables
-// that match a provider id and runs a docker image.
-func RunDockerWithEnvs(opts docker.CommandOption) error {
+// GetImage retrieves the provider docker image to use based on the user setting
+// And the version compatible with the compiled CLI.
+func GetImage() (string, error) {
+	// Get provider from config.
+	provider := viper.GetString("provider")
+	var version string
+	if provider == "gcp" {
+		version = gcpProviderVersion
+	} else if provider == "aws" {
+		version = awsProviderVersion
+	} else {
+		return "", errors.New("provider unknown")
+	}
+	// Setup the provider's image.
+	image := "gcr.io/kuda-project/provider-" + provider + ":" + version
+	return image, nil
+}
+
+// RunProviderCommand runs the provider docker image and retrieves local
+// environment variables that match a provider id.
+func RunProviderCommand(opts docker.CommandOption) error {
+	// Retrieve the provider image.
+	image, err := GetImage()
+	if err != nil {
+		return errors.New("could not retrieve provider image")
+	}
+	opts.Image = image
 	// Environment variables for the Docker image.
 	// Convert all the viper configs to environment variable
 	// in the format KUDA_* where * is the config uppercased.

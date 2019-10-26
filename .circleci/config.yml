@@ -11,6 +11,8 @@ jobs:
       - image: circleci/golang:1.13
     steps:
       - checkout
+      - run: export GCP_PROVIDER_VERSION=$(cat providers/gcp/VERSION)
+      - run: export AWS_PROVIDER_VERSION=$(cat providers/aws/VERSION)
       - run: curl -sL https://git.io/goreleaser | bash
 workflows:
   version: 2

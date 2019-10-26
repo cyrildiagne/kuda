@@ -24,7 +24,6 @@ import (
 
 	"github.com/cyrildiagne/kuda/pkg/docker"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // appDevCmd represents the `app dev` command
@@ -62,8 +61,6 @@ func init() {
 }
 
 func dev(app string, appDir string) error {
-	// Image to run.
-	image := viper.GetString("image")
 	// Command to run.
 	command := []string{"kuda_app_dev", app}
 	// Add the application folder to the volumes mounted in Docker.
@@ -74,8 +71,7 @@ func dev(app string, appDir string) error {
 		"/var/run/docker.sock:/var/run/docker.sock",
 	}
 	// Run the command.
-	dockerErr := RunDockerWithEnvs(docker.CommandOption{
-		Image:         image,
+	dockerErr := RunProviderCommand(docker.CommandOption{
 		Command:       command,
 		AppendVolumes: volumes,
 	})

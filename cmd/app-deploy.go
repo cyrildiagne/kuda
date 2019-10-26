@@ -26,7 +26,6 @@ import (
 
 	"github.com/cyrildiagne/kuda/pkg/docker"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // deployCmd represents the `app deploy` command
@@ -68,8 +67,6 @@ func deploy(app string, appDir string) error {
 	if !strings.Contains(app, ":") {
 		return errors.New("Missing version tag: app-name:version-tag")
 	}
-	// Image to run.
-	image := viper.GetString("image")
 	// Command to run.
 	command := []string{"kuda_app_deploy", app}
 	// Add the application folder to the volumes mounted in Docker.
@@ -80,8 +77,7 @@ func deploy(app string, appDir string) error {
 		"/var/run/docker.sock:/var/run/docker.sock",
 	}
 	// Run the command.
-	dockerErr := RunDockerWithEnvs(docker.CommandOption{
-		Image:         image,
+	dockerErr := RunProviderCommand(docker.CommandOption{
 		Command:       command,
 		AppendVolumes: volumes,
 	})

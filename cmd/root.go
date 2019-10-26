@@ -30,6 +30,11 @@ import (
 var version = "dev"
 var cfgFile string
 
+// These base provider versions must be set to the latest stable version when
+// Building the binary. See the Makefile or goreleaser.yml file for example.
+var awsProviderVersion = "latest"
+var gcpProviderVersion = "latest"
+
 // RootCmd is the main command.
 var RootCmd = &cobra.Command{
 	Use:   "kuda",
@@ -44,6 +49,10 @@ https://kuda.dev`,
 // This is called by main.main(). It only needs to happen once to the RootCmd.
 func Execute() {
 	RootCmd.Version = version
+	RootCmd.SetVersionTemplate(
+		"Kuda: {{.Version}}\n" +
+			"→ AWS Provider: v" + awsProviderVersion + "\n" +
+			"→ GCP Provider: v" + gcpProviderVersion + "\n")
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

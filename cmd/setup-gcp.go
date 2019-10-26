@@ -59,14 +59,9 @@ func init() {
 
 func setupGCP() error {
 	const provider = "gcp"
-	const providerVersion = "2.0.0"
 
 	// Set provider config.
 	viper.Set("provider", provider)
-
-	// Setup the provider's image.
-	image := "gcr.io/kuda-project/provider-" + provider + ":" + providerVersion
-	viper.Set("image", image)
 
 	// Setup the volume mounting for the credentials.
 	credentials := viper.GetString("gcp_credentials")
