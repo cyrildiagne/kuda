@@ -6,6 +6,7 @@
 
 - [Install](kuda/install.md)
 - [Getting Started](kuda/getting_started.md)
+- [Domain Configuration](kuda/configure_domain.md)
 - [CLI Reference](kuda/cli.md)
 - [Examples](https://github.com/cyrildiagne/kuda-apps)
 
