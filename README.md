@@ -6,9 +6,9 @@
 
 **Develop & deploy serverless applications on remote GPUs.**
 
-[Kuda](https://kuda.dev) helps prototyping and deploying serverless applications that need GPUs and [CUDA](https://developer.nvidia.com/cuda-zone) on [Kubernetes](http://kubernetes.io).
+[Kuda](https://kuda.dev) helps prototyping and deploying serverless applications that need GPUs and [CUDA](https://developer.nvidia.com/cuda-zone), on the major cloud providers.
 
-It is based on [Knative](https://knative.dev), [Skaffold](https://skaffold.dev) and [Kaniko](https://github.com/GoogleContainerTools/kaniko), and supports the major cloud providers.
+It is based on [Kubernetes](http://kubernetes.io), [Knative](https://knative.dev), [Skaffold](https://skaffold.dev) and [Kaniko](https://github.com/GoogleContainerTools/kaniko).
 
 ## Disclaimer
 
@@ -25,7 +25,7 @@ It is based on [Knative](https://knative.dev), [Skaffold](https://skaffold.dev) 
 
 **Easy to use**
 
-- `kuda setup <provider>` : Setup a new cluster will all the requirements on the provider's managed Kubernetes, or upgrade an existing cluster.
+- `kuda setup <provider>` : Setup a new cluster, or upgrade an existing cluster, on the provider's managed Kubernetes.
 - `kuda app dev` : Deploys an application and watches your local folder so that the app reloads automatically on the cluster when you make local changes.
 - `kuda app deploy` : Deploy the application as a serverless container.
 
