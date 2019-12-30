@@ -1,21 +1,31 @@
 # Getting Started
 
 Prerequisites:
- - Kuda installed on your local machine ([Installation Guide](docs/install.md))
- - Kuda installed on your local machine ([Installation Guide](docs/install.md))
+
+- Kuda installed & cluster setup ([Installation Guide](docs/install.md))
+- A local copy of the [`hello-gpu-flask`](examples/hello-gpu-flask) example:
+  ```
+  git clone github.com/cyrildiagne/kuda
+  cd kuda/examples/hello-gpu-flask
+  ```
 
 ## 1 - Initialize
 
-```bash
-# Replace with your cluster's ingress IP.
-export cluster_ip="XX.XX.XX.XX"
+First, you must provide a docker container registry that you have write access to such as `docker.io/your-username`, `gcr.io/your-projectname`..etc.
 
-# Replace with your docker container registry such as docker.io, gcr.io..etc.
-# Docker must have write access to the registry.
+```bash
 export docker_registry="docker.io/username"
 ```
 
-Then generate the configuration files using `kuda init`:
+Then you need to retrieve your cluster ingress IP. To do so run:
+
+```bash
+export cluster_ip=$(kubectl get svc istio-ingressgateway \
+    --namespace istio-system \
+    --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')
+```
+
+Finally generate the configuration files using `kuda init`:
 
 ```bash
 kuda init \
