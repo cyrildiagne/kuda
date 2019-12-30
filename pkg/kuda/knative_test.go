@@ -30,7 +30,7 @@ func TestGenerateKnativeConfig(t *testing.T) {
 	numGPUs, _ := resource.ParseQuantity("1")
 	container := corev1.Container{
 		Image: cfg.DockerDestImage,
-		Name:  cfg.DockerDestImage,
+		Name:  cfg.URLConfig.Name,
 		Resources: corev1.ResourceRequirements{
 			Limits: corev1.ResourceList{
 				corev1.ResourceName("nvidia.com/gpu"): numGPUs,
@@ -63,7 +63,7 @@ func TestGenerateKnativeDevConfig(t *testing.T) {
 	numGPUs, _ := resource.ParseQuantity("1")
 	container := corev1.Container{
 		Image: cfg.DockerDestImage,
-		Name:  cfg.DockerDestImage,
+		Name:  cfg.URLConfig.Name,
 		Resources: corev1.ResourceRequirements{
 			Limits: corev1.ResourceList{
 				corev1.ResourceName("nvidia.com/gpu"): numGPUs,
