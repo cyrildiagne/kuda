@@ -13,6 +13,7 @@ require (
 	github.com/GoogleContainerTools/skaffold v1.1.0
 	github.com/google/go-cmp v0.3.1
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/openzipkin/zipkin-go v0.2.2 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0
 	gopkg.in/yaml.v2 v2.2.7
