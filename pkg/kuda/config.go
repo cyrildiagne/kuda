@@ -128,7 +128,7 @@ func GenerateConfigFiles(dURL string, dockerRegistry string) error {
 	if err != nil {
 		return err
 	}
-	if err := WriteManifest(skaffoldManifest, cfg.ConfigFolder+"/"+"knative.yml"); err != nil {
+	if err := WriteManifest(skaffoldManifest, cfg.ConfigFolder+"/"+"skaffold.yml"); err != nil {
 		return err
 	}
 
@@ -150,7 +150,7 @@ func GenerateConfigFiles(dURL string, dockerRegistry string) error {
 	if err != nil {
 		return err
 	}
-	if err := WriteManifest(skaffoldManifestDev, cfg.ConfigFolder+"/"+"knative-dev.yml"); err != nil {
+	if err := WriteManifest(skaffoldManifestDev, cfg.ConfigFolder+"/"+"skaffold-dev.yml"); err != nil {
 		return err
 	}
 
