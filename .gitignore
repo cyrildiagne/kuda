@@ -1,3 +1,5 @@
 .DS_Store
 .vscode
+.kuda
 dist
+cmd_old

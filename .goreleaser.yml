@@ -9,8 +9,6 @@ builds:
       - CGO_ENABLED=0
     ldflags:
       - -X github.com/cyrildiagne/kuda/cmd.version={{.Version}}
-      - -X github.com/cyrildiagne/kuda/cmd.gcpProviderVersion={{.Env.GCP_PROVIDER_VERSION}}
-      - -X github.com/cyrildiagne/kuda/cmd.awsProviderVersion={{.Env.AWS_PROVIDER_VERSION}}
 archives:
   - replacements:
       darwin: Darwin

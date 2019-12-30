@@ -1,20 +1,3 @@
-/*
-Package cmd -
-
-Copyright © 2019 Cyril Diagne <diagne.cyril@gmail.com>.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
@@ -30,18 +13,10 @@ import (
 var version = "dev"
 var cfgFile string
 
-// These base provider versions must be set to the latest stable version when
-// Building the binary. See the Makefile or goreleaser.yml file for example.
-var awsProviderVersion = "latest"
-var gcpProviderVersion = "latest"
-
 // RootCmd is the main command.
 var RootCmd = &cobra.Command{
-	Use:   "kuda",
-	Short: "Develop & deploy serverless applications on remote GPUs",
-	Long: `Kuda consolidates the workflow of prototyping and deploying
-serverless CUDA-based applications on Kubernetes from any workstation.
-https://kuda.dev`,
+	Use:     "kuda",
+	Short:   "Kuda - Serverless APIs on remote GPUs",
 	Version: version,
 }
 
@@ -49,10 +24,6 @@ https://kuda.dev`,
 // This is called by main.main(). It only needs to happen once to the RootCmd.
 func Execute() {
 	RootCmd.Version = version
-	RootCmd.SetVersionTemplate(
-		"Kuda: {{.Version}}\n" +
-			"→ AWS Provider: v" + awsProviderVersion + "\n" +
-			"→ GCP Provider: v" + gcpProviderVersion + "\n")
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -83,7 +54,5 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	} else {
-		fmt.Println(err)
 	}
 }
