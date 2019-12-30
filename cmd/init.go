@@ -11,7 +11,7 @@ import (
 // initCmd represents the `setup init` command.
 var initCmd = &cobra.Command{
 	Use:   "init <URL>",
-	Short: "Generate the configuration files a local .kuda folder.",
+	Short: "Generate the configuration files in a local .kuda folder.",
 	Args:  cobra.ExactValidArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		url := args[0]
