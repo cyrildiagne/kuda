@@ -28,10 +28,12 @@ Future releases will include setup scripts for other providers.
 ### Setup on GKE
 
 Requirements:
+
 - [gcloud](#)
 - [Kubectl](#)
 
 Make sure you've enabled the API services using gcloud:
+
 ```bash
 gcloud services enable \
   cloudapis.googleapis.com \
@@ -40,11 +42,13 @@ gcloud services enable \
 ```
 
 Then override some of the defaults settings to your configuration. You can find the full list of config values in the [setup_gcp](hack/setup_gcp.sh) scripts.
+
 ```bash
 export PROJECT="your-gcp-project"
 ```
 
 Finally run the `setup_gcp` script which will create the cluster if it doesn't exist yet and will provision the required resources.
+
 ```bash
 sh hack/setup_gcp.sh
 ```
