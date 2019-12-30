@@ -30,7 +30,7 @@ func GenerateKnativeConfig(cfg Config) (v1.Service, error) {
 
 	container := corev1.Container{
 		Image: cfg.DockerDestImage,
-		Name:  cfg.DockerDestImage,
+		Name:  cfg.URLConfig.Name,
 		Resources: corev1.ResourceRequirements{
 			Limits: corev1.ResourceList{
 				corev1.ResourceName("nvidia.com/gpu"): numGPUs,
