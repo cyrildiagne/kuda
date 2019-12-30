@@ -12,13 +12,14 @@ set -e
 
 export CLUSTER_NAME="${CLUSTER_NAME:-kuda}"
 export CLUSTER_ZONE="${CLUSTER_ZONE:-us-central1-a}"
-export PROJECT="${PROJECT:-kuda-project}"
-export DOMAIN="${DOMAIN:-xip.io}"
+export PROJECT="${PROJECT:-gpu-sh}"
+export DOMAIN="${DOMAIN:-gpu.sh}"
+export NAMESPACE="${DOMAIN:-cyrildiagne}"
 export MASTER_MACHINE_TYPE="${MASTER_MACHINE_TYPE:-n1-standard-2}"
 export GPU_MACHINE_TYPE="${GPU_MACHINE_TYPE:-n1-standard-2}"
 export GPU_ACCELERATOR="${GPU_ACCELERATOR:-nvidia-tesla-k80}"
 export USE_PREEMPTIBLE_GPU="${USE_PREEMPTIBLE_GPU:-true}"
-export KNATIVE_VERSION="${KNATIVE_VERSION:-0.10.0}"
+export KNATIVE_VERSION="${KNATIVE_VERSION:-0.11.0}"
 
 export CLUSTER_USER_ADMIN=$(gcloud config get-value core/account)
 
@@ -32,6 +33,7 @@ function create_main_cluster() {
     --enable-stackdriver-kubernetes \
     --enable-ip-alias \
     --enable-autoscaling \
+    --num-nodes=2 \
     --min-nodes=1 \
     --max-nodes=8 \
     --enable-autorepair \
@@ -148,4 +150,12 @@ function setup() {
   echo "Done!"
 }
 
+function print_ip() {
+  IP_ADDRESS=$(kubectl get svc istio-ingressgateway \
+    --namespace istio-system \
+    --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')
+  echo "Cluster Ingress IP Adress: $IP_ADDRESS"
+}
+
 setup
+print_ip
