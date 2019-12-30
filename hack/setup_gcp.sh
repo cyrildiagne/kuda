@@ -10,11 +10,11 @@
 # Exit on error.
 set -e
 
+export PROJECT="${PROJECT:-gpu-sh}"
+export DOMAIN="${DOMAIN:-xip.io}"
+export NAMESPACE="${DOMAIN:-default}"
 export CLUSTER_NAME="${CLUSTER_NAME:-kuda}"
 export CLUSTER_ZONE="${CLUSTER_ZONE:-us-central1-a}"
-export PROJECT="${PROJECT:-gpu-sh}"
-export DOMAIN="${DOMAIN:-gpu.sh}"
-export NAMESPACE="${DOMAIN:-cyrildiagne}"
 export MASTER_MACHINE_TYPE="${MASTER_MACHINE_TYPE:-n1-standard-2}"
 export GPU_MACHINE_TYPE="${GPU_MACHINE_TYPE:-n1-standard-2}"
 export GPU_ACCELERATOR="${GPU_ACCELERATOR:-nvidia-tesla-k80}"
@@ -129,6 +129,11 @@ function setup() {
     echo "Installing Knative v$KNATIVE_VERSION..."
     install_knative
     echo "→ Knative installed."
+  fi
+
+  # Setup namespace
+  if [ "$NAMESPACE" != "default" ]; then
+    kubectl create namespace $NAMESPACE
   fi
 
   # Setup Domain name.
