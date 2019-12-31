@@ -1,8 +1,6 @@
-# Install
+# Install CLI
 
-## Install CLI
-
-### Requirements:
+Requirements:
 
 - [Docker](https://docs.docker.com/install)
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
@@ -16,7 +14,7 @@ curl https://raw.githubusercontent.com/cyrildiagne/kuda/master/scripts/get-kuda-
 
 ---
 
-## Setup Cluster
+# Setup Cluster
 
 Kuda is being actively developped on [GKE](https://cloud.google.com/kubernetes-engine/)
 but with cross-compatibility in mind.
