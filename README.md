@@ -4,9 +4,7 @@
 [![](https://goreportcard.com/badge/github.com/cyrildiagne/kuda?v1)](https://goreportcard.com/report/github.com/cyrildiagne/kuda)
 [![](https://img.shields.io/github/v/release/cyrildiagne/kuda?include_prereleases)](https://github.com/cyrildiagne/kuda/releases)
 
-**Serverless APIs on remote GPUs.**
-
-[Kuda](https://kuda.dev) helps developping, deploying and managing serverless APIs that need GPUs and [CUDA](https://developer.nvidia.com/cuda-zone) on Kubernetes.
+**[Kuda](https://kuda.dev) helps develop, deploy and manage serverless APIs that need GPUs on Kubernetes.**
 
 It is based on [Knative](https://knative.dev) and [Skaffold](https://skaffold.dev).
 
@@ -14,7 +12,7 @@ It is based on [Knative](https://knative.dev) and [Skaffold](https://skaffold.de
 
 🧪 Kuda is an **early** and **experimental** work in progress.
 
-## Ready?
+## Getting Started
 
 - [Install](docs/install.md)
 - [Getting Started](docs/getting_started.md)

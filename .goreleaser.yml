@@ -26,10 +26,17 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+blobs:
+  -
+    provider: gs
+    bucket: kuda-releases
+    # Template for the path/name inside the bucket.
+    # Default is `{{ .ProjectName }}/{{ .Tag }}`
+    folder: "{{ .Tag }}"
 # brews:
 #   - # Tap
 #     github:
-#       owner: tredfield
-#       name: homebrew-tap
+#       owner: cyrildiagne
+#       name: kuda-homebrew-tap
 #     homepage: "https://github.com/cyrildiagne/kuda"
-#     description: "Build & deploy serverless applications on remote GPUs."
+#     description: "Serverless APIs on remote GPUs."
