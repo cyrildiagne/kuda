@@ -4,7 +4,7 @@
 
   set -e
 
-  VERSION=0.3.3-preview
+  VERSION=0.3.4
 
   green="\033[32m"
   red="\033[31m"
