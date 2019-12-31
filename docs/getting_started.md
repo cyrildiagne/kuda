@@ -2,8 +2,8 @@
 
 Prerequisites:
 
-- Kuda installed & cluster setup ([Installation Guide](docs/install.md))
-- A local copy of the [`hello-gpu-flask`](examples/hello-gpu-flask) example:
+- Kuda installed & cluster setup ([Installation Guide](install.md))
+- A local copy of the [`hello-gpu-flask`](/examples/hello-gpu-flask) example:
   ```
   git clone github.com/cyrildiagne/kuda
   cd kuda/examples/hello-gpu-flask

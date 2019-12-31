@@ -8,7 +8,7 @@ reset="\033[0m"
 
 if [ -z "$1" ]; then
   printf "${red}ERROR: Version missing${reset}\n"
-  echo "Example usage: ./hack/release.sh 0.3.1"
+  echo "Example usage: ./scripts/release.sh 0.3.1"
   exit 1
 fi
 
