@@ -12,7 +12,7 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-VERSION=$1
+VERSION=$1-preview
 printf "${green}Releasing v$VERSION...${reset}\n"
 
 # Tidy.
@@ -32,8 +32,8 @@ git add scripts/get-kuda-cli.sh
 git commit -m "update get script to version $VERSION"
 
 # Tag & push branch for CI release.
-git tag v$VERSION-preview -m "Preview release."
-git push origin v$VERSION-preview
+git tag v$VERSION -m "Preview release."
+git push origin v$VERSION
 
 # Master.
 # git checkout master
