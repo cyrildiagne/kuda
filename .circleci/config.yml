@@ -12,7 +12,8 @@ jobs:
       - image: circleci/golang:1.13
     steps:
       - checkout
-      - run: echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
+      - run: echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > /tmp/gcloud-service-key.json
+      - run: export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcloud-service-key.json
       - run: go test github.com/cyrildiagne/kuda/pkg/kuda
       - run: curl -sL https://git.io/goreleaser | bash
 workflows:
