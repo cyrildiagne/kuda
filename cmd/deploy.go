@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// deployCmd represents the `setup init` command.
+// deployCmd represents the `kuda deploy` command.
 var deployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "Deploys the API in production mode using Skaffold.",

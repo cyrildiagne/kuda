@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// devCmd represents the `setup init` command.
+// devCmd represents the `kuda dev` command.
 var devCmd = &cobra.Command{
 	Use:   "dev",
 	Short: "Runs the API remotely in dev mode using Skaffold.",

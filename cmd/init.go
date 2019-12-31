@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// initCmd represents the `setup init` command.
+// initCmd represents the `kuda init` command.
 var initCmd = &cobra.Command{
 	Use:   "init <URL>",
 	Short: "Generate the configuration files in a local .kuda folder.",
