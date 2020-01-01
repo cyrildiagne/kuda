@@ -36,19 +36,22 @@ you should start seeing the startup logs from the Flask debug server.
 
 ## 3 - Test
 
-To call & test your API, you need your cluster ingress IP address.
+You can then call and test your dev API, for example using cURL (replace `your-domain.com` by your domain):
+
+<details><summary>If you're using the (default) automatic xip.io domain</summary>
+Then you need your cluster's ingress IP address to assemble the full domain name.
 To retrieve it, you can run:
 
 ```bash
 export cluster_ip=$(kubectl get svc istio-ingressgateway \
     --namespace istio-system \
     --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')
+echo "Your full xip.io domain is: $cluster_ip.xip.io"
 ```
-
-You can then call the API, for example using cURL:
+</details>
 
 ```bash
-curl http://hello-gpu.default.$cluster_ip.xip.io
+curl http://hello-gpu-dev.default.your-domain.com
 ```
 
 💡You can try to update the code in `main.py` while `dev`
@@ -61,4 +64,10 @@ Once you're happy with your API, you can deploy the production build using:
 
 ```bash
 kuda deploy
+```
+
+And call the production API, for example using cURL:
+
+```bash
+curl http://hello-gpu.default.$cluster_ip.xip.io
 ```
