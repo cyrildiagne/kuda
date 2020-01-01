@@ -1,6 +1,7 @@
 package kuda
 
 import (
+	"fmt"
 	"net/url"
 	"os"
 	"strings"
@@ -13,10 +14,12 @@ type Config struct {
 	URLConfig URLConfig
 	// Artifacts
 	DockerDestImage string
-	ManifestFile    string
 	// Local config
-	Dockerfile   string
+	Dockerfile string
+	// File Generation config
 	ConfigFolder string
+	KserviceFile string
+	SkaffoldFile string
 	// Dev config
 	DevConfig *DevConfig
 }
@@ -31,13 +34,34 @@ type DevConfig struct {
 
 // URLConfig stores the API config extracted from the url.
 type URLConfig struct {
-	Scheme    string
-	Name      string
+	Protocol  string
 	Namespace string
+	Name      string
 	Domain    string
 }
 
-// NewDevConfigFlask create new instance of DevConfig for Flask projects.
+// Manifests contains the yamls of the kservice and skaffold manifests.
+type Manifests struct {
+	Config   Config
+	Kservice string
+	Skaffold string
+}
+
+// ConfigManifests contains the generated manifests.
+type ConfigManifests struct {
+	Prod Manifests
+	Dev  Manifests
+}
+
+// NewURLConfig creates a new instance of URLConfig with default values.
+func NewURLConfig() URLConfig {
+	cfg := URLConfig{}
+	cfg.Protocol = "http"
+	cfg.Namespace = "default"
+	return cfg
+}
+
+// NewDevConfigFlask creates a new instance of DevConfig for Flask projects.
 func NewDevConfigFlask() DevConfig {
 	cfg := DevConfig{}
 	cfg.Sync = []string{"**/*.py"}
@@ -54,6 +78,8 @@ func NewConfig() Config {
 	cfg := Config{}
 	cfg.ConfigFolder = "./.kuda"
 	cfg.Dockerfile = "./Dockerfile"
+	cfg.KserviceFile = cfg.ConfigFolder + "/" + "service.yml"
+	cfg.SkaffoldFile = cfg.ConfigFolder + "/" + "skaffold.yml"
 	return cfg
 }
 
@@ -64,95 +90,94 @@ func ParseURL(dURL string) (*URLConfig, error) {
 		return nil, err
 	}
 
+	if u.Host == "" {
+		return nil, fmt.Errorf("Invalid URL %s \n"+
+			"Should be a valid URL: {scheme}://{api-name}.{namespace}.{domain}", dURL)
+	}
+
 	split := strings.Split(u.Host, ".")
 
-	config := URLConfig{
-		Scheme:    u.Scheme,
-		Name:      split[0],
-		Namespace: split[1],
-		Domain:    strings.Join(split[2:], "."),
+	config := NewURLConfig()
+	if u.Scheme != "" {
+		config.Protocol = u.Scheme
 	}
+
+	config.Name = split[0]
+	config.Namespace = split[1]
+	config.Domain = strings.Join(split[2:], ".")
 
 	return &config, nil
 }
 
-// WriteManifest writes the manifest to disk
-func WriteManifest(content string, name string) error {
-	f, err := os.Create(name)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	if _, err := f.WriteString(content); err != nil {
-		return err
-	}
-	return nil
-}
-
 // GenerateConfigFiles creates the configuration files from a fully qualitfied url.
-func GenerateConfigFiles(dURL string, dockerRegistry string) error {
+func GenerateConfigFiles(dURL string, dockerRegistry string) (*ConfigManifests, error) {
 
 	// Infer config from URL.
 	urlCfg, err := ParseURL(dURL)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// Docker config.
-	dockerDestImage := dockerRegistry + "/" + urlCfg.Name
+	// -- PROD --
 
+	// Create config.
 	cfg := NewConfig()
+	cfg.URLConfig = *urlCfg
+	cfg.DockerDestImage = dockerRegistry + "/" + urlCfg.Name
 
 	// Make sure config folder exists.
 	if _, err := os.Stat(cfg.ConfigFolder); os.IsNotExist(err) {
 		os.Mkdir(cfg.ConfigFolder, 0700)
 	}
 
-	// Create config.
-	cfg.URLConfig = *urlCfg
-	cfg.DockerDestImage = dockerDestImage
-
-	// -- PROD --
-
-	cfg.ManifestFile = cfg.ConfigFolder + "/" + "service.yml"
 	// Write the service manifest.
 	knativeManifest, err := GenerateKnativeConfigYAML(cfg)
 	if err != nil {
-		return err
-	}
-	if err := WriteManifest(knativeManifest, cfg.ManifestFile); err != nil {
-		return err
+		return nil, err
 	}
 	// Write the skaffold manifest.
 	skaffoldManifest, err := GenerateSkaffoldConfigYAML(cfg)
 	if err != nil {
-		return err
-	}
-	if err := WriteManifest(skaffoldManifest, cfg.ConfigFolder+"/"+"skaffold.yml"); err != nil {
-		return err
+		return nil, err
 	}
 
 	// -- DEV --
 
-	cfg.ManifestFile = cfg.ConfigFolder + "/" + "service-dev.yml"
-	devCfg := NewDevConfigFlask()
-	cfg.DevConfig = &devCfg
-	// Write the service manifest.
-	knativeManifestDev, err := GenerateKnativeConfigYAML(cfg)
-	if err != nil {
-		return err
-	}
-	if err := WriteManifest(knativeManifestDev, cfg.ManifestFile); err != nil {
-		return err
-	}
-	// Write the skaffold manifest.
-	skaffoldManifestDev, err := GenerateSkaffoldConfigYAML(cfg)
-	if err != nil {
-		return err
-	}
-	if err := WriteManifest(skaffoldManifestDev, cfg.ConfigFolder+"/"+"skaffold-dev.yml"); err != nil {
-		return err
+	// Create config.
+	cfgDev := NewConfig()
+	cfgDev.URLConfig = *urlCfg
+	cfgDev.DockerDestImage = dockerRegistry + "/" + urlCfg.Name
+
+	// Make sure config folder exists.
+	if _, err := os.Stat(cfgDev.ConfigFolder); os.IsNotExist(err) {
+		os.Mkdir(cfgDev.ConfigFolder, 0700)
 	}
 
-	return nil
+	devCfg := NewDevConfigFlask()
+	cfgDev.DevConfig = &devCfg
+	cfgDev.KserviceFile = cfgDev.ConfigFolder + "/" + "service-dev.yml"
+	cfgDev.SkaffoldFile = cfgDev.ConfigFolder + "/" + "skaffold-dev.yml"
+	// Write the service manifest.
+	knativeManifestDev, err := GenerateKnativeConfigYAML(cfgDev)
+	if err != nil {
+		return nil, err
+	}
+	// Write the skaffold manifest.
+	skaffoldManifestDev, err := GenerateSkaffoldConfigYAML(cfgDev)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ConfigManifests{
+		Prod: Manifests{
+			Config:   cfg,
+			Kservice: knativeManifest,
+			Skaffold: skaffoldManifest,
+		},
+		Dev: Manifests{
+			Config:   cfgDev,
+			Kservice: knativeManifestDev,
+			Skaffold: skaffoldManifestDev,
+		},
+	}, nil
 }

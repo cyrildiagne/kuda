@@ -53,7 +53,7 @@ func GenerateSkaffoldConfig(cfg Config) (v1.SkaffoldConfig, error) {
 		DeployType: v1.DeployType{
 			// Location of the manifest file
 			KubectlDeploy: &v1.KubectlDeploy{
-				Manifests: []string{cfg.ManifestFile},
+				Manifests: []string{cfg.KserviceFile},
 			},
 		},
 	}

@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/cyrildiagne/kuda/pkg/kuda"
 
@@ -17,9 +19,22 @@ var initCmd = &cobra.Command{
 		url := args[0]
 		dockerRegistry, _ := cmd.Flags().GetString("docker_registry")
 
-		if err := kuda.GenerateConfigFiles(url, dockerRegistry); err != nil {
-			fmt.Println("ERROR:", err)
+		err := checkFolder()
+		if err != nil {
+			log.Fatal("ERROR:", err)
 		}
+
+		manifests, err := kuda.GenerateConfigFiles(url, dockerRegistry)
+		if err != nil {
+			log.Fatal("ERROR:", err)
+		}
+
+		// Write prod manifests.
+		writeManifest(manifests.Prod.Kservice, manifests.Prod.Config.KserviceFile)
+		writeManifest(manifests.Prod.Skaffold, manifests.Prod.Config.SkaffoldFile)
+		// Write dev manifests.
+		writeManifest(manifests.Dev.Kservice, manifests.Dev.Config.KserviceFile)
+		writeManifest(manifests.Dev.Skaffold, manifests.Dev.Config.SkaffoldFile)
 	},
 }
 
@@ -28,4 +43,26 @@ func init() {
 
 	initCmd.Flags().StringP("docker_registry", "d", "", "Docker registry.")
 	initCmd.MarkFlagRequired("docker_registry")
+}
+
+func checkFolder() error {
+	if _, err := os.Stat("./main.py"); os.IsNotExist(err) {
+		fmt.Println("WARNING: Folder does not contain a main.py file." +
+			" Edit `.kuda/service-dev.yml` to enable `kuda dev`")
+	}
+	// fmt.Println(files)
+	return nil
+}
+
+// WriteManifest writes the manifest to disk
+func writeManifest(content string, name string) error {
+	f, err := os.Create(name)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if _, err := f.WriteString(content); err != nil {
+		return err
+	}
+	return nil
 }

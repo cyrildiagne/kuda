@@ -18,14 +18,15 @@ func CheckDeepEqual(t *testing.T, expected, actual interface{}) {
 func GetTestConfig() Config {
 	return Config{
 		URLConfig: URLConfig{
-			Scheme:    "https",
+			Protocol:  "https",
 			Name:      "name",
 			Namespace: "default",
 			Domain:    "example.com",
 		},
 		DockerDestImage: "docker.io/test/test-api",
 		Dockerfile:      "./Dockerfile",
-		ManifestFile:    "./.kuda/service.yml",
+		KserviceFile:    "./.kuda/service.yml",
+		SkaffoldFile:    "./.kuda/skaffold.yml",
 		ConfigFolder:    "./.kuda",
 	}
 }
