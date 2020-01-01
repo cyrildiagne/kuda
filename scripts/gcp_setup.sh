@@ -10,26 +10,27 @@
 # Exit on error.
 set -e
 
-export PROJECT="${PROJECT:-gpu-sh}"
-export DOMAIN="${DOMAIN:-xip.io}"
-export NAMESPACE="${DOMAIN:-default}"
-export CLUSTER_NAME="${CLUSTER_NAME:-kuda}"
-export CLUSTER_ZONE="${CLUSTER_ZONE:-us-central1-a}"
-export MASTER_MACHINE_TYPE="${MASTER_MACHINE_TYPE:-n1-standard-2}"
-export GPU_MACHINE_TYPE="${GPU_MACHINE_TYPE:-n1-standard-2}"
-export GPU_ACCELERATOR="${GPU_ACCELERATOR:-nvidia-tesla-k80}"
-export USE_PREEMPTIBLE_GPU="${USE_PREEMPTIBLE_GPU:-true}"
-export KNATIVE_VERSION="${KNATIVE_VERSION:-0.11.0}"
+export KUDA_GCP_PROJECT="${KUDA_GCP_PROJECT:-gpu-sh}"
+export KUDA_DOMAIN="${KUDA_DOMAIN:-xip.io}"
+export KUDA_NAMESPACE="${KUDA_NAMESPACE:-default}"
+export KUDA_CLUSTER_NAME="${KUDA_CLUSTER_NAME:-kuda}"
+export KUDA_CLUSTER_ZONE="${KUDA_CLUSTER_ZONE:-us-central1-a}"
+export KUDA_MASTER_MACHINE_TYPE="${KUDA_MASTER_MACHINE_TYPE:-n1-standard-2}"
+export KUDA_GPU_MACHINE_TYPE="${KUDA_GPU_MACHINE_TYPE:-n1-standard-2}"
+export KUDA_GPU_ACCELERATOR="${KUDA_GPU_ACCELERATOR:-nvidia-tesla-k80}"
+export KUDA_USE_PREEMPTIBLE_GPU="${KUDA_USE_PREEMPTIBLE_GPU:-true}"
+
+KNATIVE_VERSION=0.11.0
 
 export CLUSTER_USER_ADMIN=$(gcloud config get-value core/account)
 
 function create_main_cluster() {
   # Create the main Knative cluster.
-  gcloud beta container clusters create $CLUSTER_NAME \
+  gcloud beta container clusters create $KUDA_CLUSTER_NAME \
     --addons=HorizontalPodAutoscaling,HttpLoadBalancing,Istio \
-    --machine-type=$MASTER_MACHINE_TYPE \
+    --machine-type=$KUDA_MASTER_MACHINE_TYPE \
     --cluster-version=latest \
-    --zone=$CLUSTER_ZONE \
+    --zone=$KUDA_CLUSTER_ZONE \
     --enable-stackdriver-kubernetes \
     --enable-ip-alias \
     --enable-autoscaling \
@@ -50,15 +51,15 @@ function grant_admin() {
 
 function create_gpu_nodepools() {
   preemptible_mode=""
-  if [ $USE_PREEMPTIBLE_GPU = true ]; then
+  if [ $KUDA_USE_PREEMPTIBLE_GPU = true ]; then
     preemptible_mode="--preemptible"
   fi
   # Create the default GPU Node pool.
-  gcloud container node-pools create $GPU_ACCELERATOR \
-    --machine-type=$GPU_MACHINE_TYPE \
-    --accelerator type=$GPU_ACCELERATOR,count=1 \
-    --zone $CLUSTER_ZONE \
-    --cluster $CLUSTER_NAME \
+  gcloud container node-pools create $KUDA_GPU_ACCELERATOR \
+    --machine-type=$KUDA_GPU_MACHINE_TYPE \
+    --accelerator type=$KUDA_GPU_ACCELERATOR,count=1 \
+    --zone $KUDA_CLUSTER_ZONE \
+    --cluster $KUDA_CLUSTER_NAME \
     --num-nodes 1 \
     --min-nodes 0 \
     --max-nodes 8 \
@@ -93,28 +94,28 @@ function install_knative() {
 function setup() {
   echo "Setup Knative cluster on GKE..."
 
-  gcloud config set project $PROJECT
+  gcloud config set project $KUDA_GCP_PROJECT
 
   # Check if cluster already exists otherwise create one.
-  if gcloud container clusters list | grep -q $CLUSTER_NAME; then
+  if gcloud container clusters list | grep -q $KUDA_CLUSTER_NAME; then
     echo "→ Cluster already exists."
   else
-    echo "Creating cluster $CLUSTER_NAME..."
+    echo "Creating cluster $KUDA_CLUSTER_NAME..."
     create_main_cluster
     grant_admin
     echo "→ Cluster created."
   fi
 
   # Get cluster's credentials to use kubectl.
-  gcloud container clusters get-credentials $CLUSTER_NAME
+  gcloud container clusters get-credentials $KUDA_CLUSTER_NAME
 
   # Check if GPU cluster exists otherwise create one.
   if gcloud container node-pools list \
-    --zone $CLUSTER_ZONE \
-    --cluster $CLUSTER_NAME | grep -q $GPU_ACCELERATOR; then
+    --zone $KUDA_CLUSTER_ZONE \
+    --cluster $KUDA_CLUSTER_NAME | grep -q $KUDA_GPU_ACCELERATOR; then
     echo "→ GPU node pool already exists."
   else
-    echo "Creating new GPU node pool with default GPU $GPU_ACCELERATOR..."
+    echo "Creating new GPU node pool with default GPU $KUDA_GPU_ACCELERATOR..."
     create_gpu_nodepools
     install_nvidia_drivers
     echo "→ GPU node pool created."
@@ -132,12 +133,12 @@ function setup() {
   fi
 
   # Setup namespace
-  if [ "$NAMESPACE" != "default" ]; then
-    kubectl create namespace $NAMESPACE
+  if [ "$KUDA_NAMESPACE" != "default" ]; then
+    kubectl create namespace $KUDA_NAMESPACE
   fi
 
   # Setup Domain name.
-  if [ "$DOMAIN" = "xip.io" ]; then
+  if [ "$KUDA_DOMAIN" = "xip.io" ]; then
     # TODO: remove this when after next Knative release.
     EXTERNAL_IP=$(kubectl get svc istio-ingressgateway \
       --namespace istio-system \
@@ -150,7 +151,7 @@ function setup() {
     kubectl patch configmap config-domain \
       --namespace knative-serving \
       --patch \
-      '{"data": {"example.com": null, "'$DOMAIN'": ""}}'
+      '{"data": {"example.com": null, "'$KUDA_DOMAIN'": ""}}'
   fi
   echo "Done!"
 }
