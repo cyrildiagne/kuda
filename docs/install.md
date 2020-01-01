@@ -9,7 +9,7 @@ Requirements:
 ### MacOS / Linux:
 
 ```bash
-curl https://raw.githubusercontent.com/cyrildiagne/kuda/master/scripts/get-kuda-cli.sh -sSfL | sh
+curl https://raw.githubusercontent.com/cyrildiagne/kuda/master/scripts/get-cli.sh -sSfL | sh
 ```
 
 ---
