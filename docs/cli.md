@@ -3,7 +3,7 @@
 ## → Init
 
 ```bash
-kuda init <name> [-d, --docker-registry] [-n, --namespace]
+kuda init <name> [-d, --docker-artifact] [-n, --namespace]
 ```
 
 Generate the configuration files in a local `.kuda` folder.
@@ -14,7 +14,7 @@ Generate the configuration files in a local `.kuda` folder.
 
 **Flags:**
 
-- **`[-d | --docker-registry]`**: A docker registry where you have write access (eg: `gcr.io/<your-gcp-project>/hello-gpu`).
+- **`[-d | --docker-artifact]`**: A docker registry where you have write access (eg: `gcr.io/<your-gcp-project>/hello-gpu`).
 - **`[-n | --namespace]`**: The Knative namespace (default: `default`).
 
 ## → Dev
@@ -27,7 +27,7 @@ Example: `kuda dev`
 
 Deploys the API in dev mode.
 
-## → Deploy
+## → Deploy 
 
 ```bash
 kuda deploy

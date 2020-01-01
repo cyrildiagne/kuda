@@ -16,7 +16,7 @@ var initCmd = &cobra.Command{
 	Args:  cobra.ExactValidArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
-		dockerRegistry, _ := cmd.Flags().GetString("docker_registry")
+		dockerArtifact, _ := cmd.Flags().GetString("docker_artifact")
 		namespace, _ := cmd.Flags().GetString("namespace")
 
 		err := checkFolder()
@@ -26,7 +26,7 @@ var initCmd = &cobra.Command{
 
 		// Create config.
 		cfg := kuda.NewConfig(name, namespace)
-		cfg.DockerDestImage = dockerRegistry
+		cfg.DockerDestImage = dockerArtifact
 		err = generate(cfg)
 		if err != nil {
 			panic(err)
@@ -34,7 +34,7 @@ var initCmd = &cobra.Command{
 
 		// Create dev config
 		cfgDev := kuda.NewConfig(name+"-dev", namespace)
-		cfgDev.DockerDestImage = dockerRegistry
+		cfgDev.DockerDestImage = dockerArtifact
 		cfgDev.AddDevConfigFlask()
 		cfgDev.SetFilesSuffix("-dev")
 		err = generate(cfgDev)
@@ -47,8 +47,8 @@ var initCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(initCmd)
 
-	initCmd.Flags().StringP("docker_registry", "d", "", "Docker registry.")
-	initCmd.MarkFlagRequired("docker_registry")
+	initCmd.Flags().StringP("docker_artifact", "d", "", "Docker artifact.")
+	initCmd.MarkFlagRequired("docker_artifact")
 
 	initCmd.Flags().StringP("namespace", "n", "default", "Knative namespace.")
 }
