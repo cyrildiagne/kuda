@@ -1,16 +1,15 @@
 package kuda
 
 import (
+	"fmt"
+
 	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
 	yaml2 "gopkg.in/yaml.v2"
 )
 
 // GenerateSkaffoldConfigYAML generate yaml string.
 func GenerateSkaffoldConfigYAML(cfg Config) (string, error) {
-	config, err := GenerateSkaffoldConfig(cfg)
-	if err != nil {
-		return "", err
-	}
+	config, _ := GenerateSkaffoldConfig(cfg)
 	content, err := yaml2.Marshal(config)
 	if err != nil {
 		return "", err
@@ -22,12 +21,16 @@ func GenerateSkaffoldConfigYAML(cfg Config) (string, error) {
 // and based on the kuda.Config given as parameter.
 func GenerateSkaffoldConfig(cfg Config) (v1.SkaffoldConfig, error) {
 
+	if !cfg.IsValid() {
+		return v1.SkaffoldConfig{}, fmt.Errorf("invalid config")
+	}
+
 	var sync *v1.Sync
-	if cfg.DevConfig != nil {
+	if cfg.Sync != nil {
 		sync = &v1.Sync{
 			Manual: []*v1.SyncRule{},
 		}
-		for _, s := range cfg.DevConfig.Sync {
+		for _, s := range cfg.Sync {
 			sync.Manual = append(sync.Manual, &v1.SyncRule{Src: s, Dest: "."})
 		}
 	}

@@ -12,8 +12,10 @@ import (
 )
 
 func TestNewConfig(t *testing.T) {
-	cfg := NewConfig()
+	cfg := NewConfig("test", "test")
 	expected := Config{
+		Name:         "test",
+		Namespace:    "test",
 		ConfigFolder: "./.kuda",
 		Dockerfile:   "./Dockerfile",
 		KserviceFile: "./.kuda/service.yml",
@@ -24,95 +26,64 @@ func TestNewConfig(t *testing.T) {
 	}
 }
 
-func TestNewURLConfig(t *testing.T) {
-	cfg := NewURLConfig()
-	expected := URLConfig{
-		Protocol:  "http",
-		Namespace: "default",
+func TestAddDevConfigFlask(t *testing.T) {
+	cfg := NewConfig("test", "test")
+	cfg.AddDevConfigFlask()
+
+	expected := NewConfig("test", "test")
+	expected.Sync = []string{"**/*.py"}
+	expected.Command = "python3"
+	expected.Args = []string{"main.py"}
+	expected.Env = []corev1.EnvVar{
+		{Name: "FLASK_ENV", Value: "development"},
 	}
+
 	if diff := cmp.Diff(expected, cfg); diff != "" {
-		t.Errorf("TestNewURLConfig() mismatch (-want +got):\n%s", diff)
+		t.Errorf("TestAddDevConfigFlask() mismatch (-want +got):\n%s", diff)
 	}
 }
 
-func TestNewDevConfigFlask(t *testing.T) {
-	cfg := NewDevConfigFlask()
-	expected := DevConfig{
-		Sync:    []string{"**/*.py"},
-		Command: "python3",
-		Args:    []string{"main.py"},
-		Env: []corev1.EnvVar{
-			{Name: "FLASK_ENV", Value: "development"},
-		},
-	}
-	if diff := cmp.Diff(expected, cfg); diff != "" {
-		t.Errorf("TestNewDevConfigFlask() mismatch (-want +got):\n%s", diff)
-	}
+func TestSetFilesSuffix(t *testing.T) {
+	cfg := NewConfig("test", "test")
+	cfg.SetFilesSuffix("-dev")
+	assert.Equal(t, cfg.KserviceFile, "./.kuda/service-dev.yml")
+	assert.Equal(t, cfg.SkaffoldFile, "./.kuda/skaffold-dev.yml")
 }
 
-func TestParseURL(t *testing.T) {
-	emptyURL := ""
+func TestIsValid(t *testing.T) {
+	cfg := Config{}
+	assert.Assert(t, !cfg.IsValid())
 
-	if result, err := ParseURL(emptyURL); result != nil || err == nil {
-		t.Errorf("ParseURL should return error with empty URL")
-	}
+	cfg = NewConfig("test", "test")
+	assert.Assert(t, cfg.IsValid())
 
-	wrongURL := "../dir/"
-	if result, err := ParseURL(wrongURL); result != nil || err == nil {
-		t.Errorf("ParseURL should return error with wrongURL: %s", wrongURL)
-	}
+	cfg.ConfigFolder = ""
+	assert.Assert(t, !cfg.IsValid())
 
-	urlA := "https://test-url.default.example.com"
-	expectedA := URLConfig{
-		Protocol:  "https",
-		Name:      "test-url",
-		Namespace: "default",
-		Domain:    "example.com",
-	}
-	resultA, err := ParseURL(urlA)
-	assert.NilError(t, err)
-	if diff := cmp.Diff(expectedA, *resultA); diff != "" {
-		t.Errorf("TestParseURL() mismatch (-want +got):\n%s", diff)
-	}
+	cfg = NewConfig("test", "test")
+	cfg.Dockerfile = ""
+	assert.Assert(t, !cfg.IsValid())
 
-	urlB := "http://test-url2.default.1.2.3.4.xip.io/run"
-	expectedB := URLConfig{
-		Protocol:  "http",
-		Name:      "test-url2",
-		Namespace: "default",
-		Domain:    "1.2.3.4.xip.io",
-	}
-	resultB, err := ParseURL(urlB)
-	assert.NilError(t, err)
-	// if !reflect.DeepEqual(*resultB, expectedB) {
-	// 	t.Errorf("Result B error. Got: \n%v, \nExpected: \n%v", resultB, expectedB)
-	// }
-	if diff := cmp.Diff(expectedB, *resultB); diff != "" {
-		t.Errorf("TestParseURL() mismatch (-want +got):\n%s", diff)
-	}
+	cfg = NewConfig("test", "test")
+	cfg.KserviceFile = ""
+	assert.Assert(t, !cfg.IsValid())
 }
 
 func TestGenerateConfigFiles(t *testing.T) {
-	validURL := "https://test-url.default.example.com"
-	validRegistry := "docker.io/test"
-	manifests, err := GenerateConfigFiles(validURL, validRegistry)
+	cfgDev := NewConfig("test", "test")
+	cfgDev.DockerDestImage = "test.io/test"
+	manifests, err := GenerateConfigFiles(cfgDev)
 	if err != nil {
 		t.Errorf("Error generating valid config")
 	}
-	assert.Assert(t, len(manifests.Prod.Kservice) > 0)
-	assert.Assert(t, len(manifests.Prod.Skaffold) > 0)
-	assert.Assert(t, len(manifests.Dev.Kservice) > 0)
-	assert.Assert(t, len(manifests.Dev.Skaffold) > 0)
+	assert.Assert(t, len(manifests.Kservice) > 0)
+	assert.Assert(t, len(manifests.Skaffold) > 0)
 
 	ksvc := knativev1.Service{}
-	err = yaml.Unmarshal([]byte(manifests.Prod.Kservice), &ksvc)
-	assert.NilError(t, err)
-	err = yaml.Unmarshal([]byte(manifests.Dev.Kservice), &ksvc)
+	err = yaml.Unmarshal([]byte(manifests.Kservice), &ksvc)
 	assert.NilError(t, err)
 
 	skfd := skaffoldv1.SkaffoldConfig{}
-	err = yaml.Unmarshal([]byte(manifests.Prod.Skaffold), &skfd)
-	assert.NilError(t, err)
-	err = yaml.Unmarshal([]byte(manifests.Dev.Skaffold), &skfd)
+	err = yaml.Unmarshal([]byte(manifests.Skaffold), &skfd)
 	assert.NilError(t, err)
 }

@@ -6,11 +6,16 @@
 
 **Develop, deploy and manage serverless APIs that need GPUs on Kubernetes.**
 
-It is based on [Knative](https://knative.dev) and [Skaffold](https://skaffold.dev).
+Kuda is based on [Knative](https://knative.dev) and
+[Skaffold](https://skaffold.dev) and provides a simple interface for the full API development cycle:
+
+- `kuda init <name>` Initialize the API configuration files
+- `kuda dev` Deploy the API in dev mode (with file sync & live reload)
+- `kuda deploy` Deploy the API in production mode
 
 ## Disclaimer
 
-🧪 Kuda is an **early** and **experimental** work in progress.
+🧪 It's an **early** and **experimental** work in progress.
 
 ## Getting Started
 

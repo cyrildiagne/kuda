@@ -1,6 +1,8 @@
 package kuda
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,10 +13,7 @@ import (
 
 // GenerateKnativeConfigYAML generate yaml string.
 func GenerateKnativeConfigYAML(cfg Config) (string, error) {
-	config, err := GenerateKnativeConfig(cfg)
-	if err != nil {
-		return "", err
-	}
+	config, _ := GenerateKnativeConfig(cfg)
 	content, err := yaml.Marshal(config)
 	if err != nil {
 		return "", err
@@ -26,11 +25,15 @@ func GenerateKnativeConfigYAML(cfg Config) (string, error) {
 // and based on the kuda.Config given as parameter.
 func GenerateKnativeConfig(cfg Config) (v1.Service, error) {
 
+	if !cfg.IsValid() {
+		return v1.Service{}, fmt.Errorf("invalid config")
+	}
+
 	numGPUs, _ := resource.ParseQuantity("1")
 
 	container := corev1.Container{
 		Image: cfg.DockerDestImage,
-		Name:  cfg.URLConfig.Name,
+		Name:  cfg.Name,
 		Resources: corev1.ResourceRequirements{
 			Limits: corev1.ResourceList{
 				corev1.ResourceName("nvidia.com/gpu"): numGPUs,
@@ -38,10 +41,14 @@ func GenerateKnativeConfig(cfg Config) (v1.Service, error) {
 		},
 	}
 
-	if cfg.DevConfig != nil {
-		container.Command = []string{cfg.DevConfig.Command}
-		container.Args = cfg.DevConfig.Args
-		container.Env = append(container.Env, cfg.DevConfig.Env...)
+	if cfg.Command != "" {
+		container.Command = []string{cfg.Command}
+	}
+	if cfg.Args != nil {
+		container.Args = cfg.Args
+	}
+	if cfg.Env != nil {
+		container.Env = append(container.Env, cfg.Env...)
 	}
 
 	config := v1.Service{
@@ -50,8 +57,8 @@ func GenerateKnativeConfig(cfg Config) (v1.Service, error) {
 			APIVersion: "serving.knative.dev/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cfg.URLConfig.Name,
-			Namespace: cfg.URLConfig.Namespace,
+			Name:      cfg.Name,
+			Namespace: cfg.Namespace,
 		},
 		Spec: v1.ServiceSpec{
 			ConfigurationSpec: v1.ConfigurationSpec{

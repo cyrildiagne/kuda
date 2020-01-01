@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
+	"gotest.tools/assert"
 )
 
 func TestGenerateSkaffoldConfig(t *testing.T) {
@@ -20,7 +21,7 @@ func TestGenerateSkaffoldConfig(t *testing.T) {
 
 	artifacts := []*v1.Artifact{
 		{
-			ImageName: "docker.io/test/test-api",
+			ImageName: "test.io/test/test",
 			ArtifactType: v1.ArtifactType{
 				DockerArtifact: &v1.DockerArtifact{
 					DockerfilePath: "./Dockerfile",
@@ -42,8 +43,11 @@ func TestGenerateSkaffoldConfig(t *testing.T) {
 
 func TestGenerateSkaffoldDevConfig(t *testing.T) {
 
-	config := GetTestDevConfig()
+	emptyConfig := Config{}
+	_, e := GenerateSkaffoldConfig(emptyConfig)
+	assert.Error(t, e, "invalid config")
 
+	config := GetTestDevConfig()
 	result, err := GenerateSkaffoldConfig(config)
 	if err != nil {
 		t.Errorf("err")
@@ -51,7 +55,7 @@ func TestGenerateSkaffoldDevConfig(t *testing.T) {
 
 	artifacts := []*v1.Artifact{
 		{
-			ImageName: "docker.io/test/test-api",
+			ImageName: "test.io/test/test",
 			ArtifactType: v1.ArtifactType{
 				DockerArtifact: &v1.DockerArtifact{
 					DockerfilePath: "./Dockerfile",

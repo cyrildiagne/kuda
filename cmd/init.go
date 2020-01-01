@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/cyrildiagne/kuda/pkg/kuda"
@@ -12,29 +11,36 @@ import (
 
 // initCmd represents the `kuda init` command.
 var initCmd = &cobra.Command{
-	Use:   "init <URL>",
+	Use:   "init <name>",
 	Short: "Generate the configuration files in a local .kuda folder.",
 	Args:  cobra.ExactValidArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		url := args[0]
+		name := args[0]
 		dockerRegistry, _ := cmd.Flags().GetString("docker_registry")
+		namespace, _ := cmd.Flags().GetString("namespace")
 
 		err := checkFolder()
 		if err != nil {
-			log.Fatal("ERROR:", err)
+			panic(err)
 		}
 
-		manifests, err := kuda.GenerateConfigFiles(url, dockerRegistry)
+		// Create config.
+		cfg := kuda.NewConfig(name, namespace)
+		cfg.DockerDestImage = dockerRegistry
+		err = generate(cfg)
 		if err != nil {
-			log.Fatal("ERROR:", err)
+			panic(err)
 		}
 
-		// Write prod manifests.
-		writeManifest(manifests.Prod.Kservice, manifests.Prod.Config.KserviceFile)
-		writeManifest(manifests.Prod.Skaffold, manifests.Prod.Config.SkaffoldFile)
-		// Write dev manifests.
-		writeManifest(manifests.Dev.Kservice, manifests.Dev.Config.KserviceFile)
-		writeManifest(manifests.Dev.Skaffold, manifests.Dev.Config.SkaffoldFile)
+		// Create dev config
+		cfgDev := kuda.NewConfig(name, namespace)
+		cfgDev.DockerDestImage = dockerRegistry
+		cfgDev.AddDevConfigFlask()
+		cfgDev.SetFilesSuffix("-dev")
+		err = generate(cfgDev)
+		if err != nil {
+			panic(err)
+		}
 	},
 }
 
@@ -43,6 +49,8 @@ func init() {
 
 	initCmd.Flags().StringP("docker_registry", "d", "", "Docker registry.")
 	initCmd.MarkFlagRequired("docker_registry")
+
+	initCmd.Flags().StringP("namespace", "n", "default", "Knative namespace.")
 }
 
 func checkFolder() error {
@@ -50,7 +58,26 @@ func checkFolder() error {
 		fmt.Println("WARNING: Folder does not contain a main.py file." +
 			" Edit `.kuda/service-dev.yml` to enable `kuda dev`")
 	}
+
 	// fmt.Println(files)
+	return nil
+}
+
+func generate(cfg kuda.Config) error {
+	manifests, err := kuda.GenerateConfigFiles(cfg)
+	if err != nil {
+		return err
+	}
+
+	// Make sure config folders exists.
+	if _, err := os.Stat(cfg.ConfigFolder); os.IsNotExist(err) {
+		os.Mkdir(cfg.ConfigFolder, 0700)
+	}
+
+	// Write dev manifests.
+	writeManifest(manifests.Kservice, cfg.KserviceFile)
+	writeManifest(manifests.Skaffold, cfg.SkaffoldFile)
+
 	return nil
 }
 

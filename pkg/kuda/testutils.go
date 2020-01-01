@@ -17,13 +17,9 @@ func CheckDeepEqual(t *testing.T, expected, actual interface{}) {
 // GetTestConfig returns a test config
 func GetTestConfig() Config {
 	return Config{
-		URLConfig: URLConfig{
-			Protocol:  "https",
-			Name:      "name",
-			Namespace: "default",
-			Domain:    "example.com",
-		},
-		DockerDestImage: "docker.io/test/test-api",
+		Name:            "test",
+		Namespace:       "test",
+		DockerDestImage: "test.io/test/test",
 		Dockerfile:      "./Dockerfile",
 		KserviceFile:    "./.kuda/service.yml",
 		SkaffoldFile:    "./.kuda/skaffold.yml",
@@ -34,11 +30,9 @@ func GetTestConfig() Config {
 // GetTestDevConfig returns a test config
 func GetTestDevConfig() Config {
 	cfg := GetTestConfig()
-	cfg.DevConfig = &DevConfig{
-		Sync:    []string{"**/*.py"},
-		Command: "cmd",
-		Args:    []string{"a", "b", "c"},
-		Env:     []corev1.EnvVar{{Name: "ENV_NAME", Value: "env-value"}},
-	}
+	cfg.Sync = []string{"**/*.py"}
+	cfg.Command = "cmd"
+	cfg.Args = []string{"a", "b", "c"}
+	cfg.Env = []corev1.EnvVar{{Name: "ENV_NAME", Value: "env-value"}}
 	return cfg
 }

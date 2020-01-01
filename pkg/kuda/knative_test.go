@@ -3,6 +3,7 @@ package kuda
 import (
 	"testing"
 
+	"gotest.tools/assert"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,15 +23,15 @@ func TestGenerateKnativeConfig(t *testing.T) {
 	CheckDeepEqual(t, result.Kind, "Service")
 
 	meta := metav1.ObjectMeta{
-		Name:      cfg.URLConfig.Name,
-		Namespace: cfg.URLConfig.Namespace,
+		Name:      cfg.Name,
+		Namespace: cfg.Namespace,
 	}
 	CheckDeepEqual(t, result.ObjectMeta, meta)
 
 	numGPUs, _ := resource.ParseQuantity("1")
 	container := corev1.Container{
 		Image: cfg.DockerDestImage,
-		Name:  cfg.URLConfig.Name,
+		Name:  cfg.Name,
 		Resources: corev1.ResourceRequirements{
 			Limits: corev1.ResourceList{
 				corev1.ResourceName("nvidia.com/gpu"): numGPUs,
@@ -53,8 +54,11 @@ func TestGenerateKnativeConfig(t *testing.T) {
 
 func TestGenerateKnativeDevConfig(t *testing.T) {
 
-	cfg := GetTestDevConfig()
+	emptyConfig := Config{}
+	_, e := GenerateKnativeConfig(emptyConfig)
+	assert.Error(t, e, "invalid config")
 
+	cfg := GetTestDevConfig()
 	result, err := GenerateKnativeConfig(cfg)
 	if err != nil {
 		t.Errorf("err")
@@ -63,7 +67,7 @@ func TestGenerateKnativeDevConfig(t *testing.T) {
 	numGPUs, _ := resource.ParseQuantity("1")
 	container := corev1.Container{
 		Image: cfg.DockerDestImage,
-		Name:  cfg.URLConfig.Name,
+		Name:  cfg.Name,
 		Resources: corev1.ResourceRequirements{
 			Limits: corev1.ResourceList{
 				corev1.ResourceName("nvidia.com/gpu"): numGPUs,
