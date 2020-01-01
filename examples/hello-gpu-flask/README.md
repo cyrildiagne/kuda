@@ -39,11 +39,11 @@ Generate the configuration files using `kuda init`:
 
 ```bash
 kuda init \
-   -d docker.io/username/hello-gpu \
+   -d gcr.io/your-gcp-project/hello-gpu \
    hello-gpu
 ```
 
-Replace `docker.io/username/hello-gpu` with a docker registry you have write
+Replace `gcr.io/your-gcp-project/hello-gpu` with a docker registry you have write
 access to.
 
 ## 2 - Dev
