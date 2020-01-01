@@ -33,7 +33,7 @@ var initCmd = &cobra.Command{
 		}
 
 		// Create dev config
-		cfgDev := kuda.NewConfig(name, namespace)
+		cfgDev := kuda.NewConfig(name+"-dev", namespace)
 		cfgDev.DockerDestImage = dockerRegistry
 		cfgDev.AddDevConfigFlask()
 		cfgDev.SetFilesSuffix("-dev")
