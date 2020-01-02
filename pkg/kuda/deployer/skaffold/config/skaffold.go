@@ -1,47 +1,42 @@
-package kuda
+package config
 
 import (
-	"fmt"
-
 	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
-	yaml2 "gopkg.in/yaml.v2"
+	config "github.com/cyrildiagne/kuda/pkg/kuda/config"
+	latest "github.com/cyrildiagne/kuda/pkg/kuda/manifest/latest"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // GenerateSkaffoldConfigYAML generate yaml string.
-func GenerateSkaffoldConfigYAML(cfg Config) (string, error) {
-	config, _ := GenerateSkaffoldConfig(cfg)
-	content, err := yaml2.Marshal(config)
+func GenerateSkaffoldConfigYAML(name string, manifest latest.Config, cfg config.UserConfig, knativeFile string) ([]byte, error) {
+	config, _ := GenerateSkaffoldConfig(name, manifest, cfg, knativeFile)
+	content, err := yaml.Marshal(config)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(content), nil
+	return content, nil
 }
 
-// GenerateSkaffoldConfig generate skaffold yaml specifics to the Kuda workflow
-// and based on the kuda.Config given as parameter.
-func GenerateSkaffoldConfig(cfg Config) (v1.SkaffoldConfig, error) {
-
-	if !cfg.IsValid() {
-		return v1.SkaffoldConfig{}, fmt.Errorf("invalid config")
-	}
+// GenerateSkaffoldConfig generate skaffold yaml specifics to the Kuda workflow.
+func GenerateSkaffoldConfig(name string, manifest latest.Config, userCfg config.UserConfig, knativeFile string) (v1.SkaffoldConfig, error) {
 
 	var sync *v1.Sync
-	if cfg.Sync != nil {
+	if manifest.Sync != nil {
 		sync = &v1.Sync{
 			Manual: []*v1.SyncRule{},
 		}
-		for _, s := range cfg.Sync {
+		for _, s := range manifest.Sync {
 			sync.Manual = append(sync.Manual, &v1.SyncRule{Src: s, Dest: "."})
 		}
 	}
 
 	artifact := v1.Artifact{
 		// The endpoint image name.
-		ImageName: cfg.DockerDestImage,
+		ImageName: GetDockerfileArtifactName(userCfg, name),
 		// Which Dockerfile to build.
 		ArtifactType: v1.ArtifactType{
 			DockerArtifact: &v1.DockerArtifact{
-				DockerfilePath: cfg.Dockerfile,
+				DockerfilePath: manifest.Dockerfile,
 			},
 		},
 		// Sync rules.
@@ -56,7 +51,7 @@ func GenerateSkaffoldConfig(cfg Config) (v1.SkaffoldConfig, error) {
 		DeployType: v1.DeployType{
 			// Location of the manifest file
 			KubectlDeploy: &v1.KubectlDeploy{
-				Manifests: []string{cfg.KserviceFile},
+				Manifests: []string{knativeFile},
 			},
 		},
 	}

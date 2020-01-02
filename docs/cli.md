@@ -3,36 +3,78 @@
 ## → Init
 
 ```bash
-kuda init <name> [-d, --docker-artifact] [-n, --namespace]
+kuda init <deployer> [-n, --namespace] [-d, --docker-registry]
 ```
 
-Generate the configuration files in a local `.kuda` folder.
+Initializes the local configuration.
 
-**Arguments:**
+**Arguments**
 
-- **`name`**: The API name. Must be unique in the namespace.
+- `deployer` The API deployer. (default: `skaffold`)
 
-**Flags:**
+**Flags**
 
-- **`[-d | --docker-artifact]`**: A docker registry where you have write access (eg: `gcr.io/<your-gcp-project>/hello-gpu`).
-- **`[-n | --namespace]`**: The Knative namespace (default: `default`).
+- `[-n, --namespace]` Your namespace. (default: `default`)
+- `[-d, --docker-registry]` Required when using the `skaffold` deployer.
+
+**Examples**
+
+```bash
+kuda init -d gcr.io/my-gcp-project skaffold
+```
+<!-- 
+```bash
+kuda init \
+    -n your-namespace
+    -d gcr.io/my-gcp-project \
+    localhost:8080
+```
+
+```bash
+kuda init \
+    -n your-namespace \
+    deploy.kuda.gpu.sh
+``` -->
 
 ## → Dev
+
+```bash
+kuda dev <manifest>
+```
+
+Deploys the API in development mode (with live file sync & app reload).
+
+**Arguments**
+- `manifest`·: Optional, The manifest file. (default: `kuda.yml`)
+
+**Examples**
 
 ```bash
 kuda dev
 ```
 
-Example: `kuda dev`
+```bash
+kuda dev /path/to/manifest.yml
+```
 
-Deploys the API in dev mode.
+## → Deploy
 
-## → Deploy 
+```
+kuda deploy <manifest>
+```
+
+Deploys the API in production mode.
+
+**Arguments**
+
+- `manifest`: Optional, The manifest file. (default: `kuda.yml`)
+
+**Examples**
 
 ```bash
 kuda deploy
 ```
 
-Example: `kuda deploy`
-
-Deploys the API in production mode.
+```bash
+kuda deploy /path/to/manifest.yml
+```

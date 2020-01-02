@@ -1,39 +1,35 @@
-package kuda
+package config
 
 import (
-	"fmt"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "knative.dev/serving/pkg/apis/serving/v1"
 
+	config "github.com/cyrildiagne/kuda/pkg/kuda/config"
+	latest "github.com/cyrildiagne/kuda/pkg/kuda/manifest/latest"
+
 	yaml "sigs.k8s.io/yaml"
 )
 
 // GenerateKnativeConfigYAML generate yaml string.
-func GenerateKnativeConfigYAML(cfg Config) (string, error) {
-	config, _ := GenerateKnativeConfig(cfg)
+func GenerateKnativeConfigYAML(name string, manifest latest.Config, cfg config.UserConfig) ([]byte, error) {
+	config, _ := GenerateKnativeConfig(name, manifest, cfg)
 	content, err := yaml.Marshal(config)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(content), nil
+	return content, nil
 }
 
-// GenerateKnativeConfig generate knative yaml specifics to the Kuda workflow
-// and based on the kuda.Config given as parameter.
-func GenerateKnativeConfig(cfg Config) (v1.Service, error) {
-
-	if !cfg.IsValid() {
-		return v1.Service{}, fmt.Errorf("invalid config")
-	}
+// GenerateKnativeConfig generate knative yaml specifics to the Kuda workflow.
+func GenerateKnativeConfig(name string, cfg latest.Config, userCfg config.UserConfig) (v1.Service, error) {
 
 	numGPUs, _ := resource.ParseQuantity("1")
 
 	container := corev1.Container{
-		Image: cfg.DockerDestImage,
-		Name:  cfg.Name,
+		Image: GetDockerfileArtifactName(userCfg, name),
+		Name:  name,
 		Resources: corev1.ResourceRequirements{
 			Limits: corev1.ResourceList{
 				corev1.ResourceName("nvidia.com/gpu"): numGPUs,
@@ -41,11 +37,11 @@ func GenerateKnativeConfig(cfg Config) (v1.Service, error) {
 		},
 	}
 
-	if cfg.Command != "" {
-		container.Command = []string{cfg.Command}
+	if cfg.Entrypoint.Command != "" {
+		container.Command = []string{cfg.Entrypoint.Command}
 	}
-	if cfg.Args != nil {
-		container.Args = cfg.Args
+	if cfg.Entrypoint.Args != nil {
+		container.Args = cfg.Entrypoint.Args
 	}
 	if cfg.Env != nil {
 		container.Env = append(container.Env, cfg.Env...)
@@ -57,8 +53,8 @@ func GenerateKnativeConfig(cfg Config) (v1.Service, error) {
 			APIVersion: "serving.knative.dev/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cfg.Name,
-			Namespace: cfg.Namespace,
+			Name:      name,
+			Namespace: userCfg.Namespace,
 		},
 		Spec: v1.ServiceSpec{
 			ConfigurationSpec: v1.ConfigurationSpec{

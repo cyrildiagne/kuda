@@ -2,16 +2,20 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
-	"strings"
 
+	"github.com/cyrildiagne/kuda/pkg/kuda/config"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+
+	yaml "gopkg.in/yaml.v2"
 )
 
 var version = "dev"
+
 var cfgFile string
+var cfg config.UserConfig
 
 // RootCmd is the main command.
 var RootCmd = &cobra.Command{
@@ -31,7 +35,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(loadConfig)
 	// Find home directory.
 	home, err := homedir.Dir()
 	if err != nil {
@@ -42,17 +46,21 @@ func init() {
 		"Configuration file.")
 }
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	// Use config file from the flag.
-	viper.SetConfigFile(cfgFile)
-
-	viper.SetEnvPrefix("kuda")
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+// initConfig reads in the config file.
+func loadConfig() {
+	// Check if config file exists.
+	if _, err := os.Stat(cfgFile); os.IsNotExist(err) {
+		return
+	}
+	// Load config
+	data, err := ioutil.ReadFile(cfgFile)
+	if err != nil {
+		panic(err)
+	}
+	err = yaml.Unmarshal(data, &cfg)
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("Loaded config from", cfgFile)
 	}
 }

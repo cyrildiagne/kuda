@@ -4,42 +4,49 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cyrildiagne/kuda/pkg/kuda"
-
+	"github.com/cyrildiagne/kuda/pkg/kuda/config"
 	"github.com/spf13/cobra"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // initCmd represents the `kuda init` command.
 var initCmd = &cobra.Command{
-	Use:   "init <name>",
-	Short: "Generate the configuration files in a local .kuda folder.",
+	Use:   "init <deployer>",
+	Short: "Initializes the local configuration.",
 	Args:  cobra.ExactValidArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		name := args[0]
-		dockerArtifact, _ := cmd.Flags().GetString("docker_artifact")
-		namespace, _ := cmd.Flags().GetString("namespace")
+		deployer := args[0]
 
-		err := checkFolder()
-		if err != nil {
-			panic(err)
-		}
+		// Handle skaffold provider.
+		if deployer == "skaffold" {
 
-		// Create config.
-		cfg := kuda.NewConfig(name, namespace)
-		cfg.DockerDestImage = dockerArtifact
-		err = generate(cfg)
-		if err != nil {
-			panic(err)
-		}
+			// Ensure that users provide the docker_registry when using the skaffold
+			// deployer.
+			dockerRegistry, e := cmd.Flags().GetString("docker_registry")
+			if dockerRegistry == "" || e != nil {
+				panic("The skaffold deployer requires a [-d, --docker_registry] value.")
+			}
 
-		// Create dev config
-		cfgDev := kuda.NewConfig(name+"-dev", namespace)
-		cfgDev.DockerDestImage = dockerArtifact
-		cfgDev.AddDevConfigFlask()
-		cfgDev.SetFilesSuffix("-dev")
-		err = generate(cfgDev)
-		if err != nil {
-			panic(err)
+			// Create a Kuda config.
+			var newCfg config.UserConfig
+			newCfg.Namespace, e = cmd.Flags().GetString("namespace")
+			if e != nil {
+				panic("Could not retrieve namespace flag.")
+			}
+
+			// Setup the skaffold config.
+			if deployer == "skaffold" {
+				newCfg.Deployer.Skaffold = &config.SkaffoldDeployerConfig{
+					DockerRegistry: dockerRegistry,
+					ConfigFolder:   "./.kuda",
+				}
+			}
+
+			// Write the file to disk.
+			writeConfig(newCfg)
+
+		} else {
+			panic("Only 'skaffold' is currently supported as deployer.")
 		}
 	},
 }
@@ -47,49 +54,23 @@ var initCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(initCmd)
 
-	initCmd.Flags().StringP("docker_artifact", "d", "", "Docker artifact.")
-	initCmd.MarkFlagRequired("docker_artifact")
-
 	initCmd.Flags().StringP("namespace", "n", "default", "Knative namespace.")
+	initCmd.Flags().StringP("docker_registry", "d", "", "Docker registry.")
 }
 
-func checkFolder() error {
-	if _, err := os.Stat("./main.py"); os.IsNotExist(err) {
-		fmt.Println("WARNING: Folder does not contain a main.py file." +
-			" Edit `.kuda/service-dev.yml` to enable `kuda dev`")
-	}
-
-	// fmt.Println(files)
-	return nil
-}
-
-func generate(cfg kuda.Config) error {
-	manifests, err := kuda.GenerateConfigFiles(cfg)
+func writeConfig(cfg config.UserConfig) error {
+	content, err := yaml.Marshal(cfg)
 	if err != nil {
 		return err
 	}
-
-	// Make sure config folders exists.
-	if _, err := os.Stat(cfg.ConfigFolder); os.IsNotExist(err) {
-		os.Mkdir(cfg.ConfigFolder, 0700)
-	}
-
-	// Write dev manifests.
-	writeManifest(manifests.Kservice, cfg.KserviceFile)
-	writeManifest(manifests.Skaffold, cfg.SkaffoldFile)
-
-	return nil
-}
-
-// WriteManifest writes the manifest to disk
-func writeManifest(content string, name string) error {
-	f, err := os.Create(name)
+	f, err := os.Create(cfgFile)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	if _, err := f.WriteString(content); err != nil {
+	if _, err := f.Write(content); err != nil {
 		return err
 	}
+	fmt.Println("Config written in " + cfgFile)
 	return nil
 }
