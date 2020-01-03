@@ -47,8 +47,6 @@ export KUDA_GPU_MACHINE_TYPE="${KUDA_GPU_MACHINE_TYPE:-n1-standard-2}"
 export KUDA_GPU_ACCELERATOR="${KUDA_GPU_ACCELERATOR:-nvidia-tesla-k80}"
 export KUDA_USE_PREEMPTIBLE_GPU="${KUDA_USE_PREEMPTIBLE_GPU:-true}"
 
-exit 0
-
 # The Knative version supported by this version of Kuda.
 # Changing it might lead to unexpected behaviors.
 KNATIVE_VERSION=0.11.0
