@@ -68,13 +68,14 @@ rm -rf $KEY_DIRECTORY
 
 ### 3) Update the service.yaml with your GCP project id.
 
-```
-sed -i "s/value: <your-project-id>/value: $KUDA_PROJECT_ID/g" service.yaml > output.file
+```bash
+sed -i'.bak' "s/value: <your-project-id>/value: $KUDA_PROJECT_ID/g" service.yaml
+rm service.yaml.bak
 ```
 
 ### 4) Deploy with skaffold.
 
-```
+```bash
 skaffold run -f images/deployer/skaffold.yaml 
 ```
 
