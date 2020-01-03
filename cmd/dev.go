@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	skaffoldCfg "github.com/cyrildiagne/kuda/pkg/kuda/deployer/skaffold/config"
@@ -78,16 +79,16 @@ func devWithSkaffold(manifestFile string) error {
 		return err
 	}
 
-	// // Run command.
-	// args := []string{"dev", "-f", skaffoldFile}
-	// cmd := exec.Command("skaffold", args...)
-	// cmd.Stdout = os.Stdout
-	// cmd.Stdin = os.Stdin
-	// cmd.Stderr = os.Stderr
+	// Run command.
+	args := []string{"dev", "-f", skaffoldFile}
+	cmd := exec.Command("skaffold", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
 
-	// if err := cmd.Run(); err != nil {
-	// 	return err
-	// }
+	if err := cmd.Run(); err != nil {
+		return err
+	}
 
 	return nil
 }
