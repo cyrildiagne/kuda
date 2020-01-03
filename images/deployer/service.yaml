@@ -1,0 +1,23 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: deployer
+  namespace: kuda
+spec:
+  template:
+    spec:
+      containers:
+        - image: gcr.io/kuda-project/deployer
+          volumeMounts:
+            - name: secret
+              readOnly: true
+              mountPath: "/secret"
+          env:
+            - name: KUDA_GCP_PROJECT
+              value: <your-project-id>
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /secret/key.json
+      volumes:
+        - name: secret
+          secret:
+            secretName: deployer-credentials

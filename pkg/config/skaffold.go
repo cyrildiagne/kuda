@@ -6,7 +6,7 @@ import (
 )
 
 // GenerateSkaffoldConfig generate skaffold yaml specifics to the Kuda workflow.
-func GenerateSkaffoldConfig(name string, manifest latest.Config, userCfg UserConfig, knativeFile string) (v1.SkaffoldConfig, error) {
+func GenerateSkaffoldConfig(service ServiceSummary, manifest latest.Config, knativeFile string) (v1.SkaffoldConfig, error) {
 
 	var sync *v1.Sync
 	if manifest.Sync != nil {
@@ -20,7 +20,7 @@ func GenerateSkaffoldConfig(name string, manifest latest.Config, userCfg UserCon
 
 	artifact := v1.Artifact{
 		// The endpoint image name.
-		ImageName: GetDockerfileArtifactName(userCfg, name),
+		ImageName: service.DockerArtifact,
 		// Which Dockerfile to build.
 		ArtifactType: v1.ArtifactType{
 			DockerArtifact: &v1.DockerArtifact{
@@ -33,6 +33,7 @@ func GenerateSkaffoldConfig(name string, manifest latest.Config, userCfg UserCon
 
 	build := v1.BuildConfig{
 		Artifacts: []*v1.Artifact{&artifact},
+		BuildType: service.BuildType,
 	}
 
 	deploy := v1.DeployConfig{

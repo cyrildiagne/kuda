@@ -17,7 +17,15 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		deployer := args[0]
 
-		// Handle skaffold provider.
+		// Create a Kuda config.
+		var newCfg config.UserConfig
+		namespace, err := cmd.Flags().GetString("namespace")
+		if err != nil {
+			panic("Could not retrieve the namespace flag.")
+		}
+		newCfg.Namespace = namespace
+
+		// Handle skaffold deployer.
 		if deployer == "skaffold" {
 
 			// Ensure that users provide the docker_registry when using the skaffold
@@ -27,19 +35,10 @@ var initCmd = &cobra.Command{
 				panic("The skaffold deployer requires a [-d, --docker_registry] value.")
 			}
 
-			// Create a Kuda config.
-			var newCfg config.UserConfig
-			newCfg.Namespace, e = cmd.Flags().GetString("namespace")
-			if e != nil {
-				panic("Could not retrieve namespace flag.")
-			}
-
 			// Setup the skaffold config.
-			if deployer == "skaffold" {
-				newCfg.Deployer.Skaffold = &config.SkaffoldDeployerConfig{
-					DockerRegistry: dockerRegistry,
-					ConfigFolder:   "./.kuda",
-				}
+			newCfg.Deployer.Skaffold = &config.SkaffoldDeployerConfig{
+				DockerRegistry: dockerRegistry,
+				ConfigFolder:   "./.kuda",
 			}
 
 			// Write the file to disk.

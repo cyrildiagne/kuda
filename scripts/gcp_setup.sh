@@ -166,6 +166,7 @@ function setup() {
   if [ "$KUDA_NAMESPACE" != "default" ]; then
     kubectl create namespace $KUDA_NAMESPACE
   fi
+  kubectl create namespace kuda
 
   # Setup Domain name.
   if [ "$KUDA_DOMAIN" = "xip.io" ]; then

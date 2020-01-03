@@ -1,5 +1,4 @@
 .kuda
-Dockerfile
 README.md
 *.pyc
 *.pyo

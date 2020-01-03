@@ -21,13 +21,13 @@ func MarshalKnativeConfig(s v1.Service) ([]byte, error) {
 }
 
 // GenerateKnativeConfig generate knative yaml specifics to the Kuda workflow.
-func GenerateKnativeConfig(name string, cfg latest.Config, userCfg UserConfig) (v1.Service, error) {
+func GenerateKnativeConfig(service ServiceSummary, cfg latest.Config) (v1.Service, error) {
 
-	numGPUs, _ := resource.ParseQuantity("1")
+	numGPUs, _ := resource.ParseQuantity("0")
 
 	container := corev1.Container{
-		Image: GetDockerfileArtifactName(userCfg, name),
-		Name:  name,
+		Image: service.DockerArtifact,
+		Name:  service.Name,
 		Resources: corev1.ResourceRequirements{
 			Limits: corev1.ResourceList{
 				corev1.ResourceName("nvidia.com/gpu"): numGPUs,
@@ -51,8 +51,8 @@ func GenerateKnativeConfig(name string, cfg latest.Config, userCfg UserConfig) (
 			APIVersion: "serving.knative.dev/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: userCfg.Namespace,
+			Name:      service.Name,
+			Namespace: service.Namespace,
 		},
 		Spec: v1.ServiceSpec{
 			ConfigurationSpec: v1.ConfigurationSpec{

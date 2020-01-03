@@ -11,7 +11,9 @@ replace (
 
 require (
 	github.com/GoogleContainerTools/skaffold v1.1.0
+	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/google/go-cmp v0.3.1
+	github.com/gorilla/mux v1.7.3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
 	github.com/spf13/cobra v0.0.5

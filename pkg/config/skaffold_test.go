@@ -16,17 +16,21 @@ func TestGenerateSkaffoldConfig(t *testing.T) {
 		Dockerfile: "test-file",
 		Sync:       []string{"test-sync"},
 	}
-	userCfg := UserConfig{
-		Namespace: "test-namespace",
-		Deployer: DeployerType{
-			Skaffold: &SkaffoldDeployerConfig{
-				DockerRegistry: "test-registry",
-			},
-		},
-	}
+	// userCfg := UserConfig{
+	// 	Namespace: "test-namespace",
+	// 	Deployer: DeployerType{
+	// 		Skaffold: &SkaffoldDeployerConfig{
+	// 			DockerRegistry: "test-registry",
+	// 		},
+	// 	},
+	// }
 	knativeConfig := "test-knative-file"
-
-	result, err := GenerateSkaffoldConfig(name, cfg, userCfg, knativeConfig)
+	service := ServiceSummary{
+		Name:           name,
+		Namespace:      "test-namespace",
+		DockerArtifact: "test-registry/test-name",
+	}
+	result, err := GenerateSkaffoldConfig(service, cfg, knativeConfig)
 	if err != nil {
 		t.Errorf("err")
 	}

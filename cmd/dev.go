@@ -5,7 +5,9 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/cyrildiagne/kuda/pkg/config"
 	"github.com/cyrildiagne/kuda/pkg/manifest/latest"
+	"github.com/cyrildiagne/kuda/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -15,16 +17,18 @@ var devCmd = &cobra.Command{
 	Short: "Deploy the API remotely in dev mode.",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		manifest := "./kuda.yaml"
+		manifestFile := "./kuda.yaml"
 		if len(args) == 1 {
-			manifest = args[0]
+			manifestFile = args[0]
 		}
-		// Ensure manifest exists
-		if _, err := os.Stat(cfgFile); os.IsNotExist(err) {
-			fmt.Println("Could not load manifest", manifest)
+		// Load the manifest
+		manifest, err := utils.LoadManifest(manifestFile)
+		if err != nil {
+			fmt.Println("Could not load manifest", manifestFile)
 			panic(err)
 		}
-		if err := devWithSkaffold(manifest); err != nil {
+		// Start dev with Skaffold.
+		if err := devWithSkaffold(*manifest); err != nil {
 			fmt.Println("ERROR:", err)
 		}
 	},
@@ -34,17 +38,18 @@ func init() {
 	RootCmd.AddCommand(devCmd)
 }
 
-func devWithSkaffold(manifestFile string) error {
-	// Load the manifest.
-	manifest := latest.Manifest{}
-	if err := loadManifest(manifestFile, &manifest); err != nil {
-		return err
+func devWithSkaffold(manifest latest.Manifest) error {
+
+	folder := cfg.Deployer.Skaffold.ConfigFolder
+	registry := cfg.Deployer.Skaffold.DockerRegistry
+
+	service := config.ServiceSummary{
+		Name:           manifest.Name + "-dev",
+		Namespace:      cfg.Namespace,
+		DockerArtifact: registry + "/" + manifest.Name,
 	}
 
-	name := manifest.Name + "-dev"
-	folder := cfg.Deployer.Skaffold.ConfigFolder
-
-	skaffoldFile, err := generateSkaffoldConfigFiles(manifest.Dev, name, folder)
+	skaffoldFile, err := utils.GenerateSkaffoldConfigFiles(service, manifest.Dev, folder)
 	if err != nil {
 		return err
 	}

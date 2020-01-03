@@ -1,5 +1,9 @@
 package config
 
+import (
+	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
+)
+
 // UserConfig stores a local user configuration.
 type UserConfig struct {
 	Namespace string       `yaml:"namespace"`
@@ -23,4 +27,14 @@ type SkaffoldDeployerConfig struct {
 // RemoteDeployerConfig stores a remote deployer config.
 type RemoteDeployerConfig struct {
 	URL string `yaml:"url"`
+}
+
+// Helpers
+
+// ServiceSummary stores a summary of a knative service.
+type ServiceSummary struct {
+	Name           string
+	Namespace      string
+	DockerArtifact string
+	BuildType      v1.BuildType
 }

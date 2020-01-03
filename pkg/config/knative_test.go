@@ -13,8 +13,6 @@ import (
 )
 
 func TestGenerateKnativeConfig(t *testing.T) {
-
-	name := "test-name"
 	cfg := latest.Config{
 		Dockerfile: "test-file",
 		Entrypoint: latest.Entrypoint{
@@ -26,16 +24,21 @@ func TestGenerateKnativeConfig(t *testing.T) {
 			Value: "test-env-value",
 		}},
 	}
-	userCfg := UserConfig{
-		Namespace: "test-namespace",
-		Deployer: DeployerType{
-			Skaffold: &SkaffoldDeployerConfig{
-				DockerRegistry: "test-registry",
-			},
-		},
-	}
+	// userCfg := UserConfig{
+	// 	Namespace: "test-namespace",
+	// 	Deployer: DeployerType{
+	// 		Skaffold: &SkaffoldDeployerConfig{
+	// 			DockerRegistry: "test-registry",
+	// 		},
+	// 	},
+	// }
 
-	result, err := GenerateKnativeConfig(name, cfg, userCfg)
+	service := ServiceSummary{
+		Name:           "test-name",
+		Namespace:      "test-namespace",
+		DockerArtifact: "test-registry/test-name",
+	}
+	result, err := GenerateKnativeConfig(service, cfg)
 	if err != nil {
 		t.Errorf("err")
 	}
