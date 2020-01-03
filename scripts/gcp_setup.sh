@@ -10,7 +10,34 @@
 # Exit on error.
 set -e
 
-export KUDA_GCP_PROJECT="${KUDA_GCP_PROJECT:-gpu-sh}"
+
+red="\033[31m"
+reset="\033[0m"
+
+function print_help_and_exit() {
+  echo "
+This script requires the KUDA_GCP_PROJECT environment variables to be set.
+
+Example usage:
+  export KUDA_GCP_PROJECT=your-gcp-project
+  sh scripts/gcp_setup.sh
+"
+  exit 1
+}
+
+function assert_set() {
+  var_name=$1
+  var_value=$2
+  if [ -z "$var_value" ]; then
+    printf "${red}ERROR:${reset} Missing required env variable $var_name\n"
+    print_help_and_exit
+  else
+    echo "Using $var_name: $var_value"
+  fi
+}
+
+assert_set KUDA_GCP_PROJECT $KUDA_GCP_PROJECT
+
 export KUDA_DOMAIN="${KUDA_DOMAIN:-xip.io}"
 export KUDA_NAMESPACE="${KUDA_NAMESPACE:-default}"
 export KUDA_CLUSTER_NAME="${KUDA_CLUSTER_NAME:-kuda}"
@@ -20,9 +47,14 @@ export KUDA_GPU_MACHINE_TYPE="${KUDA_GPU_MACHINE_TYPE:-n1-standard-2}"
 export KUDA_GPU_ACCELERATOR="${KUDA_GPU_ACCELERATOR:-nvidia-tesla-k80}"
 export KUDA_USE_PREEMPTIBLE_GPU="${KUDA_USE_PREEMPTIBLE_GPU:-true}"
 
+exit 0
+
+# The Knative version supported by this version of Kuda.
+# Changing it might lead to unexpected behaviors.
 KNATIVE_VERSION=0.11.0
 
-export CLUSTER_USER_ADMIN=$(gcloud config get-value core/account)
+# The user name to give RBAC admin role on the cluster.
+CLUSTER_USER_ADMIN=$(gcloud config get-value core/account)
 
 function create_main_cluster() {
   # Create the main Knative cluster.

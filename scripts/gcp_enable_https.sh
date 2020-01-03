@@ -11,7 +11,7 @@ reset="\033[0m"
 
 function print_help_and_exit() {
   echo "
-This scripts requires 4 environment variables to be set:
+This script requires 4 environment variables to be set:
 - KUDA_PROJECT_ID: The gcloud project ID for CloudDNS.
 - KUDA_DOMAIN: Your domain name.
 - KUDA_NAMESPACE: Your Kuda namespace.
@@ -68,7 +68,7 @@ function install_knative_cert_serving() {
 }
 
 function create_service_account() {
-  if gcloud --project gpu-sh iam service-accounts list | grep $CLOUD_DNS_SA; then
+  if gcloud --project $KUDA_PROJECT_ID iam service-accounts list | grep $CLOUD_DNS_SA; then
     echo "service account already exists."
   else
     gcloud --project $KUDA_PROJECT_ID iam service-accounts \
@@ -128,7 +128,7 @@ function create_certificate() {
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: gpu-sh
+  name: $KUDA_PROJECT_ID
   # Istio certs secret lives in the istio-system namespace, and
   # a cert-manager Certificate is namespace-scoped.
   namespace: istio-system
