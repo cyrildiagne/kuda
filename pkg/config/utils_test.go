@@ -3,14 +3,13 @@ package config
 import (
 	"testing"
 
-	config "github.com/cyrildiagne/kuda/pkg/kuda/config"
 	"gotest.tools/assert"
 )
 
 func TestGetDockerfileArtifactName(t *testing.T) {
-	testUserCfg := config.UserConfig{
-		Deployer: config.DeployerType{
-			Skaffold: &config.SkaffoldDeployerConfig{
+	testUserCfg := UserConfig{
+		Deployer: DeployerType{
+			Skaffold: &SkaffoldDeployerConfig{
 				DockerRegistry: "test-registry",
 			},
 		},

@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/cyrildiagne/kuda/pkg/kuda/config"
+	"github.com/cyrildiagne/kuda/pkg/config"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 

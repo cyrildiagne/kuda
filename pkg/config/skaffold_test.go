@@ -4,8 +4,7 @@ import (
 	"testing"
 
 	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
-	config "github.com/cyrildiagne/kuda/pkg/kuda/config"
-	latest "github.com/cyrildiagne/kuda/pkg/kuda/manifest/latest"
+	latest "github.com/cyrildiagne/kuda/pkg/manifest/latest"
 	"github.com/google/go-cmp/cmp"
 	"gotest.tools/assert"
 )
@@ -17,10 +16,10 @@ func TestGenerateSkaffoldConfig(t *testing.T) {
 		Dockerfile: "test-file",
 		Sync:       []string{"test-sync"},
 	}
-	userCfg := config.UserConfig{
+	userCfg := UserConfig{
 		Namespace: "test-namespace",
-		Deployer: config.DeployerType{
-			Skaffold: &config.SkaffoldDeployerConfig{
+		Deployer: DeployerType{
+			Skaffold: &SkaffoldDeployerConfig{
 				DockerRegistry: "test-registry",
 			},
 		},

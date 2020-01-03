@@ -3,7 +3,6 @@ package config
 import (
 	"testing"
 
-	config "github.com/cyrildiagne/kuda/pkg/config"
 	latest "github.com/cyrildiagne/kuda/pkg/manifest/latest"
 	"github.com/google/go-cmp/cmp"
 	"gotest.tools/assert"
@@ -27,10 +26,10 @@ func TestGenerateKnativeConfig(t *testing.T) {
 			Value: "test-env-value",
 		}},
 	}
-	userCfg := config.UserConfig{
+	userCfg := UserConfig{
 		Namespace: "test-namespace",
-		Deployer: config.DeployerType{
-			Skaffold: &config.SkaffoldDeployerConfig{
+		Deployer: DeployerType{
+			Skaffold: &SkaffoldDeployerConfig{
 				DockerRegistry: "test-registry",
 			},
 		},

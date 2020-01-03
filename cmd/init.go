@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cyrildiagne/kuda/pkg/kuda/config"
+	"github.com/cyrildiagne/kuda/pkg/config"
 	"github.com/spf13/cobra"
 	yaml "gopkg.in/yaml.v2"
 )

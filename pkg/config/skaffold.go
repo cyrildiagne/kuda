@@ -2,12 +2,11 @@ package config
 
 import (
 	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
-	config "github.com/cyrildiagne/kuda/pkg/kuda/config"
-	latest "github.com/cyrildiagne/kuda/pkg/kuda/manifest/latest"
+	latest "github.com/cyrildiagne/kuda/pkg/manifest/latest"
 )
 
 // GenerateSkaffoldConfig generate skaffold yaml specifics to the Kuda workflow.
-func GenerateSkaffoldConfig(name string, manifest latest.Config, userCfg config.UserConfig, knativeFile string) (v1.SkaffoldConfig, error) {
+func GenerateSkaffoldConfig(name string, manifest latest.Config, userCfg UserConfig, knativeFile string) (v1.SkaffoldConfig, error) {
 
 	var sync *v1.Sync
 	if manifest.Sync != nil {

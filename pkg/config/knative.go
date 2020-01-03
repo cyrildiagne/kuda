@@ -6,8 +6,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "knative.dev/serving/pkg/apis/serving/v1"
 
-	config "github.com/cyrildiagne/kuda/pkg/kuda/config"
-	latest "github.com/cyrildiagne/kuda/pkg/kuda/manifest/latest"
+	latest "github.com/cyrildiagne/kuda/pkg/manifest/latest"
 
 	yaml "sigs.k8s.io/yaml"
 )
@@ -22,7 +21,7 @@ func MarshalKnativeConfig(s v1.Service) ([]byte, error) {
 }
 
 // GenerateKnativeConfig generate knative yaml specifics to the Kuda workflow.
-func GenerateKnativeConfig(name string, cfg latest.Config, userCfg config.UserConfig) (v1.Service, error) {
+func GenerateKnativeConfig(name string, cfg latest.Config, userCfg UserConfig) (v1.Service, error) {
 
 	numGPUs, _ := resource.ParseQuantity("1")
 
