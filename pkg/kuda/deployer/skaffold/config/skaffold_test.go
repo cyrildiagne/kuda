@@ -15,6 +15,7 @@ func TestGenerateSkaffoldConfig(t *testing.T) {
 	name := "test-name"
 	cfg := latest.Config{
 		Dockerfile: "test-file",
+		Sync:       []string{"test-sync"},
 	}
 	userCfg := config.UserConfig{
 		Namespace: "test-namespace",
@@ -41,6 +42,9 @@ func TestGenerateSkaffoldConfig(t *testing.T) {
 				DockerArtifact: &v1.DockerArtifact{
 					DockerfilePath: "test-file",
 				},
+			},
+			Sync: &v1.Sync{
+				Manual: []*v1.SyncRule{{Src: "test-sync", Dest: "."}},
 			},
 		},
 	}

@@ -18,6 +18,14 @@ func TestGenerateKnativeConfig(t *testing.T) {
 	name := "test-name"
 	cfg := latest.Config{
 		Dockerfile: "test-file",
+		Entrypoint: latest.Entrypoint{
+			Command: "test-cmd",
+			Args:    []string{"test-arg1", "test-arg2"},
+		},
+		Env: []corev1.EnvVar{{
+			Name:  "TEST_ENV_NAME",
+			Value: "test-env-value",
+		}},
 	}
 	userCfg := config.UserConfig{
 		Namespace: "test-namespace",
@@ -44,7 +52,9 @@ func TestGenerateKnativeConfig(t *testing.T) {
 		t.Errorf("Mismatch (-want +got):\n%s", diff)
 	}
 
-	numGPUs, _ := resource.ParseQuantity("1")
+	numGPUs, err := resource.ParseQuantity("1")
+	assert.NilError(t, err)
+
 	container := corev1.Container{
 		Image: "test-registry/test-name",
 		Name:  "test-name",
@@ -53,6 +63,9 @@ func TestGenerateKnativeConfig(t *testing.T) {
 				corev1.ResourceName("nvidia.com/gpu"): numGPUs,
 			},
 		},
+		Command: []string{"test-cmd"},
+		Args:    []string{"test-arg1", "test-arg2"},
+		Env:     []corev1.EnvVar{{Name: "TEST_ENV_NAME", Value: "test-env-value"}},
 	}
 	spec := v1.ServiceSpec{
 		ConfigurationSpec: v1.ConfigurationSpec{
@@ -68,4 +81,9 @@ func TestGenerateKnativeConfig(t *testing.T) {
 	if diff := cmp.Diff(result.Spec, spec); diff != "" {
 		t.Errorf("Mismatch (-want +got):\n%s", diff)
 	}
+
+	// Test Marshal
+	resultYAML, err := MarshalKnativeConfig(result)
+	assert.NilError(t, err)
+	assert.Assert(t, len(resultYAML) > 0)
 }

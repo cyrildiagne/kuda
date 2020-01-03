@@ -3,12 +3,12 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	skaffoldCfg "github.com/cyrildiagne/kuda/pkg/kuda/deployer/skaffold/config"
 	"github.com/cyrildiagne/kuda/pkg/kuda/manifest/latest"
 	"github.com/spf13/cobra"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // devCmd represents the `kuda dev` command.
@@ -51,40 +51,43 @@ func devWithSkaffold(manifestFile string) error {
 	}
 
 	// Generate the knative yaml file.
-	knative, err := skaffoldCfg.GenerateKnativeConfigYAML(manifest.Name+"-dev", manifest.Dev, cfg)
+	knativeCfg, err := skaffoldCfg.GenerateKnativeConfig(manifest.Name+"-dev", manifest.Dev, cfg)
+	if err != nil {
+		return err
+	}
+	knativeYAML, err := skaffoldCfg.MarshalKnativeConfig(knativeCfg)
 	if err != nil {
 		return err
 	}
 	knativeFile := filepath.FromSlash(cfgFolder + "/knative-dev.yaml")
-	err = writeYAML(knative, knativeFile)
-	if err != nil {
+	if err := writeYAML(knativeYAML, knativeFile); err != nil {
 		return err
 	}
 
 	// Generate the skaffold yaml file.
-	skaffold, err := skaffoldCfg.GenerateSkaffoldConfigYAML(manifest.Name+"-dev", manifest.Dev, cfg, knativeFile)
+	skaffoldCfg, err := skaffoldCfg.GenerateSkaffoldConfig(manifest.Name+"-dev", manifest.Dev, cfg, knativeFile)
+	if err != nil {
+		return err
+	}
+	skaffoldYAML, err := yaml.Marshal(skaffoldCfg)
 	if err != nil {
 		return err
 	}
 	skaffoldFile := filepath.FromSlash(cfgFolder + "/skaffold-dev.yaml")
-	if err := writeYAML(skaffold, skaffoldFile); err != nil {
+	if err := writeYAML(skaffoldYAML, skaffoldFile); err != nil {
 		return err
 	}
 
-	// Run command.
-	args := []string{"dev", "-f", skaffoldFile}
-	cmd := exec.Command("skaffold", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
+	// // Run command.
+	// args := []string{"dev", "-f", skaffoldFile}
+	// cmd := exec.Command("skaffold", args...)
+	// cmd.Stdout = os.Stdout
+	// cmd.Stdin = os.Stdin
+	// cmd.Stderr = os.Stderr
 
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-
-	os.Stdout.Close()
-	os.Stdin.Close()
-	os.Stderr.Close()
+	// if err := cmd.Run(); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

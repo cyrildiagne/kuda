@@ -12,10 +12,9 @@ import (
 	yaml "sigs.k8s.io/yaml"
 )
 
-// GenerateKnativeConfigYAML generate yaml string.
-func GenerateKnativeConfigYAML(name string, manifest latest.Config, cfg config.UserConfig) ([]byte, error) {
-	config, _ := GenerateKnativeConfig(name, manifest, cfg)
-	content, err := yaml.Marshal(config)
+// MarshalKnativeConfig generate yaml bytes from a knative config.
+func MarshalKnativeConfig(s v1.Service) ([]byte, error) {
+	content, err := yaml.Marshal(s)
 	if err != nil {
 		return nil, err
 	}

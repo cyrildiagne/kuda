@@ -4,18 +4,7 @@ import (
 	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
 	config "github.com/cyrildiagne/kuda/pkg/kuda/config"
 	latest "github.com/cyrildiagne/kuda/pkg/kuda/manifest/latest"
-	yaml "gopkg.in/yaml.v2"
 )
-
-// GenerateSkaffoldConfigYAML generate yaml string.
-func GenerateSkaffoldConfigYAML(name string, manifest latest.Config, cfg config.UserConfig, knativeFile string) ([]byte, error) {
-	config, _ := GenerateSkaffoldConfig(name, manifest, cfg, knativeFile)
-	content, err := yaml.Marshal(config)
-	if err != nil {
-		return nil, err
-	}
-	return content, nil
-}
 
 // GenerateSkaffoldConfig generate skaffold yaml specifics to the Kuda workflow.
 func GenerateSkaffoldConfig(name string, manifest latest.Config, userCfg config.UserConfig, knativeFile string) (v1.SkaffoldConfig, error) {
