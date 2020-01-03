@@ -6,13 +6,24 @@ green="\033[32m"
 red="\033[31m"
 reset="\033[0m"
 
+# Ensure version was given as arg.
 if [ -z "$1" ]; then
-  printf "${red}ERROR: Version missing${reset}\n"
+  printf "${red}ERROR:${reset} Version missing\n"
   echo "Example usage: ./scripts/release.sh 0.3.1"
   exit 1
 fi
 
 VERSION=$1-preview
+
+# Check if current branch name matches with given version
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+
+if [[ "$VERSION" != "$BRANCH_NAME"* ]]; then
+  printf "${red}ERROR:${reset} Git branch version mismatch.\n"
+  echo "Version: $VERSION should start with Git branch name: $BRANCH_NAME"
+  exit 1
+fi
+
 printf "${green}Releasing v$VERSION...${reset}\n"
 
 # Tidy.
@@ -26,9 +37,9 @@ if [[ $(git diff --stat) != '' ]]; then
 fi
 
 # Update scripts/get-kuda-cli.sh
-sed -i'.bak' -e "s/\(VERSION=\)\(.*\)/\1$VERSION/" scripts/get-kuda-cli.sh
+sed -i'.bak' -e "s/\(VERSION=\)\(.*\)/\1$VERSION/" scripts/get-cli.sh
 rm scripts/*.bak
-git add scripts/get-kuda-cli.sh
+git add scripts/get-cli.sh
 git commit -m "update get script to version $VERSION"
 
 # Tag & push branch for CI release.
