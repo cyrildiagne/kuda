@@ -3,11 +3,50 @@ package cmd
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 
-	"github.com/cyrildiagne/kuda/pkg/kuda/manifest/latest"
+	skaffoldCfg "github.com/cyrildiagne/kuda/pkg/config"
+	"github.com/cyrildiagne/kuda/pkg/manifest/latest"
 	yaml "gopkg.in/yaml.v2"
 )
+
+func generateSkaffoldConfigFiles(config latest.Config, name string, folder string) (string, error) {
+	// Make sure output folder exists.
+	if _, err := os.Stat(folder); os.IsNotExist(err) {
+		os.Mkdir(folder, 0700)
+	}
+
+	// Generate the knative yaml file.
+	knativeCfg, err := skaffoldCfg.GenerateKnativeConfig(name, config, cfg)
+	if err != nil {
+		return "", err
+	}
+	knativeYAML, err := skaffoldCfg.MarshalKnativeConfig(knativeCfg)
+	if err != nil {
+		return "", err
+	}
+	knativeFile := filepath.FromSlash(folder + "/knative-" + name + ".yaml")
+	if err := writeYAML(knativeYAML, knativeFile); err != nil {
+		return "", err
+	}
+
+	// Generate the skaffold yaml file.
+	skaffoldCfg, err := skaffoldCfg.GenerateSkaffoldConfig(name, config, cfg, knativeFile)
+	if err != nil {
+		return "", err
+	}
+	skaffoldYAML, err := yaml.Marshal(skaffoldCfg)
+	if err != nil {
+		return "", err
+	}
+	skaffoldFile := filepath.FromSlash(folder + "/skaffold-" + name + ".yaml")
+	if err := writeYAML(skaffoldYAML, skaffoldFile); err != nil {
+		return "", err
+	}
+
+	return skaffoldFile, nil
+}
 
 func loadManifest(manifestFile string, manifest *latest.Manifest) error {
 	// Check if file exists.

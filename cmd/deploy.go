@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 
-	skaffoldCfg "github.com/cyrildiagne/kuda/pkg/kuda/deployer/skaffold/config"
-	"github.com/cyrildiagne/kuda/pkg/kuda/manifest/latest"
+	"github.com/cyrildiagne/kuda/pkg/manifest/latest"
 	"github.com/spf13/cobra"
-	yaml "gopkg.in/yaml.v2"
 )
 
 // deployCmd represents the `kuda deploy` command.
@@ -44,38 +41,11 @@ func deployWithSkaffold(manifestFile string) error {
 		return err
 	}
 
-	cfgFolder := cfg.Deployer.Skaffold.ConfigFolder
+	name := manifest.Name
+	folder := cfg.Deployer.Skaffold.ConfigFolder
 
-	// Make sure output folder exists.
-	if _, err := os.Stat(cfgFolder); os.IsNotExist(err) {
-		os.Mkdir(cfgFolder, 0700)
-	}
-
-	// Generate the knative yaml file.
-	knativeCfg, err := skaffoldCfg.GenerateKnativeConfig(manifest.Name, manifest.Deploy, cfg)
+	skaffoldFile, err := generateSkaffoldConfigFiles(manifest.Deploy, name, folder)
 	if err != nil {
-		return err
-	}
-	knativeYAML, err := skaffoldCfg.MarshalKnativeConfig(knativeCfg)
-	if err != nil {
-		return err
-	}
-	knativeFile := filepath.FromSlash(cfgFolder + "/knative.yaml")
-	if err := writeYAML(knativeYAML, knativeFile); err != nil {
-		return err
-	}
-
-	// Generate the skaffold yaml file.
-	skaffoldCfg, err := skaffoldCfg.GenerateSkaffoldConfig(manifest.Name, manifest.Deploy, cfg, knativeFile)
-	if err != nil {
-		return err
-	}
-	skaffoldYAML, err := yaml.Marshal(skaffoldCfg)
-	if err != nil {
-		return err
-	}
-	skaffoldFile := filepath.FromSlash(cfgFolder + "/skaffold.yaml")
-	if err := writeYAML(skaffoldYAML, skaffoldFile); err != nil {
 		return err
 	}
 
