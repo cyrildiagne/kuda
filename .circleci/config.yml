@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run: go test github.com/cyrildiagne/kuda/pkg/config
-      - run: go build main.go
+      - run: go build cli/main.go
   release:
     docker:
       - image: circleci/golang:1.13

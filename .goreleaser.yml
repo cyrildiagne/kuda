@@ -4,11 +4,11 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - # Env
+  - main: ./cli/main.go
     env:
       - CGO_ENABLED=0
     ldflags:
-      - -X github.com/cyrildiagne/kuda/cmd.version={{.Version}}
+      - -X github.com/cyrildiagne/kuda/cli/cmd.version={{.Version}}
 archives:
   - replacements:
       darwin: Darwin
