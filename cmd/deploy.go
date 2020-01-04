@@ -33,12 +33,15 @@ var deployCmd = &cobra.Command{
 			panic(err)
 		}
 
+		// Check if running a dry run.
+		dryRun, _ := cmd.Flags().GetBool("dry-run")
+
 		if cfg.Deployer.Remote != nil {
-			if err := deployWithRemote(manifest); err != nil {
+			if err := deployWithRemote(manifest, dryRun); err != nil {
 				fmt.Println("ERROR:", err)
 			}
 		} else if cfg.Deployer.Skaffold != nil {
-			if err := deployWithSkaffold(manifest); err != nil {
+			if err := deployWithSkaffold(manifest, dryRun); err != nil {
 				fmt.Println("ERROR:", err)
 			}
 		}
@@ -47,16 +50,16 @@ var deployCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(deployCmd)
+	deployCmd.Flags().Bool("dry-run", false, "Just generate the config files.")
 }
 
-func deployWithRemote(manifest *latest.Manifest) error {
+func deployWithRemote(manifest *latest.Manifest, dryRun bool) error {
 	// Create destination tar file
-	output, err := ioutil.TempFile("", "*.rar")
+	output, err := ioutil.TempFile("", "*.tar")
 	fmt.Println("Building context tar:", output.Name())
 	if err != nil {
 		return err
 	}
-	defer os.Remove(output.Name())
 
 	// Open .dockerignore file if it exists
 	dockerignore, err := os.Open(".dockerignore")
@@ -66,7 +69,16 @@ func deployWithRemote(manifest *latest.Manifest) error {
 	defer dockerignore.Close()
 
 	// Tar context folder.
-	utils.Tar("./", output.Name(), output, dockerignore)
+	source := "./"
+	utils.Tar(source, output.Name(), output, dockerignore)
+
+	if dryRun {
+		fmt.Println("Dry run: Skipping remote deployment.")
+		return nil
+	}
+
+	// Defer the deletion of the temp tar file.
+	defer os.Remove(output.Name())
 
 	fmt.Println("Sending to deployer:", cfg.Deployer.Remote.URL)
 
@@ -115,7 +127,7 @@ func deployWithRemote(manifest *latest.Manifest) error {
 	return nil
 }
 
-func deployWithSkaffold(manifest *latest.Manifest) error {
+func deployWithSkaffold(manifest *latest.Manifest, dryRun bool) error {
 
 	folder := cfg.Deployer.Skaffold.ConfigFolder
 	registry := cfg.Deployer.Skaffold.DockerRegistry
@@ -129,6 +141,12 @@ func deployWithSkaffold(manifest *latest.Manifest) error {
 	skaffoldFile, err := utils.GenerateSkaffoldConfigFiles(service, manifest.Deploy, folder)
 	if err != nil {
 		return err
+	}
+	fmt.Println("Config files have been written in:", folder)
+
+	if dryRun {
+		fmt.Println("Dry run: Skipping execution.")
+		return nil
 	}
 
 	// Run command.

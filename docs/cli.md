@@ -3,7 +3,7 @@
 ## → Init
 
 ```bash
-kuda init <deployer> [-n, --namespace] [-d, --docker-registry]
+kuda init <deployer> [flags]
 ```
 
 Initializes the local configuration.
@@ -22,7 +22,8 @@ Initializes the local configuration.
 ```bash
 kuda init -d gcr.io/my-gcp-project skaffold
 ```
-<!-- 
+
+<!--
 ```bash
 kuda init \
     -n your-namespace
@@ -39,13 +40,18 @@ kuda init \
 ## → Dev
 
 ```bash
-kuda dev <manifest>
+kuda dev <manifest> [flags]
 ```
 
 Deploys the API in development mode (with live file sync & app reload).
 
 **Arguments**
+
 - `manifest`·: Optional, The manifest file. (default: `kuda.yml`)
+
+**Flags**
+
+- `[--dry-run]` Generate the config files and skip execution.
 
 **Examples**
 
@@ -60,7 +66,7 @@ kuda dev /path/to/manifest.yml
 ## → Deploy
 
 ```
-kuda deploy <manifest>
+kuda deploy <manifest> [flags]
 ```
 
 Deploys the API in production mode.
@@ -68,6 +74,10 @@ Deploys the API in production mode.
 **Arguments**
 
 - `manifest`: Optional, The manifest file. (default: `kuda.yml`)
+
+**Flags**
+
+- `[--dry-run]` Generate the config files and skip deployment.
 
 **Examples**
 

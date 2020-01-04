@@ -29,10 +29,11 @@ var devCmd = &cobra.Command{
 		}
 
 		if cfg.Deployer.Remote != nil {
-			panic("dev is not yet supported with remote deployers.")
+			panic("dev is not yet supported on remote deployers")
 		} else if cfg.Deployer.Skaffold != nil {
 			// Start dev with Skaffold.
-			if err := devWithSkaffold(*manifest); err != nil {
+			dryRun, _ := cmd.Flags().GetBool("dry-run")
+			if err := devWithSkaffold(*manifest, dryRun); err != nil {
 				fmt.Println("ERROR:", err)
 			}
 		}
@@ -41,9 +42,10 @@ var devCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(devCmd)
+	devCmd.Flags().Bool("dry-run", false, "Just generate the config files.")
 }
 
-func devWithSkaffold(manifest latest.Manifest) error {
+func devWithSkaffold(manifest latest.Manifest, dryRun bool) error {
 
 	folder := cfg.Deployer.Skaffold.ConfigFolder
 	registry := cfg.Deployer.Skaffold.DockerRegistry
@@ -57,6 +59,12 @@ func devWithSkaffold(manifest latest.Manifest) error {
 	skaffoldFile, err := utils.GenerateSkaffoldConfigFiles(service, manifest.Dev, folder)
 	if err != nil {
 		return err
+	}
+	fmt.Println("Config files have been written in:", folder)
+
+	if dryRun {
+		fmt.Println("Dry run: Skipping execution.")
+		return nil
 	}
 
 	// Run command.
