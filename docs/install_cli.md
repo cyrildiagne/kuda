@@ -17,7 +17,7 @@ The best way to get started quickly on a cost-effective, fully managed cluster.
 ```bash
 kuda init \
   -n $your_namespace \
-  deploy.kuda.gpu.sh 
+  gpu.sh 
 ```
 
 Replace `$your_namespace` with your [gpu.sh](#) username. -->
@@ -43,11 +43,11 @@ kuda init \
 ```
 
 <!-- ```bash
-If you've installed and configured a [Kuda Deployer](#): 
+If you've installed and configured a [Kuda Deployer](#):
 
 kuda init \
   -n $your_namespace \
-  deploy.kuda.$your_domain
+  $your_domain
 ```
 -->
 

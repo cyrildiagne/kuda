@@ -16,6 +16,8 @@ Initializes the local configuration.
 
 - `[-n, --namespace]` Your namespace. (default: `default`)
 - `[-d, --docker-registry]` Required when using the `skaffold` deployer.
+- `[--auth-url]` Specify which url to use for authentication when using a remote deployer.
+- `[--deployer-url]` Specify which url to use for deployment when using a remote deployer.
 
 **Examples**
 
@@ -26,16 +28,20 @@ kuda init -d gcr.io/my-gcp-project skaffold
 <!--
 ```bash
 kuda init \
-    -n your-namespace
-    -d gcr.io/my-gcp-project \
-    localhost:8080
+    -n your-namespace \
+    gpu.sh
 ```
 
 ```bash
 kuda init \
-    -n your-namespace \
-    deploy.kuda.gpu.sh
-``` -->
+    -n your-namespace
+    -d gcr.io/my-gcp-project \
+    --auth_url localhost:8070 \
+    --deployer_url localhost:8090
+    localhost:8080
+```
+
+-->
 
 ## → Dev
 

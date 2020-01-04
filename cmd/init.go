@@ -46,10 +46,31 @@ var initCmd = &cobra.Command{
 
 		} else {
 
-			// Setup the skaffold config.
-			newCfg.Deployer.Remote = &config.RemoteDeployerConfig{
-				URL: deployer,
+			// Setup the default remote config.
+			authURL := "https://auth.kuda." + deployer
+			authURLFlag, _ := cmd.Flags().GetString("auth_url")
+			if authURLFlag != "" {
+				authURL = authURLFlag
 			}
+			deployerURL := "https://deployer.kuda." + deployer
+			deployerURLFlag, _ := cmd.Flags().GetString("deployer_url")
+			if deployerURLFlag != "" {
+				deployerURL = deployerURLFlag
+			}
+			newCfg.Deployer.Remote = &config.RemoteDeployerConfig{
+				AuthURL:     authURL,
+				DeployerURL: deployerURL,
+			}
+
+			// Start login flow.
+			fmt.Println("Authenticating on...", newCfg.Deployer.Remote.AuthURL)
+			user, err := startLoginFlow(newCfg.Deployer.Remote.AuthURL)
+			if err != nil {
+				fmt.Println("Authentication error.")
+				panic(err)
+			}
+			newCfg.Deployer.Remote.User = user
+			fmt.Println("Authenticated as", user.DisplayName)
 
 			// Write the file to disk.
 			writeConfig(newCfg)
@@ -62,6 +83,8 @@ func init() {
 
 	initCmd.Flags().StringP("namespace", "n", "default", "Knative namespace.")
 	initCmd.Flags().StringP("docker_registry", "d", "", "Docker registry.")
+	initCmd.Flags().String("auth_url", "", "Authentication URL.")
+	initCmd.Flags().String("deployer_url", "", "Deployer URL.")
 }
 
 func writeConfig(cfg config.UserConfig) error {

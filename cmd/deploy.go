@@ -80,7 +80,7 @@ func deployWithRemote(manifest *latest.Manifest, dryRun bool) error {
 	// Defer the deletion of the temp tar file.
 	defer os.Remove(output.Name())
 
-	fmt.Println("Sending to deployer:", cfg.Deployer.Remote.URL)
+	fmt.Println("Sending to deployer:", cfg.Deployer.Remote.DeployerURL)
 
 	// Create request
 	body := &bytes.Buffer{}
@@ -104,7 +104,7 @@ func deployWithRemote(manifest *latest.Manifest, dryRun bool) error {
 	// Close writer
 	writer.Close()
 
-	url := cfg.Deployer.Remote.URL
+	url := cfg.Deployer.Remote.DeployerURL
 	req, err := http.NewRequest("POST", url, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 

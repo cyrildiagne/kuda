@@ -2,6 +2,7 @@ package config
 
 import (
 	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
+	"github.com/cyrildiagne/kuda/pkg/auth"
 )
 
 // UserConfig stores a local user configuration.
@@ -26,7 +27,9 @@ type SkaffoldDeployerConfig struct {
 
 // RemoteDeployerConfig stores a remote deployer config.
 type RemoteDeployerConfig struct {
-	URL string `yaml:"url"`
+	AuthURL     string     `yaml:"auth"`
+	DeployerURL string     `yaml:"deployer"`
+	User        *auth.User `yaml:"user"`
 }
 
 // Helpers
