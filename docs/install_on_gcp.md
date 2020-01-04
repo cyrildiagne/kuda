@@ -38,6 +38,11 @@ sh scripts/setup_gcp.sh
 kubectl get pods --all-namespaces
 ```
 
+## (Optional) Deployer
+
+If you'd like to enable the remote deployer, follow the instructions in
+[/images/deployer](/images/deployer).
+
 ## (Optional) Enable HTTPS
 
 You must have a real domain name (not xip.io auto-domain) to enable HTTPS.
