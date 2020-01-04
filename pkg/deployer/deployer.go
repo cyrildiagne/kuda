@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
 	"github.com/cyrildiagne/kuda/pkg/config"
@@ -24,6 +25,7 @@ func handleDeployment(w http.ResponseWriter, r *http.Request) {
 
 	// Retrieve namespace.
 	namespace := r.FormValue("namespace")
+	namespace = strings.ToValidUTF8(namespace, "")
 	if namespace == "" {
 		http.Error(w, "error retrieving namespace", 500)
 		return
