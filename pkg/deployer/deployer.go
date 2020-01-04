@@ -28,6 +28,10 @@ func handleDeployment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "error retrieving namespace", 500)
 		return
 	}
+	if namespace == "kuda" {
+		http.Error(w, "namespace cannot be kuda", 500)
+		return
+	}
 
 	// Retrieve Filename, Header and Size of the file.
 	file, handler, err := r.FormFile("context")
