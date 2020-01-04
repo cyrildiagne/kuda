@@ -27,9 +27,14 @@ var devCmd = &cobra.Command{
 			fmt.Println("Could not load manifest", manifestFile)
 			panic(err)
 		}
-		// Start dev with Skaffold.
-		if err := devWithSkaffold(*manifest); err != nil {
-			fmt.Println("ERROR:", err)
+
+		if cfg.Deployer.Remote != nil {
+			panic("dev is not yet supported with remote deployers.")
+		} else if cfg.Deployer.Skaffold != nil {
+			// Start dev with Skaffold.
+			if err := devWithSkaffold(*manifest); err != nil {
+				fmt.Println("ERROR:", err)
+			}
 		}
 	},
 }

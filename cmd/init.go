@@ -45,7 +45,14 @@ var initCmd = &cobra.Command{
 			writeConfig(newCfg)
 
 		} else {
-			panic("Only 'skaffold' is currently supported as deployer.")
+
+			// Setup the skaffold config.
+			newCfg.Deployer.Remote = &config.RemoteDeployerConfig{
+				URL: deployer,
+			}
+
+			// Write the file to disk.
+			writeConfig(newCfg)
 		}
 	},
 }
