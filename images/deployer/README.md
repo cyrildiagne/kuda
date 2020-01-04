@@ -21,8 +21,6 @@ docker run --rm \
 
 ## Deploy
 
-Update the `service.yaml` file with your GCP Project ID.
-
 ### 1) Create service account and bind roles.
 
 ```bash
