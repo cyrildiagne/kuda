@@ -1,3 +1,6 @@
+The authentication service serves a simple static page that lets user
+authenticate using [firebase auth](https://firebase.google.com/docs/auth).
+
 ```bash
 export KUDA_AUTH_API_KEY="your auth API key"
 export KUDA_AUTH_DOMAIN="your auth domain"
@@ -38,4 +41,8 @@ sed -i'.bak' "s/value: <your-auth-domain>/value: $KUDA_AUTH_DOMAIN/g" service.ya
 sed -i'.bak' "s/value: <your-tos-url>/value: $KUDA_AUTH_TOS_URL/g" service.yaml
 sed -i'.bak' "s/value: <your-pp-url>/value: $KUDA_AUTH_PP_URL/g" service.yaml
 rm service.yaml.bak
+```
+
+```bash
+skaffold run
 ```
