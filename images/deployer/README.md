@@ -67,6 +67,7 @@ rm -rf $KEY_DIRECTORY
 ### 3) Update the service.yaml with your GCP project id.
 
 ```bash
+cp service.tpl.yaml service.yaml
 sed -i'.bak' "s/value: <your-project-id>/value: $KUDA_PROJECT_ID/g" service.yaml
 rm service.yaml.bak
 ```
