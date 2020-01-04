@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Authentication</title>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/4.3.0/firebase-ui-auth.js"></script>
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://www.gstatic.com/firebasejs/ui/4.3.0/firebase-ui-auth.css"
+    />
+  </head>
+  <body>
+    <div>
+      <button id="sign-out" style="display:none;">Sign out</button>
+      <pre id="account-details"></pre>
+    </div>
+
+    <div id="firebaseui-auth-container" style="display:none;"></div>
+
+    <script>
+      const config = {
+        apiKey: "{{.APIKey}}",
+        authDomain: "{{.AuthDomain}}",
+        termsOfServiceURL: "{{.TermsOfServiceURL}}",
+        privacyPolicyURL: "{{.PrivacyPolicyURL}}"
+      };
+    </script>
+    <script src="/public/index.js"></script>
+  </body>
+</html>

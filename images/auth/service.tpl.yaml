@@ -1,0 +1,19 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: auth
+  namespace: kuda
+spec:
+  template:
+    spec:
+      containers:
+        - image: gcr.io/kuda-project/auth
+          env:
+            - name: KUDA_AUTH_API_KEY
+              value: <your-auth-api-key>
+            - name: KUDA_AUTH_DOMAIN
+              value: <your-auth-domain>
+            - name: KUDA_AUTH_TOS_URL
+              value: <your-tos-url>
+            - name: KUDA_AUTH_PP_URL
+              value: <your-pp-url>
