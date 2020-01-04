@@ -136,12 +136,13 @@ spec:
   # Reference to the Istio default cert secret.
   secretName: istio-ingressgateway-certs
   # The certificate common name, use one from your domains.
-  commonName: "*.$KUDA_NAMESPACE.$KUDA_DOMAIN"
+  commonName: "*.kuda.$KUDA_DOMAIN"
   dnsNames:
     # Since certificate wildcards only allow one level, we will
     # need to one for every namespace that Knative is used in.
     # We don't need to use wildcard here, fully-qualified domains
     # will work fine too.
+    - "*.kuda.$KUDA_DOMAIN"
     - "*.$KUDA_NAMESPACE.$KUDA_DOMAIN"
   # Reference to the ClusterIssuer we created in the previous step.
   issuerRef:
