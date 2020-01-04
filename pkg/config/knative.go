@@ -23,7 +23,8 @@ func MarshalKnativeConfig(s v1.Service) ([]byte, error) {
 // GenerateKnativeConfig generate knative yaml specifics to the Kuda workflow.
 func GenerateKnativeConfig(service ServiceSummary, cfg latest.Config) (v1.Service, error) {
 
-	numGPUs, _ := resource.ParseQuantity("0")
+	// Kuda supports only 1 GPU per service for now.
+	numGPUs, _ := resource.ParseQuantity("1")
 
 	container := corev1.Container{
 		Image: service.DockerArtifact,
