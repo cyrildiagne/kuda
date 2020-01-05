@@ -41,9 +41,6 @@ app = flask.Flask(__name__)
 @app.route('/')
 def hello():
     return 'Hello GPU!\n\n' + os.popen('nvidia-smi').read()
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=80)
 ```
 
 - `Dockerfile`
@@ -57,13 +54,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   apt-get clean && \
   apt-get autoremove && \
   rm -rf /var/lib/apt/lists/*
+
 RUN pip3 install setuptools Flask gunicorn
 
 WORKDIR /app
 
 COPY main.py ./main.py
 
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 main:app
+CMD exec gunicorn --bind :80 --workers 1 --threads 8 main:app
 ```
 
 - `kuda.yaml`
@@ -77,7 +75,7 @@ deploy:
   dockerfile: ./Dockerfile
 ```
 
-Running `kuda deploy` will then build and deploy the API which you can call via HTTP,
+Running `kuda deploy` will then build and deploy the API which you can call,
 for instance with [cURL](https://curl.haxx.se/):
 
 ```
