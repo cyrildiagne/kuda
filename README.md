@@ -10,7 +10,7 @@
 ## Rapidly develop and deploy serverless APIs that need GPUs
 
 Kuda deploys APIs as serverless containers using [Knative](https://knative.dev)
-which means you can use any language and any framework.
+which means that you can use any language and any framework, and there is no library to import in your code.
 All you need is a Dockerfile.
 
 ## A simple interface for the full serverless API development cycle
@@ -20,42 +20,89 @@ All you need is a Dockerfile.
   It will be automatically scaled down to zero when there is no traffic,
   and back up when there are new requests.
 
-## Intuitive configuration with full control
-
-Each API is configured with a simple declarative manifest such as:
-
-```yaml
-kudaManifestVersion: v1alpha1
-
-# Name of the API.
-name: hello-gpu
-
-# 'deploy' is the configuration used when running `kuda deploy`.
-# It has sensible defaults but you can override all the properties.
-deploy:
-  dockerfile: ./Dockerfile
-
-# 'dev' is the configuration used when running `kuda dev`.
-# It inherits all properties from 'deploy' which you can override individually.
-dev:
-  # Use python3 to start the Flask debug server rather than gunicorn.
-  entrypoint:
-    command: python3
-    args: ["main.py"]
-  # Live sync all python files.
-  sync:
-    - "**/*.py"
-  # Set FLASK_ENV to "development" to enable Flask debugger & live reload.
-  env:
-    - name: FLASK_ENV
-      value: development
-```
-
 ## Run your APIs anywhere Kubernetes is running
 
 <!-- - [gpu.sh](#) - The best way to get started quickly on a cost-effective, fully-managed GPU cluster. -->
 
-- [GCP](#) - Installation guide for [running Kuda on GCP](/docs/install_on_gcp.md).
+- [GKE](#) - Installation guide for [running Kuda on GCP](/docs/install_on_gcp.md).
+
+## Use the tools you know
+
+Here's a simple example that prints the result of `nvidia-smi` using [Flask](http://flask.palletsprojects.com):
+
+- `main.py`
+
+```python
+import os
+import flask
+
+app = flask.Flask(__name__)
+
+@app.route('/')
+def hello():
+    return 'Hello GPU!\n\n' + os.popen('nvidia-smi').read()
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=80)
+```
+
+- `Dockerfile`
+
+```Dockerfile
+FROM nvidia/cuda:10.1-base
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  python3 python3-pip \
+  && \
+  apt-get clean && \
+  apt-get autoremove && \
+  rm -rf /var/lib/apt/lists/*
+RUN pip3 install setuptools Flask gunicorn
+
+WORKDIR /app
+
+COPY main.py ./main.py
+
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 main:app
+```
+
+- `kuda.yaml`
+
+```yaml
+kudaManifestVersion: v1alpha1
+
+name: hello-gpu
+
+deploy:
+  dockerfile: ./Dockerfile
+```
+
+This `kuda deploy` build and deploy the API which you can call via HTTP,
+for instance with [cURL](https://curl.haxx.se/):
+
+```bash
+$ curl https://hello-gpu.kuda.yourdomain.com
+
+Hello GPU!
+
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 418.67       Driver Version: 418.67       CUDA Version: 10.1     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  Tesla K80           Off  | 00000000:00:04.0 Off |                    0 |
+| N/A   37C    P8    27W / 149W |      0MiB / 11441MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+
+```
 
 ## Get Started
 
