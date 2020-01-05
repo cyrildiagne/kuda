@@ -22,7 +22,7 @@ Then override some of the defaults settings to your configuration.
 You can find the full list of config values in the [setup_gcp](/scripts/setup_gcp.sh) script.
 
 ```bash
-export PROJECT="your-gcp-project"
+export KUDA_GCP_PROJECT="your-gcp-project"
 ```
 
 Finally run the `setup_gcp` script which will create the cluster
@@ -45,19 +45,24 @@ You must have a real domain name (not xip.io auto-domain) to enable HTTPS.
 The helper script enables HTTPS using [CloudDNS](#), [Let's Encrypt](#) and [cert-manager](#). Adapt the ClusterIssuer manifest if you are using a different DNS.
 
 ```bash
-export KUDA_GCP_PROJECT=your-gcp-project
-export KUDA_DOMAIN=example.com
-export KUDA_NAMESPACE=default
-export KUDA_LETSENCRYPT_EMAIL=you@example.com
+export KUDA_DOMAIN="example.com"
+export KUDA_NAMESPACE="default"
+export KUDA_LETSENCRYPT_EMAIL="you@example.com"
 sh scripts/gcp_enable_https.sh
 ```
 
 ## Authentication
 
-To install the authentication service, follow the instruction in
+Install the authentication service, by following the instruction in
 [/images/deployer](/images/auth).
+
+Then install Istio's authentication policy:
+
+```
+sh scripts/setup_auth_policy.sh
+```
 
 ## Deployer
 
-To install the remote deployer service, follow the instructions in
+Install the remote deployer service, by following the instructions in
 [/images/deployer](/images/deployer).
