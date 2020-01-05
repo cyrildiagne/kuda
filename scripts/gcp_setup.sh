@@ -14,6 +14,10 @@ set -e
 red="\033[31m"
 reset="\033[0m"
 
+function error() {
+  printf "${red}ERROR:${reset} $1\n"
+}
+
 function print_help_and_exit() {
   echo "
 This script requires the KUDA_GCP_PROJECT environment variables to be set.
@@ -29,7 +33,7 @@ function assert_set() {
   var_name=$1
   var_value=$2
   if [ -z "$var_value" ]; then
-    printf "${red}ERROR:${reset} Missing required env variable $var_name\n"
+    error "Missing required env variable $var_name"
     print_help_and_exit
   else
     echo "Using $var_name: $var_value"
@@ -167,6 +171,7 @@ function setup() {
     kubectl create namespace $KUDA_NAMESPACE
   fi
   kubectl create namespace kuda
+  kubectl label namespace kuda istio-injection=enabled
 
   # Setup Domain name.
   if [ "$KUDA_DOMAIN" = "xip.io" ]; then

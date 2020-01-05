@@ -12,13 +12,13 @@ reset="\033[0m"
 function print_help_and_exit() {
   echo "
 This script requires 4 environment variables to be set:
-- KUDA_PROJECT_ID: The gcloud project ID for CloudDNS.
+- KUDA_GCP_PROJECT: The gcloud project ID for CloudDNS.
 - KUDA_DOMAIN: Your domain name.
 - KUDA_NAMESPACE: Your Kuda namespace.
 - KUDA_LETSENCRYPT_EMAIL: The admin email for Let's Encrypt.
 
 Example usage:
-  export KUDA_PROJECT_ID=your-gcp-project
+  export KUDA_GCP_PROJECT=your-gcp-project
   export KUDA_DOMAIN=example.com
   export KUDA_NAMESPACE=default
   export KUDA_LETSENCRYPT_EMAIL=you@example.com
@@ -38,7 +38,7 @@ function assert_set() {
   fi
 }
 
-assert_set KUDA_PROJECT_ID $KUDA_PROJECT_ID
+assert_set KUDA_GCP_PROJECT $KUDA_GCP_PROJECT
 assert_set KUDA_DOMAIN $KUDA_DOMAIN
 assert_set KUDA_NAMESPACE $KUDA_NAMESPACE
 assert_set KUDA_LETSENCRYPT_EMAIL $KUDA_LETSENCRYPT_EMAIL
@@ -50,7 +50,7 @@ KNATIVE_VERSION=0.11.0
 # Name of the service account you want to create.
 CLOUD_DNS_SA=certm-cdns-admin-$(date +%s)
 # Fully-qualified service account name also has project-id information.
-CLOUD_DNS_SA_EMAIL=$CLOUD_DNS_SA@$KUDA_PROJECT_ID.iam.gserviceaccount.com
+CLOUD_DNS_SA_EMAIL=$CLOUD_DNS_SA@$KUDA_GCP_PROJECT.iam.gserviceaccount.com
 
 # Install certmanager CRDs & resources.
 function install_cert_manager() {
@@ -68,16 +68,16 @@ function install_knative_cert_serving() {
 }
 
 function create_service_account() {
-  if gcloud --project $KUDA_PROJECT_ID iam service-accounts list | grep $CLOUD_DNS_SA; then
+  if gcloud --project $KUDA_GCP_PROJECT iam service-accounts list | grep $CLOUD_DNS_SA; then
     echo "service account already exists."
   else
-    gcloud --project $KUDA_PROJECT_ID iam service-accounts \
+    gcloud --project $KUDA_GCP_PROJECT iam service-accounts \
       create $CLOUD_DNS_SA \
       --display-name "Service Account to support ACME DNS-01 challenge."
 
     # Bind the role dns.admin to this service account, so it can be used to support
     # the ACME DNS01 challenge.
-    gcloud projects add-iam-policy-binding $KUDA_PROJECT_ID \
+    gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
       --member serviceAccount:$CLOUD_DNS_SA_EMAIL \
       --role roles/dns.admin
   fi
@@ -116,7 +116,7 @@ spec:
     - selector: {}
       dns01:
         clouddns:
-          project: $KUDA_PROJECT_ID
+          project: $KUDA_GCP_PROJECT
           serviceAccountSecretRef:
             name: cloud-dns-key
             key: key.json
@@ -128,7 +128,7 @@ function create_certificate() {
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: $KUDA_PROJECT_ID
+  name: $KUDA_GCP_PROJECT
   # Istio certs secret lives in the istio-system namespace, and
   # a cert-manager Certificate is namespace-scoped.
   namespace: istio-system
