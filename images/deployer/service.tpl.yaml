@@ -5,6 +5,10 @@ metadata:
   namespace: kuda
 spec:
   template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
       containers:
         - image: gcr.io/kuda-project/deployer

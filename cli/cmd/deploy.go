@@ -107,19 +107,25 @@ func deployWithRemote(manifest *latest.Manifest, dryRun bool) error {
 	url := cfg.Deployer.Remote.DeployerURL
 	req, err := http.NewRequest("POST", url, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+	accessToken := "Bearer " + cfg.Deployer.Remote.User.Token.AccessToken
+	req.Header.Set("Authorization", accessToken)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer resp.Body.Close()
 
 	// Check response.
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
+		fmt.Println("Sending to deployer returned an error:")
 		fmt.Println(resp.Status)
 		fmt.Println(string(respBody))
+		if resp.StatusCode == 401 {
+			fmt.Println("Try authenticating again running 'kuda init <args>'.")
+		}
 		return fmt.Errorf("error with remote deployer")
 	}
 	fmt.Println(string(respBody))

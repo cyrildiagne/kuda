@@ -45,7 +45,7 @@ You must have a real domain name (not xip.io auto-domain) to enable HTTPS.
 The helper script enables HTTPS using [CloudDNS](#), [Let's Encrypt](#) and [cert-manager](#). Adapt the ClusterIssuer manifest if you are using a different DNS.
 
 ```bash
-export KUDA_PROJECT_ID=your-gcp-project
+export KUDA_GCP_PROJECT=your-gcp-project
 export KUDA_DOMAIN=example.com
 export KUDA_NAMESPACE=default
 export KUDA_LETSENCRYPT_EMAIL=you@example.com

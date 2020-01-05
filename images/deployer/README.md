@@ -24,24 +24,24 @@ docker run --rm \
 ### 1) Create service account and bind roles.
 
 ```bash
-KUDA_PROJECT_ID="your-project-id"
-KUDA_DEPLOYER_SA=kuda-deployer
-KUDA_DEPLOYER_SA_EMAIL=$KUDA_DEPLOYER_SA@$KUDA_PROJECT_ID.iam.gserviceaccount.com
+export KUDA_GCP_PROJECT="your-project-id"
+export KUDA_DEPLOYER_SA=kuda-deployer
+export KUDA_DEPLOYER_SA_EMAIL=$KUDA_DEPLOYER_SA@$KUDA_GCP_PROJECT.iam.gserviceaccount.com
 
 # Create the service account.
-gcloud --project $KUDA_PROJECT_ID iam service-accounts \
+gcloud --project $KUDA_GCP_PROJECT iam service-accounts \
       create $KUDA_DEPLOYER_SA \
       --display-name "Service Account for the deployer."
 
 # Bind the role dns.admin to this service account, so it can be used to support
 # the ACME DNS01 challenge.
-gcloud projects add-iam-policy-binding $KUDA_PROJECT_ID \
+gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
   --member serviceAccount:$KUDA_DEPLOYER_SA_EMAIL \
   --role roles/container.developer
-gcloud projects add-iam-policy-binding $KUDA_PROJECT_ID \
+gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
   --member serviceAccount:$KUDA_DEPLOYER_SA_EMAIL \
   --role roles/storage.objectCreator
-gcloud projects add-iam-policy-binding $KUDA_PROJECT_ID \
+gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
   --member serviceAccount:$KUDA_DEPLOYER_SA_EMAIL \
   --role roles/cloudbuild.builds.builder
 ```
@@ -68,7 +68,7 @@ rm -rf $KEY_DIRECTORY
 
 ```bash
 cp service.tpl.yaml service.yaml
-sed -i'.bak' "s/value: <your-project-id>/value: $KUDA_PROJECT_ID/g" service.yaml
+sed -i'.bak' "s/value: <your-project-id>/value: $KUDA_GCP_PROJECT/g" service.yaml
 rm service.yaml.bak
 ```
 

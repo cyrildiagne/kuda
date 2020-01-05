@@ -12,10 +12,7 @@ COPY go.mod go.sum /go/src/github.com/cyrildiagne/kuda/
 WORKDIR /go/src/github.com/cyrildiagne/kuda
 RUN go mod download
 
-COPY pkg/config /go/src/github.com/cyrildiagne/kuda/pkg/config
-COPY pkg/manifest /go/src/github.com/cyrildiagne/kuda/pkg/manifest
-COPY pkg/utils /go/src/github.com/cyrildiagne/kuda/pkg/utils
-COPY pkg/deployer /go/src/github.com/cyrildiagne/kuda/pkg/deployer
+COPY pkg ./pkg
 WORKDIR /go/src/github.com/cyrildiagne/kuda/pkg/deployer
 RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -installsuffix cgo -o deployer .
 
