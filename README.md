@@ -77,7 +77,7 @@ deploy:
   dockerfile: ./Dockerfile
 ```
 
-This `kuda deploy` build and deploy the API which you can call via HTTP,
+Running `kuda deploy` will then build and deploy the API which you can call via HTTP,
 for instance with [cURL](https://curl.haxx.se/):
 
 ```
