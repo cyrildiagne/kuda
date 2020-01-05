@@ -81,7 +81,7 @@ Running `kuda deploy` will then build and deploy the API which you can call via 
 for instance with [cURL](https://curl.haxx.se/):
 
 ```
-$ curl https://hello-gpu.kuda.yourdomain.com
+$ curl https://hello-gpu.default.yourdomain.com
 
 Hello GPU!
 
@@ -104,7 +104,7 @@ Hello GPU!
 
 ```
 
-Checkout the full example with annotations in [examples/hello-gpu-flask](examples/hello-gpu-flask)
+Checkout the full example with annotations in [examples/hello-gpu-flask](examples/hello-gpu-flask).
 
 ## Get Started
 
