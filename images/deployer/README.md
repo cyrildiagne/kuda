@@ -44,6 +44,9 @@ gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
 gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
   --member serviceAccount:$KUDA_DEPLOYER_SA_EMAIL \
   --role roles/cloudbuild.builds.builder
+gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
+  --member serviceAccount:$KUDA_DEPLOYER_SA_EMAIL \
+  --role roles/firebase.admin
 ```
 
 ### 2) Create secret for this service account.

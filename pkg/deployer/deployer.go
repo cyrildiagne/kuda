@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,11 +14,17 @@ import (
 	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
 	"github.com/cyrildiagne/kuda/pkg/config"
 	"github.com/cyrildiagne/kuda/pkg/utils"
+
+	"cloud.google.com/go/firestore"
+	firebase "firebase.google.com/go"
+	firebaseAuth "firebase.google.com/go/auth"
 	"github.com/gorilla/mux"
 )
 
 var gcpProjectID string
 var dockerRegistry string
+var fsDb *firestore.Client
+var fbAuth *firebaseAuth.Client
 
 func handleDeployment(w http.ResponseWriter, r *http.Request) {
 	// Set maximum upload size to 2GB.
@@ -32,6 +39,39 @@ func handleDeployment(w http.ResponseWriter, r *http.Request) {
 	}
 	if namespace == "kuda" {
 		http.Error(w, "namespace cannot be kuda", 500)
+		return
+	}
+
+	// Get bearer token.
+	accessToken := r.Header.Get("Authorization")
+	accessToken = strings.Split(accessToken, "Bearer ")[1]
+	// Verify Token
+	token, err := fbAuth.VerifyIDToken(context.Background(), accessToken)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error verifying token %v", err), 500)
+		return
+	}
+
+	// Check if namespace has the user id as admin.
+	ctx := context.Background()
+	ns, err := fsDb.Collection("namespaces").Doc(namespace).Get(ctx)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error getting namespace info %v", err), 500)
+		return
+	}
+	if !ns.Exists() {
+		http.Error(w, fmt.Sprintf("namespace not found %v", namespace), 400)
+		return
+	}
+	nsData := ns.Data()
+	nsAdmins, hasAdmins := nsData["admins"]
+	if !hasAdmins {
+		http.Error(w, fmt.Sprintf("no admin found for namespace %v", namespace), 403)
+		return
+	}
+	_, isAdmin := nsAdmins.(map[string]interface{})[token.UID]
+	if !isAdmin {
+		http.Error(w, fmt.Sprintf("user %v must be admin of %v", token.UID, namespace), 403)
 		return
 	}
 
@@ -122,7 +162,7 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-func initKubectlGcloud() {
+func initGCP() {
 	// Authenticate gcloud using application credentials.
 	cmd := exec.Command("gcloud", "auth", "activate-service-account", "--key-file",
 		os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"))
@@ -130,7 +170,7 @@ func initKubectlGcloud() {
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		panic("Error authenticating with credentials.")
+		log.Fatalf("Error authenticating with credentials. %v\n", err)
 	}
 
 	// Get kubeconfig.
@@ -142,8 +182,28 @@ func initKubectlGcloud() {
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		panic("could not retrieve kubectl credentials")
+		log.Fatalf("could not retrieve kubectl credentials %v\n", err)
 	}
+}
+
+func initFirebase() (*firebaseAuth.Client, *firestore.Client) {
+	config := &firebase.Config{ProjectID: gcpProjectID}
+	app, err := firebase.NewApp(context.Background(), config)
+	if err != nil {
+		log.Fatalf("error initializing app: %v\n", err)
+	}
+
+	auth, err := app.Auth(context.Background())
+	if err != nil {
+		log.Fatalf("error getting auth client: %v\n", err)
+	}
+
+	fs, err := app.Firestore(context.Background())
+	if err != nil {
+		log.Fatalf("error connecting to firestore: %v\n", err)
+	}
+
+	return auth, fs
 }
 
 func main() {
@@ -156,7 +216,11 @@ func main() {
 	dockerRegistry = "gcr.io/" + gcpProjectID
 	log.Println("Using registry:", dockerRegistry)
 
-	initKubectlGcloud()
+	initGCP()
+
+	auth, fs := initFirebase()
+	fbAuth = auth
+	fsDb = fs
 
 	port := getEnv("PORT", "8080")
 	fmt.Println("Starting deployer on port", port)

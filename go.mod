@@ -10,6 +10,8 @@ replace (
 )
 
 require (
+	cloud.google.com/go/firestore v1.1.0
+	firebase.google.com/go v3.11.1+incompatible
 	github.com/GoogleContainerTools/skaffold v1.1.0
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/google/go-cmp v0.3.1
