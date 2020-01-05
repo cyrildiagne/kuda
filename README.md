@@ -104,6 +104,8 @@ Hello GPU!
 
 ```
 
+Checkout the full example with annotations in [examples/hello-gpu-flask](examples/hello-gpu-flask)
+
 ## Get Started
 
 - [Install](docs/install_cli.md)
