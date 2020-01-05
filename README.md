@@ -3,30 +3,30 @@
 [![](https://circleci.com/gh/cyrildiagne/kuda/tree/master.svg?style=shield&circle-token=b14f5838ae2acabe21a8255070507f7e36ba510b)](https://circleci.com/gh/cyrildiagne/kuda)
 [![](https://img.shields.io/github/v/release/cyrildiagne/kuda?include_prereleases)](https://github.com/cyrildiagne/kuda/releases)
 
-🧪 **Status:** early and experimental WIP
+🧪 **Status:** experimental
 
----
+## Develop and deploy APIs on remote GPUs
 
-## Rapidly develop and deploy serverless APIs that need GPUs
-
-Kuda deploys APIs as serverless containers using [Knative](https://knative.dev)
-which means that you can use any language and any framework, and there is no library to import in your code.
+Kuda deploys APIs as serverless containers on remote GPUs using [Knative](https://knative.dev).
+So you can use any language, any framework, and there is no library to import in your code.
 All you need is a Dockerfile.
 
-## A simple interface for the full serverless API development cycle
+## Easy to use
 
-- `kuda dev` Deploy the API on remote GPUs in dev mode (with file sync & live reload)
+- `kuda init` Initializes your local & remote configurations.
+- `kuda dev` Deploy the API on remote GPUs in dev mode (with file sync & live reload).
 - `kuda deploy` Deploy the API in production mode.
   It will be automatically scaled down to zero when there is no traffic,
   and back up when there are new requests.
 
-## Run your APIs anywhere Kubernetes is running
+## Features
 
-<!-- - [gpu.sh](#) - The best way to get started quickly on a cost-effective, fully-managed GPU cluster. -->
+- Provision GPUs & scale based on traffic (from zero to N)
+- Interactive development on remote GPUs from any workstation
+- Protect & control access to your APIs using API Keys
+- HTTPS with TLS termination & automatic certificate management
 
-- [GKE](#) - Installation guide for [running Kuda on GCP](/docs/install_on_gcp.md).
-
-## Use the tools you know
+## Use the frameworks you know
 
 Here's a simple example that prints the result of `nvidia-smi` using [Flask](http://flask.palletsprojects.com):
 
