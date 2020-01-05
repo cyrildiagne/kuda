@@ -80,7 +80,7 @@ deploy:
 This `kuda deploy` build and deploy the API which you can call via HTTP,
 for instance with [cURL](https://curl.haxx.se/):
 
-```bash
+```
 $ curl https://hello-gpu.kuda.yourdomain.com
 
 Hello GPU!
