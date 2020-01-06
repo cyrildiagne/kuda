@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -83,8 +86,7 @@ func handleDeployment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
-	fmt.Printf("File: %+v, %+v Ko\n", handler.Filename, handler.Size/1024)
-	fmt.Printf("Header: %+v\n", handler.Header)
+	log.Printf("Building: %+v, %+v Ko, for namespace %v\n", handler.Filename, handler.Size/1024, namespace)
 
 	// Create new temp directory.
 	tempDir, err := ioutil.TempDir("", namespace)
@@ -113,6 +115,7 @@ func handleDeployment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: replace namespace by user ID.
 	dockerArtifact := dockerRegistry + "/" + namespace + "__" + manifest.Name
 
 	// Generate Skaffold & Knative config files.
@@ -134,21 +137,78 @@ func handleDeployment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Run Skaffold Deploy.
-	args := []string{"run", "-f", skaffoldFile}
-	cmd := exec.Command("skaffold", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
-	cmd.Dir = tempDir
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "text/event-stream")
 
-	if err := cmd.Run(); err != nil {
-		fmt.Println(err)
-		http.Error(w, "error running skaffold", 500)
+	if err := runSkaffold(tempDir, skaffoldFile, w); err != nil {
+		http.Error(w, fmt.Sprintf("error running skaffold: %v", err), 500)
 		return
 	}
 
+	// TODO: add API entry to the APIs base:
+	// { meta, user, image, versions[ {tag, public, openapi},...] }
+
 	fmt.Fprintf(w, "Deployment successful!\n")
+}
+
+func runSkaffold(tempDir string, skaffoldFile string, w io.Writer) error {
+	// Run Skaffold Deploy.
+	args := []string{"run", "-f", skaffoldFile}
+	cmd := exec.Command("skaffold", args...)
+	cmdout, _ := cmd.StdoutPipe()
+	cmderr, _ := cmd.StderrPipe()
+	cmd.Dir = tempDir
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	// Make sure the client accepts server side events.
+	conn, ok := w.(http.Flusher)
+	if !ok {
+		return errors.New("clients must support server side events")
+	}
+
+	errc := make(chan error)
+
+	go func() {
+		err := copyAndFlush(w, cmdout, conn)
+		errc <- err
+	}()
+
+	if err := <-errc; err != nil {
+		return err
+	}
+
+	err := copyAndFlush(w, cmderr, conn)
+	if err != nil {
+		return err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func copyAndFlush(w io.Writer, r io.Reader, conn http.Flusher) error {
+	br := bufio.NewReader(r)
+	for {
+		n, err := br.ReadBytes('\n')
+		if len(n) > 0 {
+			_, err := w.Write(n)
+			if err != nil {
+				return err
+			}
+			conn.Flush()
+		}
+		if err != nil {
+			if err == io.EOF {
+				err = nil
+			}
+			return err
+		}
+	}
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {

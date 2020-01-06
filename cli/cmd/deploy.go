@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -117,18 +118,26 @@ func deployWithRemote(manifest *latest.Manifest, dryRun bool) error {
 	}
 	defer resp.Body.Close()
 
+	// Read body stream.
+	br := bufio.NewReader(resp.Body)
+	for {
+		bs, err := br.ReadBytes('\n')
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		}
+		fmt.Print(string(bs))
+	}
+
 	// Check response.
-	respBody, _ := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
-		fmt.Println("Sending to deployer returned an error:")
-		fmt.Println(resp.Status)
-		fmt.Println(string(respBody))
+		fmt.Println("Sending to deployer returned an error", resp.Status)
 		if resp.StatusCode == 401 {
 			fmt.Println("Try authenticating again running 'kuda init <args>'.")
 		}
 		return fmt.Errorf("error with remote deployer")
 	}
-	fmt.Println(string(respBody))
 
 	return nil
 }

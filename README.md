@@ -67,16 +67,14 @@ CMD exec gunicorn --bind :80 --workers 1 --threads 8 main:app
 - `kuda.yaml`
 
 ```yaml
-kudaManifestVersion: v1alpha1
-
 name: hello-gpu
 
 deploy:
   dockerfile: ./Dockerfile
 ```
 
-Running `kuda deploy` will then build and deploy the API which you can call,
-for instance with [cURL](https://curl.haxx.se/):
+Running `kuda deploy` in this example would build and deploy the API to a url
+such as `https://hello-gpu.default.yourdomain.com` which you can easily call:
 
 ```
 $ curl https://hello-gpu.default.yourdomain.com
