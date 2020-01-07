@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+// config for kuda
+package adapter.kuda.config;
+
+import "gogoproto/gogo.proto";
+
+option go_package="config";
+
+// config for kuda
+message Params {
+  
+    // header name to check for custom token
+    string auth_key = 1;
+}
