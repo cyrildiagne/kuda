@@ -37,11 +37,11 @@ func handleDeployment(w http.ResponseWriter, r *http.Request) {
 	namespace := r.FormValue("namespace")
 	namespace = strings.ToValidUTF8(namespace, "")
 	if namespace == "" {
-		http.Error(w, "error retrieving namespace", 500)
+		http.Error(w, "error retrieving namespace", 400)
 		return
 	}
 	if namespace == "kuda" {
-		http.Error(w, "namespace cannot be kuda", 500)
+		http.Error(w, "namespace cannot be kuda", 403)
 		return
 	}
 
@@ -51,7 +51,7 @@ func handleDeployment(w http.ResponseWriter, r *http.Request) {
 	// Verify Token
 	token, err := fbAuth.VerifyIDToken(context.Background(), accessToken)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("error verifying token %v", err), 500)
+		http.Error(w, fmt.Sprintf("error verifying token %v", err), 401)
 		return
 	}
 
@@ -111,7 +111,7 @@ func handleDeployment(w http.ResponseWriter, r *http.Request) {
 	manifest, err := utils.LoadManifest(manifestFile)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "could not load manifest", 500)
+		http.Error(w, "could not load manifest", 400)
 		return
 	}
 
