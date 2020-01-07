@@ -8,4 +8,4 @@ build:
 deploy:
   kubectl:
     manifests:
-      - images/deployer/service.yaml
+      - images/deployer/service-workaround.yaml
