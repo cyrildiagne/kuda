@@ -106,9 +106,9 @@ func (s *Adapter) HandleAuthorization(ctx context.Context, r *authorization.Hand
 		}, nil
 	}
 
-	// Check if key has quotas.
+	// Check if key is active.
 	quotas := keyEntry.Data()["quotas"].(int64)
-	if quotas < 1 {
+	if quotas <= 0 {
 		return &v1beta1.CheckResult{
 			Status: status.WithResourceExhausted("Quotas exhausted."),
 		}, nil
@@ -166,26 +166,6 @@ func (s *Adapter) HandleMetric(ctx context.Context, r *metric.HandleMetricReques
 		_, _, err := fsClient.Collection("requests").Add(ctx, req)
 		if err != nil {
 			log.Errorf("add request: %s", err)
-			continue
-		}
-
-		// Don't update credit if request was not authorized.
-		if !authorized {
-			continue
-		}
-
-		// Update quotas.
-		keyEntry, err := fsClient.Collection("keys").Doc(apiKey).Get(ctx)
-		if err != nil {
-			log.Errorf("credit update: can't find key %v", apiKey)
-			continue
-		}
-		quotas := keyEntry.Data()["quotas"].(int64)
-		_, updateErr := keyEntry.Ref.Set(ctx, map[string]interface{}{
-			"quotas": quotas - 1,
-		}, firestore.MergeAll)
-		if updateErr != nil {
-			log.Errorf("credit update: %v", updateErr)
 			continue
 		}
 	}
