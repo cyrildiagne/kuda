@@ -58,8 +58,8 @@ metadata:
   namespace: istio-system
 spec:
   # match: match(destination.service.host, "*.svc.cluster.local") && !match(destination.service.host, "*.kuda.svc.cluster.local") && match(context.reporter.uid, "kubernetes://istio-ingressgateway-*")
-  match: destination.service.namespace != "kuda" && destination.service.namespace != "istio-system" && destination.service.namespace != "knative-serving" && destination.service.namespace != "kube-system" && destination.service.namespace != "cert-manager"
-  # match: destination.service.namespace == "cyrildiagne"
+  # match: destination.service.namespace != "kuda" && destination.service.namespace != "istio-system" && destination.service.namespace != "knative-serving" && destination.service.namespace != "kube-system" && destination.service.namespace != "cert-manager"
+  match: source.labels["istio"] == "ingressgateway" && destination.service.namespace != "kuda"
   actions:
     - handler: kuda-handler.istio-system
       instances:
