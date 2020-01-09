@@ -46,14 +46,10 @@ kuda init \
 ## → Dev
 
 ```bash
-kuda dev <manifest> [flags]
+kuda dev [flags]
 ```
 
-Deploys the API in development mode (with live file sync & app reload).
-
-**Arguments**
-
-- `manifest`·: Optional, The manifest file. (default: `kuda.yml`)
+Deploys an API in development mode (with live file sync & app reload).
 
 **Flags**
 
@@ -61,36 +57,36 @@ Deploys the API in development mode (with live file sync & app reload).
 
 **Examples**
 
-```bash
-kuda dev
-```
+Deploy an API from the local directory:
 
 ```bash
-kuda dev /path/to/manifest.yml
+kuda dev
 ```
 
 ## → Deploy
 
 ```
-kuda deploy <manifest> [flags]
+kuda deploy [flags]
 ```
 
-Deploys the API in production mode.
-
-**Arguments**
-
-- `manifest`: Optional, The manifest file. (default: `kuda.yml`)
+Deploys an API in production mode.
 
 **Flags**
 
+- `[-f, --from]` Qualitifed name of a published API from the registry: `<user>/<api-name>:<version|latest>`
 - `[--dry-run]` Generate the config files and skip deployment.
 
 **Examples**
+
+Deploy an API from the local directory:
 
 ```bash
 kuda deploy
 ```
 
+Deploy an API from a published API in the repo:
+
 ```bash
-kuda deploy /path/to/manifest.yml
+kuda deploy -f cyrildiagne/hello-gpu
+kuda deploy -f cyrildiagne/hello-gpu:1.3.0
 ```

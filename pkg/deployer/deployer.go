@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -29,52 +27,105 @@ var dockerRegistry string
 var fsDb *firestore.Client
 var fbAuth *firebaseAuth.Client
 
-func handleDeployment(w http.ResponseWriter, r *http.Request) {
-	// Set maximum upload size to 2GB.
-	r.ParseMultipartForm((2 * 1000) << 20)
-
-	// Retrieve namespace.
-	namespace := r.FormValue("namespace")
-	namespace = strings.ToValidUTF8(namespace, "")
-	if namespace == "" {
-		http.Error(w, "error retrieving namespace", 400)
-		return
-	}
-	if namespace == "kuda" {
-		http.Error(w, "namespace cannot be kuda", 403)
-		return
-	}
-
+func checkAuthorized(namespace string, w http.ResponseWriter, r *http.Request) (int, error) {
 	// Get bearer token.
 	accessToken := r.Header.Get("Authorization")
 	accessToken = strings.Split(accessToken, "Bearer ")[1]
 	// Verify Token
 	token, err := fbAuth.VerifyIDToken(context.Background(), accessToken)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("error verifying token %v", err), 401)
-		return
+		return 401, fmt.Errorf("error verifying token %v", err)
 	}
 
 	// Check if namespace has the user id as admin.
 	ctx := context.Background()
 	ns, err := fsDb.Collection("namespaces").Doc(namespace).Get(ctx)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("error getting namespace info %v", err), 500)
-		return
+		return 500, fmt.Errorf("error getting namespace info %v", err)
 	}
 	if !ns.Exists() {
-		http.Error(w, fmt.Sprintf("namespace not found %v", namespace), 400)
-		return
+		return 400, fmt.Errorf("namespace not found %v", namespace)
 	}
 	nsData := ns.Data()
 	nsAdmins, hasAdmins := nsData["admins"]
 	if !hasAdmins {
-		http.Error(w, fmt.Sprintf("no admin found for namespace %v", namespace), 403)
-		return
+		return 403, fmt.Errorf("no admin found for namespace %v", namespace)
 	}
 	_, isAdmin := nsAdmins.(map[string]interface{})[token.UID]
 	if !isAdmin {
-		http.Error(w, fmt.Sprintf("user %v must be admin of %v", token.UID, namespace), 403)
+		return 403, fmt.Errorf("user %v must be admin of %v", token.UID, namespace)
+	}
+
+	return 200, nil
+}
+
+func getNamespace(r *http.Request) (string, int, error) {
+	// Retrieve namespace.
+	namespace := r.FormValue("namespace")
+	namespace = strings.ToValidUTF8(namespace, "")
+	if namespace == "" {
+		err := "error retrieving namespace"
+		return "", 400, errors.New(err)
+	}
+	if namespace == "kuda" {
+		err := "namespace cannot be kuda"
+		return "", 403, errors.New(err)
+	}
+	return namespace, 200, nil
+}
+
+func handlePublish(w http.ResponseWriter, r *http.Request) {
+	// Retrieve namespace.
+	namespace, code, err := getNamespace(r)
+	if err != nil {
+		http.Error(w, err.Error(), code)
+		return
+	}
+
+	// Check authorizations.
+	if code, err := checkAuthorized(namespace, w, r); err != nil {
+		http.Error(w, err.Error(), code)
+		return
+	}
+
+	// TODO: Check if image@version exists.
+	// TODO: Mark image@version as public.
+}
+
+func handleDeploymentFromPublished(w http.ResponseWriter, r *http.Request) {
+	// Retrieve namespace.
+	namespace, code, err := getNamespace(r)
+	if err != nil {
+		http.Error(w, err.Error(), code)
+		return
+	}
+
+	// Check authorizations.
+	if code, err := checkAuthorized(namespace, w, r); err != nil {
+		http.Error(w, err.Error(), code)
+		return
+	}
+
+	// TODO: Check if image@version exists.
+	// TODO: Check if image@version is public.
+	// TODO: Generate Knative YAML with appropriate namespace.
+	// TODO: Run kubectl apply.
+}
+
+func handleDeployment(w http.ResponseWriter, r *http.Request) {
+	// Set maximum upload size to 2GB.
+	r.ParseMultipartForm((2 * 1000) << 20)
+
+	// Retrieve requested namespace.
+	namespace, code, err := getNamespace(r)
+	if err != nil {
+		http.Error(w, err.Error(), code)
+		return
+	}
+
+	// Check authorizations.
+	if code, err := checkAuthorized(namespace, w, r); err != nil {
+		http.Error(w, err.Error(), code)
 		return
 	}
 
@@ -140,7 +191,7 @@ func handleDeployment(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "text/event-stream")
 
-	if err := runSkaffold(tempDir, skaffoldFile, w); err != nil {
+	if err := RunSkaffold(tempDir, skaffoldFile, w); err != nil {
 		http.Error(w, fmt.Sprintf("error running skaffold: %v", err), 500)
 		return
 	}
@@ -149,66 +200,6 @@ func handleDeployment(w http.ResponseWriter, r *http.Request) {
 	// { meta, user, image, versions[ {tag, public, openapi},...] }
 
 	fmt.Fprintf(w, "Deployment successful!\n")
-}
-
-func runSkaffold(tempDir string, skaffoldFile string, w io.Writer) error {
-	// Run Skaffold Deploy.
-	args := []string{"run", "-f", skaffoldFile}
-	cmd := exec.Command("skaffold", args...)
-	cmdout, _ := cmd.StdoutPipe()
-	cmderr, _ := cmd.StderrPipe()
-	cmd.Dir = tempDir
-
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	// Make sure the client accepts server side events.
-	conn, ok := w.(http.Flusher)
-	if !ok {
-		return errors.New("clients must support server side events")
-	}
-
-	errc := make(chan error)
-
-	go func() {
-		err := copyAndFlush(w, cmdout, conn)
-		errc <- err
-	}()
-
-	if err := <-errc; err != nil {
-		return err
-	}
-
-	err := copyAndFlush(w, cmderr, conn)
-	if err != nil {
-		return err
-	}
-
-	if err := cmd.Wait(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func copyAndFlush(w io.Writer, r io.Reader, conn http.Flusher) error {
-	br := bufio.NewReader(r)
-	for {
-		n, err := br.ReadBytes('\n')
-		if len(n) > 0 {
-			_, err := w.Write(n)
-			if err != nil {
-				return err
-			}
-			conn.Flush()
-		}
-		if err != nil {
-			if err == io.EOF {
-				err = nil
-			}
-			return err
-		}
-	}
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {

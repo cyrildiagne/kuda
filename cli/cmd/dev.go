@@ -13,18 +13,20 @@ import (
 
 // devCmd represents the `kuda dev` command.
 var devCmd = &cobra.Command{
-	Use:   "dev <manifest=./kuda.yaml>",
+	Use:   "dev",
 	Short: "Deploy the API remotely in dev mode.",
-	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		manifestFile := "./kuda.yaml"
-		if len(args) == 1 {
-			manifestFile = args[0]
-		}
 		// Load the manifest
+		manifestFile := "./kuda.yaml"
 		manifest, err := utils.LoadManifest(manifestFile)
 		if err != nil {
 			fmt.Println("Could not load manifest", manifestFile)
+			panic(err)
+		}
+
+		// Check if dry run
+		dryRun, err := cmd.Flags().GetBool("dry-run")
+		if err != nil {
 			panic(err)
 		}
 
@@ -32,7 +34,6 @@ var devCmd = &cobra.Command{
 			panic("dev is not yet supported on remote deployers")
 		} else if cfg.Deployer.Skaffold != nil {
 			// Start dev with Skaffold.
-			dryRun, _ := cmd.Flags().GetBool("dry-run")
 			if err := devWithSkaffold(*manifest, dryRun); err != nil {
 				fmt.Println("ERROR:", err)
 			}
@@ -42,7 +43,7 @@ var devCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(devCmd)
-	devCmd.Flags().Bool("dry-run", false, "Just generate the config files.")
+	devCmd.Flags().Bool("dry-run", false, "Generate the config files but skip execution.")
 }
 
 func devWithSkaffold(manifest latest.Manifest, dryRun bool) error {
@@ -62,6 +63,7 @@ func devWithSkaffold(manifest latest.Manifest, dryRun bool) error {
 	}
 	fmt.Println("Config files have been written in:", folder)
 
+	// Stop here if dry run.
 	if dryRun {
 		fmt.Println("Dry run: Skipping execution.")
 		return nil
