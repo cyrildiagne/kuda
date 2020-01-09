@@ -3,6 +3,9 @@ kudaManifestVersion: v1alpha1
 # Name of the API.
 name: hello-gpu
 
+# (Optional) Version of the API.
+version: 0.1.0
+
 # 'deploy' is the config used when running `kuda deploy`.
 # It has sensible defaults but you can override all the properpties.
 deploy:

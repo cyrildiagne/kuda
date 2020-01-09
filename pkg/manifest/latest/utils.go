@@ -1,6 +1,7 @@
 package latest
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"reflect"
@@ -29,6 +30,14 @@ func (manifest *Manifest) Load(reader io.Reader) error {
 			fDeploy := valuesDeploy.Field(i)
 			fDev.Set(fDeploy)
 		}
+	}
+	return manifest.CheckValid()
+}
+
+// CheckValid ensures a manifest fields are properly set.
+func (manifest *Manifest) CheckValid() error {
+	if manifest.Name == "" {
+		return errors.New("name can't be empy")
 	}
 	return nil
 }

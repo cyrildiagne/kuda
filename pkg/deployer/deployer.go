@@ -14,12 +14,15 @@ import (
 
 	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
 	"github.com/cyrildiagne/kuda/pkg/config"
+	"github.com/cyrildiagne/kuda/pkg/manifest/latest"
 	"github.com/cyrildiagne/kuda/pkg/utils"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
 	firebaseAuth "firebase.google.com/go/auth"
 	"github.com/gorilla/mux"
+
+	yaml "gopkg.in/yaml.v2"
 )
 
 var gcpProjectID string
@@ -87,6 +90,17 @@ func handlePublish(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), code)
 		return
 	}
+
+	// Load image manifest
+	manifestYAML := r.FormValue("manifest")
+	fmt.Println(manifestYAML)
+
+	// Add manifest
+	manifest := latest.Manifest{}
+	if err := yaml.Unmarshal([]byte(manifestYAML), &manifest); err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+	fmt.Println(manifest.Version)
 
 	// TODO: Check if image@version exists.
 	// TODO: Mark image@version as public.
@@ -279,5 +293,6 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", hello).Methods("GET")
 	r.HandleFunc("/", handleDeployment).Methods("POST")
+	r.HandleFunc("/publish", handlePublish).Methods("POST")
 	http.ListenAndServe(":"+port, r)
 }

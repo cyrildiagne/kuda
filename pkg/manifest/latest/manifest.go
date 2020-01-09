@@ -6,10 +6,19 @@ import (
 
 // Manifest stores a kuda manifest.
 type Manifest struct {
-	Version string `yaml:"kudaManifestVersion"`
-	Name    string `yaml:"name"`
-	Deploy  Config `yaml:"deploy"`
-	Dev     Config `yaml:"dev,omitempty"`
+	ManivestVersion string `yaml:"kudaManifestVersion"`
+	Version         string `yaml:"version,omitempty"`
+	Name            string `yaml:"name"`
+	Meta            Meta   `yaml:"meta,omitempty"`
+	Deploy          Config `yaml:"deploy"`
+	Dev             Config `yaml:"dev,omitempty"`
+}
+
+// Meta stores the metadata.
+type Meta struct {
+	Author     string `yaml:"author,omitempty"`
+	Repository string `yaml:"repository,omitempty"`
+	License    string `yaml:"license,omitempty"`
 }
 
 // Config stores a deployment config.

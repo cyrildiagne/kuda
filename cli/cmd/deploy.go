@@ -69,7 +69,6 @@ func deployFromPublished(published string, dryRun bool) error {
 		return err
 	}
 	return nil
-
 }
 
 func deployFromLocal(dryRun bool) {
@@ -154,8 +153,6 @@ func deployWithRemote(manifest *latest.Manifest, dryRun bool) error {
 }
 
 func sendToRemoteDeployer(req *http.Request) error {
-	fmt.Println("Sending to deployer:", cfg.Deployer.Remote.DeployerURL)
-
 	accessToken := "Bearer " + cfg.Deployer.Remote.User.Token.AccessToken
 	req.Header.Set("Authorization", accessToken)
 
