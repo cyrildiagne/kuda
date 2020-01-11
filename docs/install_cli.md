@@ -10,17 +10,20 @@ curl https://raw.githubusercontent.com/cyrildiagne/kuda/master/scripts/get-cli.s
 
 The CLI must be initialized with a remote Kuda cluster configuration.
 
-<!-- ## Using gpu.sh
+<!--
+## Using gpu.sh
 
 The best way to get started quickly on a cost-effective, fully managed cluster.
 
+First create an account on gpu.sh then initialize your local configuration with your namespace.
+
 ```bash
-kuda init \
-  -n $your_namespace \
-  gpu.sh 
+kuda init <your_namespace>
 ```
 
-Replace `$your_namespace` with your [gpu.sh](#) username. -->
+Replace <your_namespace> with your [gpu.sh](#) username.
+-->
+
 
 ## Using [GCP](#)
 
@@ -30,24 +33,8 @@ GCP provides a good environment for running Kuda.
 Follow the installation guide for
 [installing Kuda on GCP](/docs/install_on_gcp.md).
 
-Then configure the CLI to deploy to the GKE cluster directly from your
-workstation using the `skaffold` deployer.
-This deployer requires [Docker](docker.com) and [Skaffold](https://skaffold.dev)
-installed and configured on your machine.
+Then initialize your local configuration with your namespace.
 
 ```bash
-kuda init \
-  -n $your_namespace \
-  -d gcr.io/$your_gcp_project \
-  skaffold
+kuda init -n <your_namespace> -p <your_domain>
 ```
-
-<!-- ```bash
-If you've installed and configured a [Kuda Deployer](#):
-
-kuda init \
-  -n $your_namespace \
-  $your_domain
-```
--->
-
