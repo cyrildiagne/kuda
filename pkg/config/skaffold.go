@@ -31,9 +31,16 @@ func GenerateSkaffoldConfig(service ServiceSummary, manifest latest.Config, knat
 		Sync: sync,
 	}
 
+	tagPolicy := v1.TagPolicy{
+		EnvTemplateTagger: &v1.EnvTemplateTagger{
+			Template: "{{.IMAGE_NAME}}:{{.API_VERSION}}",
+		},
+	}
+
 	build := v1.BuildConfig{
 		Artifacts: []*v1.Artifact{&artifact},
 		BuildType: service.BuildType,
+		TagPolicy: tagPolicy,
 	}
 
 	deploy := v1.DeployConfig{

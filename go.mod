@@ -14,11 +14,14 @@ require (
 	firebase.google.com/go v3.11.1+incompatible
 	github.com/GoogleContainerTools/skaffold v1.1.0
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
+	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.3.1
+	github.com/google/go-containerregistry v0.0.0-20191211193041-0eaa33c3d13c
 	github.com/gorilla/mux v1.7.3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
 	github.com/spf13/cobra v0.0.5
+	google.golang.org/grpc v1.25.1
 	gopkg.in/yaml.v2 v2.2.7
 	gotest.tools v2.2.0+incompatible
 	k8s.io/api v0.0.0-20190831074750-7364b6bdad65

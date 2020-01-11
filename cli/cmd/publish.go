@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -10,7 +9,7 @@ import (
 	"github.com/cyrildiagne/kuda/pkg/manifest/latest"
 	"github.com/cyrildiagne/kuda/pkg/utils"
 	"github.com/spf13/cobra"
-	yaml "gopkg.in/yaml.v2"
+	// "github.com/go-openapi/loads/fmts"
 )
 
 // publishCmd represents the `kuda publish` command.
@@ -23,9 +22,13 @@ var publishCmd = &cobra.Command{
 		manifestFile := "./kuda.yaml"
 		manifest, err := utils.LoadManifest(manifestFile)
 		if err != nil {
-			fmt.Println("Could not load manifest", manifestFile)
+			fmt.Println("Could not load ./kuda.yaml", manifestFile)
 			panic(err)
 		}
+
+		// TODO: Ensure there is an OpenAPI spec.
+
+		// Publish
 		if err := publish(manifest); err != nil {
 			panic(err)
 		}
@@ -34,28 +37,22 @@ var publishCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(publishCmd)
-	publishCmd.Flags().Bool("dry-run", false, "Check the manifest for publication but skip execution.")
 }
 
 func publish(manifest *latest.Manifest) error {
-	// Make sure a version is set.
-	if manifest.Version == "" {
-		return errors.New("version missing in manifest file")
-	}
-	// Create request
+	// Create request body
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	// Add namespace
-	writer.WriteField("namespace", cfg.Namespace)
-	// Add manifest
-	manifestYAML, err := yaml.Marshal(manifest)
-	if err != nil {
+	// Add context
+	if err := addContextFilesToRequest("./", writer); err != nil {
 		return err
 	}
-	writer.WriteField("manifest", string(manifestYAML))
+	// Add namespace
+	writer.WriteField("namespace", cfg.Namespace)
 	// Close writer
 	writer.Close()
 
+	// Create request.
 	url := cfg.Deployer.Remote.DeployerURL + "/publish"
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
@@ -63,6 +60,7 @@ func publish(manifest *latest.Manifest) error {
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 
+	// Send to remote deployer.
 	if err := sendToRemoteDeployer(req); err != nil {
 		return err
 	}

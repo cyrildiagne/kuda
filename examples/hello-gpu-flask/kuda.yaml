@@ -25,3 +25,17 @@ dev:
   env:
     - name: FLASK_ENV
       value: development
+
+# 'paths' is optional. It lets you specify how to interact with the API.
+# It follows the OpenAPI 3.0 specification.
+# It is only required when publishing to a registry.
+paths:
+  /:
+    get:
+      responses:
+        "200":
+          description: The output of nvidia-smi
+          content:
+            text/plain:
+              schema:
+                type: string

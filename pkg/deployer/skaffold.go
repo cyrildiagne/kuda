@@ -1,4 +1,4 @@
-package main
+package deployer
 
 import (
 	"bufio"
@@ -8,10 +8,10 @@ import (
 	"os/exec"
 )
 
-// RunSkaffold launches 'run' on skaffold and streams logs to w.
-func RunSkaffold(tempDir string, skaffoldFile string, w io.Writer) error {
+// Skaffold builds an image with skaffold and streams logs to w.
+func Skaffold(command string, tempDir string, skaffoldFile string, w io.Writer) error {
 	// Run Skaffold Deploy.
-	args := []string{"run", "-f", skaffoldFile}
+	args := []string{command, "-f", skaffoldFile}
 	cmd := exec.Command("skaffold", args...)
 	cmdout, _ := cmd.StdoutPipe()
 	cmderr, _ := cmd.StderrPipe()

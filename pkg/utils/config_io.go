@@ -29,7 +29,7 @@ func LoadManifest(manifestFile string) (*latest.Manifest, error) {
 }
 
 // GenerateSkaffoldConfigFiles generates the skaffold config files to disk.
-func GenerateSkaffoldConfigFiles(service config.ServiceSummary, appCfg latest.Config, folder string) (string, error) {
+func GenerateSkaffoldConfigFiles(service config.ServiceSummary, appCfg latest.Config, folder string) error {
 	// Make sure output folder exists.
 	if _, err := os.Stat(folder); os.IsNotExist(err) {
 		os.Mkdir(folder, 0700)
@@ -38,32 +38,32 @@ func GenerateSkaffoldConfigFiles(service config.ServiceSummary, appCfg latest.Co
 	// Generate the knative yaml file.
 	knativeCfg, err := config.GenerateKnativeConfig(service, appCfg)
 	if err != nil {
-		return "", err
+		return err
 	}
 	knativeYAML, err := config.MarshalKnativeConfig(knativeCfg)
 	if err != nil {
-		return "", err
+		return err
 	}
-	knativeFile := filepath.FromSlash(folder + "/knative-" + service.Name + ".yaml")
+	knativeFile := filepath.FromSlash(folder + "/knative.yaml")
 	if err := writeYAML(knativeYAML, knativeFile); err != nil {
-		return "", err
+		return err
 	}
 
 	// Generate the skaffold yaml file.
 	skaffoldCfg, err := config.GenerateSkaffoldConfig(service, appCfg, knativeFile)
 	if err != nil {
-		return "", err
+		return err
 	}
 	skaffoldYAML, err := yaml.Marshal(skaffoldCfg)
 	if err != nil {
-		return "", err
+		return err
 	}
-	skaffoldFile := filepath.FromSlash(folder + "/skaffold-" + service.Name + ".yaml")
+	skaffoldFile := filepath.FromSlash(folder + "/skaffold.yaml")
 	if err := writeYAML(skaffoldYAML, skaffoldFile); err != nil {
-		return "", err
+		return err
 	}
 
-	return skaffoldFile, nil
+	return nil
 }
 
 func writeYAML(content []byte, name string) error {

@@ -3,32 +3,36 @@
 [![](https://circleci.com/gh/cyrildiagne/kuda/tree/master.svg?style=shield&circle-token=b14f5838ae2acabe21a8255070507f7e36ba510b)](https://circleci.com/gh/cyrildiagne/kuda)
 [![](https://img.shields.io/github/v/release/cyrildiagne/kuda?include_prereleases)](https://github.com/cyrildiagne/kuda/releases)
 
-🧪 **Status:** experimental
+**Status:** 🧪Experimental
 
-## Develop and deploy APIs on remote GPUs
+## Turn any model into a serverless API
 
-Kuda deploys APIs as serverless containers on remote GPUs using [Knative](https://knative.dev).
-So you can use any language, any framework, and there is no library to import in your code.
+Easily turn any model into a serverless API that will consume cloud GPUs only
+when it's being called.
+
+Kuda deploys your API as a docker container, so you can use any language, any
+framework, and there is no library to import in your code.
+
 All you need is a Dockerfile.
 
 ## Easy to use
 
-- `kuda init` Initializes your local & remote configurations.
-- `kuda dev` Deploy the API on remote GPUs in dev mode (with file sync & live reload).
-- `kuda deploy` Deploy the API in production mode.
-  It will be automatically scaled down to zero when there is no traffic,
-  and back up when there are new requests.
+- `kuda init` Initializes your local & remote configurations
+- `kuda dev` Deploys the API in dev mode (with file sync & live reload)
+- `kuda deploy` Deploys the API in production mode
+- `kuda publish` Publishes the API template to the registry
 
 ## Features
 
 - Provision GPUs & scale based on traffic (from zero to N)
-- Interactive development on remote GPUs from any workstation
+- Interactive development on cloud GPUs from any workstation
 - Protect & control access to your APIs using API Keys
 - HTTPS with TLS termination & automatic certificate management
 
 ## Use the frameworks you know
 
-Here's a simple example that prints the result of `nvidia-smi` using [Flask](http://flask.palletsprojects.com):
+Here's a minimal example that just prints the result of `nvidia-smi` using
+[Flask](http://flask.palletsprojects.com):
 
 - `main.py`
 
@@ -40,7 +44,7 @@ app = flask.Flask(__name__)
 
 @app.route('/')
 def hello():
-    return 'Hello GPU!\n\n' + os.popen('nvidia-smi').read()
+    return 'Hello GPU:\n' + os.popen('nvidia-smi').read()
 ```
 
 - `Dockerfile`
@@ -48,16 +52,9 @@ def hello():
 ```Dockerfile
 FROM nvidia/cuda:10.1-base
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  python3 python3-pip \
-  && \
-  apt-get clean && \
-  apt-get autoremove && \
-  rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y python3 python3-pip
 
 RUN pip3 install setuptools Flask gunicorn
-
-WORKDIR /app
 
 COPY main.py ./main.py
 
@@ -68,7 +65,6 @@ CMD exec gunicorn --bind :80 --workers 1 --threads 8 main:app
 
 ```yaml
 name: hello-gpu
-
 deploy:
   dockerfile: ./Dockerfile
 ```
@@ -100,7 +96,8 @@ Hello GPU!
 
 ```
 
-Checkout the full example with annotations in [examples/hello-gpu-flask](examples/hello-gpu-flask).
+Checkout the full example with annotations in
+[examples/hello-gpu-flask](examples/hello-gpu-flask).
 
 ## Get Started
 

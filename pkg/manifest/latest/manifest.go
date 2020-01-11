@@ -1,6 +1,7 @@
 package latest
 
 import (
+	// openapi "github.com/go-openapi/spec"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -12,6 +13,7 @@ type Manifest struct {
 	Meta            Meta   `yaml:"meta,omitempty"`
 	Deploy          Config `yaml:"deploy"`
 	Dev             Config `yaml:"dev,omitempty"`
+	// Paths           *openapi.Paths `yaml:"paths,omitempty"`
 }
 
 // Meta stores the metadata.

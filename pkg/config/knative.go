@@ -24,7 +24,7 @@ func MarshalKnativeConfig(s v1.Service) ([]byte, error) {
 func GenerateKnativeConfig(service ServiceSummary, cfg latest.Config) (v1.Service, error) {
 
 	// Kuda supports only 1 GPU per service for now.
-	numGPUs, _ := resource.ParseQuantity("1")
+	numGPUs, _ := resource.ParseQuantity("0")
 
 	container := corev1.Container{
 		Image: service.DockerArtifact,

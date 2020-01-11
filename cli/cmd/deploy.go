@@ -22,18 +22,11 @@ var deployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "Deploy the API remotely in production mode.",
 	Run: func(cmd *cobra.Command, args []string) {
-
-		// Check if dry run
-		dryRun, err := cmd.Flags().GetBool("dry-run")
-		if err != nil {
-			panic(err)
-		}
-
 		published, _ := cmd.Flags().GetString("from")
 		if published != "" {
-			deployFromPublished(published, dryRun)
+			deployFromPublished(published)
 		} else {
-			deployFromLocal(dryRun)
+			deployFromLocal()
 		}
 	},
 }
@@ -41,10 +34,9 @@ var deployCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(deployCmd)
 	deployCmd.Flags().StringP("from", "f", "", "Fully qualified name of a published API image.")
-	deployCmd.Flags().Bool("dry-run", false, "Generate the config files but skip execution.")
 }
 
-func deployFromPublished(published string, dryRun bool) error {
+func deployFromPublished(published string) error {
 	fmt.Println("Deploy from published API image", published)
 
 	fmt.Println("Sending to deployer:", cfg.Deployer.Remote.DeployerURL)
@@ -58,7 +50,7 @@ func deployFromPublished(published string, dryRun bool) error {
 	// Close writer
 	writer.Close()
 
-	url := cfg.Deployer.Remote.DeployerURL
+	url := cfg.Deployer.Remote.DeployerURL + "/deploy"
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return err
@@ -71,7 +63,7 @@ func deployFromPublished(published string, dryRun bool) error {
 	return nil
 }
 
-func deployFromLocal(dryRun bool) {
+func deployFromLocal() {
 	// Load the manifest
 	manifestFile := "./kuda.yaml"
 	manifest, err := utils.LoadManifest(manifestFile)
@@ -81,17 +73,17 @@ func deployFromLocal(dryRun bool) {
 	}
 
 	if cfg.Deployer.Remote != nil {
-		if err := deployWithRemote(manifest, dryRun); err != nil {
+		if err := deploy(manifest); err != nil {
 			fmt.Println("ERROR:", err)
 		}
 	} else if cfg.Deployer.Skaffold != nil {
-		if err := deployWithSkaffold(manifest, dryRun); err != nil {
+		if err := deployWithSkaffold(manifest); err != nil {
 			fmt.Println("ERROR:", err)
 		}
 	}
 }
 
-func deployWithRemote(manifest *latest.Manifest, dryRun bool) error {
+func addContextFilesToRequest(source string, writer *multipart.Writer) error {
 	// Create destination tar file
 	output, err := ioutil.TempFile("", "*.tar")
 	fmt.Println("Building context tar:", output.Name())
@@ -107,21 +99,10 @@ func deployWithRemote(manifest *latest.Manifest, dryRun bool) error {
 	defer dockerignore.Close()
 
 	// Tar context folder.
-	source := "./"
 	utils.Tar(source, output.Name(), output, dockerignore)
-
-	// Stop here if dry run.
-	if dryRun {
-		fmt.Println("Dry run: Skipping remote deployment.")
-		return nil
-	}
 
 	// Defer the deletion of the temp tar file.
 	defer os.Remove(output.Name())
-
-	// Create request
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
 
 	// Add tar file to request
 	file, err := os.Open(output.Name())
@@ -135,14 +116,28 @@ func deployWithRemote(manifest *latest.Manifest, dryRun bool) error {
 	}
 	io.Copy(part, file)
 
+	return nil
+}
+
+func deploy(manifest *latest.Manifest) error {
+	// Create request body
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	// Add context
+	if err := addContextFilesToRequest("./", writer); err != nil {
+		return err
+	}
 	// Add namespace
 	writer.WriteField("namespace", cfg.Namespace)
-
 	// Close writer
 	writer.Close()
 
-	url := cfg.Deployer.Remote.DeployerURL
+	// Create request.
+	url := cfg.Deployer.Remote.DeployerURL + "/deploy"
 	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return err
+	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	// Send to remote deployer.
@@ -186,7 +181,7 @@ func sendToRemoteDeployer(req *http.Request) error {
 	return nil
 }
 
-func deployWithSkaffold(manifest *latest.Manifest, dryRun bool) error {
+func deployWithSkaffold(manifest *latest.Manifest) error {
 
 	folder := cfg.Deployer.Skaffold.ConfigFolder
 	registry := cfg.Deployer.Skaffold.DockerRegistry
@@ -197,20 +192,13 @@ func deployWithSkaffold(manifest *latest.Manifest, dryRun bool) error {
 		DockerArtifact: registry + "/" + manifest.Name,
 	}
 
-	skaffoldFile, err := utils.GenerateSkaffoldConfigFiles(service, manifest.Deploy, folder)
-	if err != nil {
+	if err := utils.GenerateSkaffoldConfigFiles(service, manifest.Deploy, folder); err != nil {
 		return err
 	}
 	fmt.Println("Config files have been written in:", folder)
 
-	// Stop here if dry run.
-	if dryRun {
-		fmt.Println("Dry run: Skipping execution.")
-		return nil
-	}
-
 	// Run command.
-	args := []string{"run", "-f", skaffoldFile}
+	args := []string{"run", "-f", folder + "/skaffold.yaml"}
 	cmd := exec.Command("skaffold", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin

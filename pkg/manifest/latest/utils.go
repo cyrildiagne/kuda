@@ -6,7 +6,8 @@ import (
 	"io/ioutil"
 	"reflect"
 
-	yaml "gopkg.in/yaml.v2"
+	// yaml "gopkg.in/yaml.v2"
+	"github.com/ghodss/yaml"
 )
 
 // Load the content of a file into a manifest.
@@ -19,6 +20,11 @@ func (manifest *Manifest) Load(reader io.Reader) error {
 	// Parse.
 	if err = yaml.Unmarshal(data, manifest); err != nil {
 		return err
+	}
+
+	// Default version.
+	if manifest.Version == "" {
+		manifest.Version = "0.1.0"
 	}
 	// Dev extends values from Deploy.
 	valuesDev := reflect.ValueOf(&manifest.Dev).Elem()

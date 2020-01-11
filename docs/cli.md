@@ -46,18 +46,14 @@ kuda init \
 ## → Dev
 
 ```bash
-kuda dev [flags]
+kuda dev
 ```
 
-Deploys an API in development mode (with live file sync & app reload).
-
-**Flags**
-
-- `[--dry-run]` Generate the config files and skip execution.
+Deploys the API in development mode (with live file sync & app reload).
 
 **Examples**
 
-Deploy an API from the local directory:
+Deploy the API from the local directory:
 
 ```bash
 kuda dev
@@ -66,27 +62,45 @@ kuda dev
 ## → Deploy
 
 ```
-kuda deploy [flags]
+kuda deploy
 ```
 
-Deploys an API in production mode.
+Deploys the API in production mode.
 
 **Flags**
 
 - `[-f, --from]` Qualitifed name of a published API from the registry: `<user>/<api-name>:<version|latest>`
-- `[--dry-run]` Generate the config files and skip deployment.
 
 **Examples**
 
-Deploy an API from the local directory:
+Deploy the API from the local directory:
 
 ```bash
 kuda deploy
 ```
 
-Deploy an API from a published API in the repo:
+Deploy the API from a published API in the repo:
 
 ```bash
 kuda deploy -f cyrildiagne/hello-gpu
 kuda deploy -f cyrildiagne/hello-gpu:1.3.0
+```
+
+## → Publish
+
+```
+kuda publish
+```
+
+Publish the API template to the registry.
+This command publishes the API template & docker image so that other users can
+deploy it inside their own environment.
+It doesn't affect access to your deployed APIs.
+
+**Examples**
+
+Publish the API template from the local directory:
+
+```bash
+kuda publish
 ```
