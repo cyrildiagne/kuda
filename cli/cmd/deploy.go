@@ -9,9 +9,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"os/exec"
 
-	"github.com/cyrildiagne/kuda/pkg/config"
 	"github.com/cyrildiagne/kuda/pkg/manifest/latest"
 	"github.com/cyrildiagne/kuda/pkg/utils"
 	"github.com/spf13/cobra"
@@ -39,7 +37,7 @@ func init() {
 func deployFromPublished(published string) error {
 	fmt.Println("Deploy from published API image", published)
 
-	fmt.Println("Sending to deployer:", cfg.Deployer.Remote.DeployerURL)
+	fmt.Println("Sending to deployer:", cfg.Provider.DeployerURL)
 
 	// Create request
 	body := &bytes.Buffer{}
@@ -50,7 +48,7 @@ func deployFromPublished(published string) error {
 	// Close writer
 	writer.Close()
 
-	url := cfg.Deployer.Remote.DeployerURL + "/deploy"
+	url := cfg.Provider.DeployerURL + "/deploy"
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return err
@@ -72,14 +70,8 @@ func deployFromLocal() {
 		panic(err)
 	}
 
-	if cfg.Deployer.Remote != nil {
-		if err := deploy(manifest); err != nil {
-			fmt.Println("ERROR:", err)
-		}
-	} else if cfg.Deployer.Skaffold != nil {
-		if err := deployWithSkaffold(manifest); err != nil {
-			fmt.Println("ERROR:", err)
-		}
+	if err := deploy(manifest); err != nil {
+		fmt.Println("ERROR:", err)
 	}
 }
 
@@ -133,7 +125,7 @@ func deploy(manifest *latest.Manifest) error {
 	writer.Close()
 
 	// Create request.
-	url := cfg.Deployer.Remote.DeployerURL + "/deploy"
+	url := cfg.Provider.DeployerURL + "/deploy"
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return err
@@ -148,7 +140,7 @@ func deploy(manifest *latest.Manifest) error {
 }
 
 func sendToRemoteDeployer(req *http.Request) error {
-	accessToken := "Bearer " + cfg.Deployer.Remote.User.Token.AccessToken
+	accessToken := "Bearer " + cfg.Provider.User.Token.AccessToken
 	req.Header.Set("Authorization", accessToken)
 
 	client := &http.Client{}
@@ -178,35 +170,5 @@ func sendToRemoteDeployer(req *http.Request) error {
 		}
 		return fmt.Errorf("error with remote deployer")
 	}
-	return nil
-}
-
-func deployWithSkaffold(manifest *latest.Manifest) error {
-
-	folder := cfg.Deployer.Skaffold.ConfigFolder
-	registry := cfg.Deployer.Skaffold.DockerRegistry
-
-	service := config.ServiceSummary{
-		Name:           manifest.Name,
-		Namespace:      cfg.Namespace,
-		DockerArtifact: registry + "/" + manifest.Name,
-	}
-
-	if err := utils.GenerateSkaffoldConfigFiles(service, manifest.Deploy, folder); err != nil {
-		return err
-	}
-	fmt.Println("Config files have been written in:", folder)
-
-	// Run command.
-	args := []string{"run", "-f", folder + "/skaffold.yaml"}
-	cmd := exec.Command("skaffold", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-
 	return nil
 }

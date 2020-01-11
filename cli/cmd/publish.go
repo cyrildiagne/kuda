@@ -53,7 +53,7 @@ func publish(manifest *latest.Manifest) error {
 	writer.Close()
 
 	// Create request.
-	url := cfg.Deployer.Remote.DeployerURL + "/publish"
+	url := cfg.Provider.DeployerURL + "/publish"
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return err

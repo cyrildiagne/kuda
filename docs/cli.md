@@ -3,45 +3,31 @@
 ## → Init
 
 ```bash
-kuda init <deployer> [flags]
+kuda init <namespace> [flags]
 ```
 
 Initializes the local configuration.
 
 **Arguments**
 
-- `deployer` The API deployer. (default: `skaffold`)
+- `namespace` Your namespace.
 
 **Flags**
 
-- `[-n, --namespace]` Your namespace. (default: `default`)
-- `[-d, --docker-registry]` Required when using the `skaffold` deployer.
-- `[--auth-url]` Specify which url to use for authentication when using a remote deployer.
-- `[--deployer-url]` Specify which url to use for deployment when using a remote deployer.
+- `[-p, --provider]` The provider root URL (default: `kuda.gpu.sh`).
+- `[--auth-url]` Specify which url to use for authentication when using a remote deployer. (default: `auth.<provider>`)
+- `[--deployer-url]` Specify which url to use for deployment when using a remote deployer. (default: `deployer.<provider>`)
 
 **Examples**
 
 ```bash
-kuda init -d gcr.io/my-gcp-project skaffold
-```
-
-<!--
-```bash
-kuda init \
-    -n your-namespace \
-    gpu.sh
+kuda init my-namespace
 ```
 
 ```bash
-kuda init \
-    -n your-namespace
-    -d gcr.io/my-gcp-project \
-    --auth_url localhost:8070 \
-    --deployer_url localhost:8090
-    localhost:8080
+kuda init my-namespace \
+    -p kuda.my-cluster.com
 ```
-
--->
 
 ## → Dev
 
