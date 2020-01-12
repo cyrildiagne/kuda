@@ -1,0 +1,68 @@
+# handler for adapter kuda
+apiVersion: "config.istio.io/v1alpha2"
+kind: handler
+metadata:
+  name: kuda-handler
+  namespace: istio-system
+spec:
+  adapter: kuda
+  connection:
+    # address: "[::]:44225"
+    address: "kuda-mixer-adapter-service:44225"
+    #address: "35.184.34.117:44225"
+  params:
+    auth_key: "abc"
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: instance
+metadata:
+  name: kuda-auth
+  namespace: istio-system
+spec:
+  template: authorization
+  params:
+    subject:
+      properties:
+        api_key: request.api_key | request.headers["x-api-key"] | ""
+        request_id: connection.id | "unknown"
+---
+# instance for template metric
+apiVersion: "config.istio.io/v1alpha2"
+kind: instance
+metadata:
+  name: kuda-metric
+  namespace: istio-system
+spec:
+  template: metric
+  params:
+    value: request.size | 0
+    dimensions:
+      api_key: request.api_key | request.headers["x-api-key"] | ""
+      request_id: connection.id | "unknown"
+      request_url: request.url_path | ""
+      request_method: request.method | ""
+      request_host: request.host | ""
+      request_timestamp: request.time
+      user_ip: source.ip | ip("0.0.0.0")
+      user_agent: request.useragent | ""
+      response_timestamp: response.time
+      response_size: response.size | 0
+      response_code: response.code | 0
+      destination: destination.service.host | ""
+---
+# rule to dispatch to handler kuda-handler
+apiVersion: "config.istio.io/v1alpha2"
+kind: rule
+metadata:
+  name: kuda-rule
+  namespace: istio-system
+spec:
+  # match: match(destination.service.host, "*.svc.cluster.local") && !match(destination.service.host, "*.kuda.svc.cluster.local") && match(context.reporter.uid, "kubernetes://istio-ingressgateway-*")
+  # match: destination.service.namespace != "kuda" && destination.service.namespace != "istio-system" && destination.service.namespace != "knative-serving" && destination.service.namespace != "kube-system" && destination.service.namespace != "cert-manager"
+  # match: source.labels["istio"] == "ingressgateway" && destination.service.namespace != "kuda"
+  match: match(source.labels["istio"], "nothing")
+  actions:
+    - handler: kuda-handler.istio-system
+      instances:
+        - kuda-auth
+        - kuda-metric

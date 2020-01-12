@@ -1,0 +1,11 @@
+apiVersion: skaffold/v1
+kind: Config
+build:
+  artifacts:
+  - image: gcr.io/kuda-cloud/deployer
+    docker:
+      dockerfile: images/deployer/Dockerfile
+deploy:
+  kubectl:
+    manifests:
+      - images/deployer/service-workaround.yaml

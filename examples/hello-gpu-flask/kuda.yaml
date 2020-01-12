@@ -6,12 +6,12 @@ name: hello-gpu
 # (Optional) Version of the API.
 version: 0.1.0
 
-# 'deploy' is the config used when running `kuda deploy`.
+# `deploy` is the config used when running `kuda deploy`.
 # It has sensible defaults but you can override all the properpties.
 deploy:
   dockerfile: ./Dockerfile
 
-# 'dev' is the config used when running `kuda dev`.
+# (Optional) `dev` is used when running `kuda dev`.
 # It inherits all properties from 'deploy' which you can override individually.
 dev:
   # Use python3 to start the Flask dev server rather than gunicorn.
@@ -26,7 +26,7 @@ dev:
     - name: FLASK_ENV
       value: development
 
-# 'paths' is optional. It lets you specify how to interact with the API.
+# (Optional) `paths` lets you specify how clients interact with the API.
 # It follows the OpenAPI 3.0 specification.
 # It is only required when publishing to a registry.
 paths:

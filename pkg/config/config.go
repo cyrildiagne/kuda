@@ -14,7 +14,7 @@ type UserConfig struct {
 // ProviderConfig stores a remote deployer config.
 type ProviderConfig struct {
 	AuthURL     string     `yaml:"auth"`
-	DeployerURL string     `yaml:"deployer"`
+	ApiURL string     `yaml:"deployer"`
 	User        *auth.User `yaml:"user"`
 }
 

@@ -5,31 +5,48 @@
 
 **Status:** 🧪Experimental
 
+Kuda's goal is to make it **easy** and **inexpensive** to add cloud GPUs to any webapp.
+
+## Serverless GPU inference
+
+Kuda builds on [Knative](#) to allocate cloud GPUs only when there is traffic to your app.
+
+This is ideal when you want to share your prototypes online without keeping expensive GPUs allocated all the time.
+
+It tries to reduce cold starts time (gpu nodes allocation and service instanciation) as much possible and to tries manage cooldown times intelligently.
+
+## Add GPU models to a webapp easily
+
+- Deploy a template from github
+
+```bash
+kuda deploy -f github.com/cyrildiagne/gpt2-http
+```
+
+- Call your deployed API
+
+```bash
+$ curl \
+    -H 'x-api-key: $your_key' \
+    -F 'input=Kuda is' \
+    https://gpt2.<your-namespace>.kuda.cloud/generate
+```
+
+```json
+{
+  "query": "Kuda is",
+  "generated": "a tool that...etc."
+}
+```
+
+Checkout the full list of templates available in [the registry](#).
+
 ## Turn any model into a serverless API
 
-Easily turn any model into a serverless API that will consume cloud GPUs only
-when it's being called.
-
-Kuda deploys your API as a docker container, so you can use any language, any
+Kuda deploys APIs as a docker containers, so you can use any language, any
 framework, and there is no library to import in your code.
 
 All you need is a Dockerfile.
-
-## Easy to use
-
-- `kuda init` Initializes your local & remote configurations
-- `kuda dev` Deploys the API in dev mode (with file sync & live reload)
-- `kuda deploy` Deploys the API in production mode
-- `kuda publish` Publishes the API template to the registry
-
-## Features
-
-- Provision GPUs & scale based on traffic (from zero to N)
-- Interactive development on cloud GPUs from any workstation
-- Protect & control access to your APIs using API Keys
-- HTTPS with TLS termination & automatic certificate management
-
-## Use the frameworks you know
 
 Here's a minimal example that just prints the result of `nvidia-smi` using
 [Flask](http://flask.palletsprojects.com):
@@ -70,10 +87,10 @@ deploy:
 ```
 
 Running `kuda deploy` in this example would build and deploy the API to a url
-such as `https://hello-gpu.default.yourdomain.com` which you can easily call:
+such as `https://hello-gpu.my-namespace.kuda.cloud` which you can easily call:
 
 ```
-$ curl https://hello-gpu.default.yourdomain.com
+$ curl https://hello-gpu.my-namespace.kuda.cloud
 
 Hello GPU!
 
@@ -98,6 +115,13 @@ Hello GPU!
 
 Checkout the full example with annotations in
 [examples/hello-gpu-flask](examples/hello-gpu-flask).
+
+## Features
+
+- Provision GPUs & scale based on traffic (from zero to N)
+- Interactive development on cloud GPUs from any workstation
+- Protect & control access to your APIs using API Keys
+- HTTPS with TLS termination & automatic certificate management
 
 ## Get Started
 

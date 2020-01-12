@@ -1,0 +1,101 @@
+# Workaround "native" istio service since there is an issue with Knative and
+# istio's policy not being applied.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: kuda
+spec:
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - image: gcr.io/kuda-cloud/api
+          name: api
+          volumeMounts:
+            - name: secret
+              readOnly: true
+              mountPath: "/secret"
+          env:
+            - name: PORT
+              value: "80"
+            - name: KUDA_GCP_PROJECT
+              value: $KUDA_GCP_PROJECT
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /secret/key.json
+          ports:
+            - containerPort: 80
+      volumes:
+        - name: secret
+          secret:
+            secretName: api-credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: kuda
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+    app: api
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: api-vservice
+  namespace: kuda
+spec:
+  hosts:
+    - api.$KUDA_DOMAIN
+    - api.kuda
+    - api.kuda.svc
+    - api.kuda.svc.cluster.local
+  gateways:
+    - api-gw
+  http:
+    - route:
+        - destination:
+            host: api
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: api-gw
+  namespace: kuda
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - api.$KUDA_DOMAIN
+        - api.kuda
+        - api.kuda.svc
+        - api.kuda.svc.cluster.local
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        privateKey: /etc/istio/ingressgateway-certs/tls.key
+        serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+      hosts:
+        - api.$KUDA_DOMAIN
+        - api.kuda
+        - api.kuda.svc
+        - api.kuda.svc.cluster.local
