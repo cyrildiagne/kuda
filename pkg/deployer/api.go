@@ -2,6 +2,7 @@ package deployer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"cloud.google.com/go/firestore"
@@ -31,28 +32,29 @@ type API struct {
 }
 
 func registerAPI(env *Env, author string, api APIVersion) error {
-	name := api.Manifest.Name
-	version := api.Version
-
-	fullapiname := author + "__" + name
+	im := ImageName{
+		Author:  author,
+		Name:    api.Manifest.Name,
+		Version: api.Version,
+	}
 
 	ctx := context.Background()
 
 	// Get API document.
-	apiDoc := env.DB.Collection("apis").Doc(fullapiname)
+	apiDoc := env.DB.Collection("apis").Doc(im.GetID())
 
 	// Update API metadata.
 	_, err := apiDoc.Set(ctx, map[string]interface{}{
-		"author": author,
-		"name":   name,
-		"image":  env.GetDockerImagePath(author, name),
+		"author": im.Author,
+		"name":   im.Name,
+		"image":  env.GetDockerImagePath(im),
 	}, firestore.MergeAll)
 	if err != nil {
 		return err
 	}
 
 	// Retrieve api version document
-	versDoc := apiDoc.Collection("versions").Doc(version)
+	versDoc := apiDoc.Collection("versions").Doc(im.Version)
 	vers, versDocErr := versDoc.Get(ctx)
 	if versDocErr != nil && status.Code(versDocErr) != codes.NotFound {
 		return versDocErr
@@ -65,7 +67,7 @@ func registerAPI(env *Env, author string, api APIVersion) error {
 			return err
 		}
 		if apiVersion.IsPublic {
-			err := fmt.Errorf("version %s already exists and is public", version)
+			err := fmt.Errorf("version %s already exists and is public", im.Version)
 			return StatusError{400, err}
 		}
 	}
@@ -77,4 +79,30 @@ func registerAPI(env *Env, author string, api APIVersion) error {
 	}
 
 	return nil
+}
+
+// GetVersion retrieves an api version from the DB.
+func GetVersion(env *Env, im ImageName) (*APIVersion, error) {
+	// TODO: if "latest" retrieve all version of author/apiname and pick latest public.
+	if im.Version == "latest" {
+		return nil, errors.New("getting image tag 'latest' is not yet supported")
+	}
+
+	// Get API document.
+	apiDoc := env.DB.Collection("apis").Doc(im.GetID())
+
+	// Retrieve api version document.
+	versDoc := apiDoc.Collection("versions").Doc(im.Version)
+	vers, err := versDoc.Get(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	// Retrieve Data.
+	apiVersion := APIVersion{}
+	if err := vers.DataTo(&apiVersion); err != nil {
+		return nil, err
+	}
+
+	return &apiVersion, nil
 }

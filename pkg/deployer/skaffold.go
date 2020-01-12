@@ -8,14 +8,17 @@ import (
 	"os/exec"
 )
 
-// Skaffold builds an image with skaffold and streams logs to w.
-func Skaffold(command string, tempDir string, skaffoldFile string, w io.Writer) error {
-	// Run Skaffold Deploy.
-	args := []string{command, "-f", skaffoldFile}
-	cmd := exec.Command("skaffold", args...)
+// RunCMD runs a command and streams the results.
+func RunCMD(w io.Writer, command string, args []string) error {
+	return RunCMDFrom(w, command, args, "")
+}
+
+// RunCMDFrom runs a command from a directory and streams the results.
+func RunCMDFrom(w io.Writer, command string, args []string, dir string) error {
+	cmd := exec.Command(command, args...)
 	cmdout, _ := cmd.StdoutPipe()
 	cmderr, _ := cmd.StderrPipe()
-	cmd.Dir = tempDir
+	cmd.Dir = dir
 
 	if err := cmd.Start(); err != nil {
 		return err
@@ -47,6 +50,13 @@ func Skaffold(command string, tempDir string, skaffoldFile string, w io.Writer) 
 		return err
 	}
 	return nil
+}
+
+// Skaffold builds an image with skaffold and streams logs to w.
+func Skaffold(command string, tempDir string, skaffoldFile string, w io.Writer) error {
+	// Run Skaffold Deploy.
+	args := []string{command, "-f", skaffoldFile}
+	return RunCMDFrom(w, "skaffold", args, tempDir)
 }
 
 func copyAndFlush(w io.Writer, r io.Reader, conn http.Flusher) error {

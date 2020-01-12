@@ -45,7 +45,7 @@ func GenerateSkaffoldConfigFiles(service config.ServiceSummary, appCfg latest.Co
 		return err
 	}
 	knativeFile := filepath.FromSlash(folder + "/knative.yaml")
-	if err := writeYAML(knativeYAML, knativeFile); err != nil {
+	if err := WriteYAML(knativeYAML, knativeFile); err != nil {
 		return err
 	}
 
@@ -59,14 +59,15 @@ func GenerateSkaffoldConfigFiles(service config.ServiceSummary, appCfg latest.Co
 		return err
 	}
 	skaffoldFile := filepath.FromSlash(folder + "/skaffold.yaml")
-	if err := writeYAML(skaffoldYAML, skaffoldFile); err != nil {
+	if err := WriteYAML(skaffoldYAML, skaffoldFile); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func writeYAML(content []byte, name string) error {
+// WriteYAML writes a yaml to disk.
+func WriteYAML(content []byte, name string) error {
 	f, err := os.Create(name)
 	if err != nil {
 		return err

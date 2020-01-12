@@ -19,8 +19,13 @@ func generate(namespace string, contextDir string, env *Env) error {
 		return StatusError{400, err}
 	}
 
+	im := ImageName{
+		Author: namespace,
+		Name:   manifest.Name,
+	}
+
 	// TODO: replace namespace by user ID.
-	dockerArtifact := env.GetDockerImagePath(namespace, manifest.Name)
+	dockerArtifact := env.GetDockerImagePath(im)
 
 	// Generate Skaffold & Knative config files.
 	service := config.ServiceSummary{

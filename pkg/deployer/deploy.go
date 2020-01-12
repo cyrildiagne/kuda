@@ -2,25 +2,71 @@ package deployer
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 
+	"github.com/cyrildiagne/kuda/pkg/config"
 	"github.com/cyrildiagne/kuda/pkg/utils"
 )
 
-func deployFromPublished(env *Env, w http.ResponseWriter, r *http.Request) error {
+func deployFromPublished(fromPublished string, env *Env, w http.ResponseWriter, r *http.Request) error {
 	// Retrieve namespace.
 	namespace, err := GetAuthorizedNamespace(env, r)
 	if err != nil {
 		return err
 	}
-	fmt.Println(namespace)
 
-	// TODO: Check if image@version exists and is public.
-	// TODO: Check if image@version is public.
-	// TODO: Generate Knative YAML with appropriate namespace.
-	// TODO: Run kubectl apply.
+	// Parse fromPublished to get author, name & version.
+	im := ImageName{}
+	if err := im.ParseFrom(fromPublished); err != nil {
+		return err
+	}
+
+	// Check if image@version exists and is public.
+	api, err := GetVersion(env, im)
+	if err != nil {
+		return err
+	}
+	if !api.IsPublic {
+		err := fmt.Errorf("%s not found or not available", fromPublished)
+		return StatusError{400, err}
+	}
+
+	// Generate Knative YAML with appropriate namespace.
+	service := config.ServiceSummary{
+		Name:           im.Name,
+		Namespace:      namespace,
+		DockerArtifact: env.GetDockerImagePath(im),
+	}
+	knativeCfg, err := config.GenerateKnativeConfig(service, api.Manifest.Deploy)
+	if err != nil {
+		return err
+	}
+	knativeYAML, err := config.MarshalKnativeConfig(knativeCfg)
+	if err != nil {
+		return err
+	}
+	// Create new temp directory.
+	tempDir, err := ioutil.TempDir("", namespace+"__"+im.Name)
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tempDir)
+	knativeFile := filepath.FromSlash(tempDir + "/knative.yaml")
+	if err := utils.WriteYAML(knativeYAML, knativeFile); err != nil {
+		return err
+	}
+
+	// Run kubectl apply.
+	args := []string{"apply", "-f", knativeFile}
+	if err := RunCMD(w, "kubectl", args); err != nil {
+		return err
+	}
+
+	// TODO: Add to the namespaces' deployments.
+
 	return nil
 }
 
@@ -33,6 +79,12 @@ func HandleDeploy(env *Env, w http.ResponseWriter, r *http.Request) error {
 	namespace, err := GetAuthorizedNamespace(env, r)
 	if err != nil {
 		return err
+	}
+
+	// Check if deploying from published
+	fromPublished := r.FormValue("from_published")
+	if fromPublished != "" {
+		return deployFromPublished(fromPublished, env, w, r)
 	}
 
 	// Extract archive to temp folder.
@@ -63,7 +115,7 @@ func HandleDeploy(env *Env, w http.ResponseWriter, r *http.Request) error {
 		return StatusError{400, err}
 	}
 
-	// Register API.
+	// Register Template.
 	apiVersion := APIVersion{
 		IsPublic: false,
 		Version:  manifest.Version,
@@ -72,6 +124,8 @@ func HandleDeploy(env *Env, w http.ResponseWriter, r *http.Request) error {
 	if err := registerAPI(env, namespace, apiVersion); err != nil {
 		return err
 	}
+
+	// TODO: Add to the namespaces' deployments.
 
 	fmt.Fprintf(w, "Deployment successful!\n")
 	return nil

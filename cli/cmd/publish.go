@@ -15,7 +15,7 @@ import (
 // publishCmd represents the `kuda publish` command.
 var publishCmd = &cobra.Command{
 	Use:   "publish",
-	Short: "Set an API image as publicly accessible. This doesn't affect your deployed APIs.",
+	Short: "Set an API template as publicly accessible. This doesn't affect your deployed APIs.",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Load the manifest
@@ -47,8 +47,6 @@ func publish(manifest *latest.Manifest) error {
 	if err := addContextFilesToRequest("./", writer); err != nil {
 		return err
 	}
-	// Add namespace
-	writer.WriteField("namespace", cfg.Namespace)
 	// Close writer
 	writer.Close()
 

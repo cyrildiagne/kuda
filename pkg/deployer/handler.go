@@ -1,6 +1,7 @@
 package deployer
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -40,8 +41,8 @@ type Env struct {
 }
 
 // GetDockerImagePath returns the fully qualified URL of a docker image on GCR
-func (e *Env) GetDockerImagePath(user string, image string) string {
-	return "gcr.io/" + e.GCPProjectID + "/" + user + "__" + image
+func (e *Env) GetDockerImagePath(im ImageName) string {
+	return "gcr.io/" + e.GCPProjectID + "/" + im.GetID()
 }
 
 // Handler takes a configured Env and a function matching our signature.
@@ -59,10 +60,12 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			// We can retrieve the status here and write out a specific
 			// HTTP status code.
 			log.Printf("HTTP %d - %s", e.Status(), e)
+			fmt.Fprintf(w, "%v\n", e.Error())
 			http.Error(w, e.Error(), e.Status())
 			break
 		default:
 			log.Printf("Internal Error - %s", e)
+			fmt.Fprintf(w, "%v\n", e.Error())
 			// Any error types we don't specifically look out for default
 			// to serving a HTTP 500
 			http.Error(w, http.StatusText(http.StatusInternalServerError),

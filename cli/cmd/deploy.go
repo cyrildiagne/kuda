@@ -8,7 +8,9 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/cyrildiagne/kuda/pkg/manifest/latest"
 	"github.com/cyrildiagne/kuda/pkg/utils"
@@ -35,25 +37,18 @@ func init() {
 }
 
 func deployFromPublished(published string) error {
-	fmt.Println("Deploy from published API image", published)
+	fmt.Println("Deploying from published API image", published)
 
-	fmt.Println("Sending to deployer:", cfg.Provider.DeployerURL)
-
-	// Create request
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	// Add namespace
-	writer.WriteField("namespace", cfg.Namespace)
-	writer.WriteField("from_published", published)
-	// Close writer
-	writer.Close()
+	params := url.Values{}
+	params.Set("from_published", published)
+	body := strings.NewReader(params.Encode())
 
 	url := cfg.Provider.DeployerURL + "/deploy"
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	if err := sendToRemoteDeployer(req); err != nil {
 		return err
@@ -119,8 +114,6 @@ func deploy(manifest *latest.Manifest) error {
 	if err := addContextFilesToRequest("./", writer); err != nil {
 		return err
 	}
-	// Add namespace
-	writer.WriteField("namespace", cfg.Namespace)
 	// Close writer
 	writer.Close()
 
@@ -142,6 +135,7 @@ func deploy(manifest *latest.Manifest) error {
 func sendToRemoteDeployer(req *http.Request) error {
 	accessToken := "Bearer " + cfg.Provider.User.Token.AccessToken
 	req.Header.Set("Authorization", accessToken)
+	req.Header.Set("x-kuda-namespace", cfg.Namespace)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

@@ -11,7 +11,7 @@ import (
 // GetAuthorizedNamespace returns a namespace only if user is admin.
 func GetAuthorizedNamespace(env *Env, r *http.Request) (string, error) {
 	// Retrieve namespace.
-	namespace := r.FormValue("namespace")
+	namespace := r.Header.Get("x-kuda-namespace")
 	namespace = strings.ToValidUTF8(namespace, "")
 	if namespace == "" {
 		err := errors.New("error retrieving namespace")
