@@ -1,12 +1,13 @@
 version: 2
 jobs:
-  build-cli:
+  build-cli-and-api:
     docker:
       - image: circleci/golang:1.13
     steps:
       - checkout
       - run: go test github.com/cyrildiagne/kuda/pkg/config
-      - run: go build cli/main.go
+      - run: go build cmd/api
+      - run: go build cmd/cli
   release:
     docker:
       - image: circleci/golang:1.13
@@ -20,7 +21,7 @@ workflows:
   version: 2
   any-commit:
     jobs:
-      - build-cli:
+      - build-cli-and-api:
           filters:
             tags:
               ignore: /.*/
