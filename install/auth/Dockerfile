@@ -8,29 +8,21 @@ WORKDIR /app
 COPY go.* ./
 RUN go mod download
 
-# Copy local code to the container image.
-COPY *.go ./
+COPY pkg ./pkg
+COPY cmd/auth ./cmd/auth
+RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -mod=readonly -installsuffix cgo -o auth ./cmd/auth
 
-# Copy public assets to the container image.
-COPY public ./public
-
-# Build the binary.
-# -mod=readonly ensures immutable go.mod and go.sum in container builds.
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v -o server
-
+COPY web/auth ./web/auth
 
 #
 
-
-# Use the official Alpine image for a lean production container.
 FROM alpine:3
 RUN apk add --no-cache ca-certificates
 
-# Copy the binary to the production image from the builder stage.
-COPY --from=builder /app/server /server
+COPY --from=builder /app/auth ./auth
 
 # Copy public assets to the container image.
-COPY  --from=builder /app/public ./public
+COPY  --from=builder /app/web/auth ./web/auth
 
 # Run the web service on container startup.
-CMD ["/server"]
+CMD ["/auth"]

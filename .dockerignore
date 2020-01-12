@@ -3,3 +3,5 @@ config.sh
 !pkg
 !go.mod
 !go.sum
+!cmd
+!web

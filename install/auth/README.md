@@ -13,7 +13,7 @@ export KUDA_AUTH_PP_URL="your privacy policy url"
 ```bash
 docker build \
   -t gcr.io/kuda-cloud/auth \
-  -f ./Dockerfile \
+  -f install/auth/Dockerfile \
   .
 ```
 

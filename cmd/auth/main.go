@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -79,8 +80,14 @@ func main() {
 		PrivacyPolicyURL:  template.URL(os.Getenv("KUDA_AUTH_PP_URL")),
 	}
 
+	staticFolder := os.Getenv("STATIC_FOLDER")
+	if staticFolder == "" {
+		staticFolder = filepath.FromSlash("./web/auth")
+	}
+
 	// Process template with values.
-	t, err := template.ParseFiles("./public/index.html")
+	indexFile := filepath.FromSlash(staticFolder + "/index.html")
+	t, err := template.ParseFiles(indexFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,7 +96,7 @@ func main() {
 	authPage = w.String()
 
 	// Setup static serving.
-	fileServer := http.FileServer(http.Dir("./public"))
+	fileServer := http.FileServer(http.Dir(staticFolder))
 	mux.Handle("/public/", http.StripPrefix("/public", fileServer))
 
 	// Setup refresh token endpoint
