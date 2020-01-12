@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/cyrildiagne/kuda/pkg/config"
 	homedir "github.com/mitchellh/go-homedir"
@@ -62,5 +64,27 @@ func loadConfig() {
 		panic(err)
 	} else {
 		fmt.Println("Loaded config from", cfgFile)
+
+		// Check access token
+		i, err := strconv.ParseInt(strconv.Itoa(cfg.Provider.User.Token.ExpirationTime/1000), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		tm := time.Unix(i, 0)
+
+		if tm.Before(time.Now()) {
+			fmt.Println("Refreshing token...")
+			refreshURL := cfg.Provider.AuthURL + "/refresh"
+			refreshToken := cfg.Provider.User.Token.RefreshToken
+			res, err := refreshAuthToken(refreshURL, refreshToken)
+			if err != nil {
+				panic(err)
+			}
+
+			cfg.Provider.User.Token.RefreshToken = res.RefreshToken
+			cfg.Provider.User.Token.AccessToken = res.AccessToken
+			cfg.Provider.User.Token.ExpirationTime = (int(time.Now().Unix()) + res.ExpiresIn) * 1000
+			writeConfig(cfg)
+		}
 	}
 }

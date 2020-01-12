@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
+	"strconv"
 	"time"
 
 	"github.com/cyrildiagne/kuda/pkg/auth"
@@ -77,4 +79,41 @@ func startLoginFlow(authURL string) (*auth.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+// RefreshToken stores refreshtoken results
+type RefreshToken struct {
+	RefreshToken string `json:"refresh_token"`
+	AccessToken  string `json:"access_token"`
+	ExpiresIn    int    `json:"expires_in"`
+}
+
+// This is a simple util for the CLI to refresh expired tokens
+func refreshAuthToken(refreshURL string, refreshToken string) (*RefreshToken, error) {
+	formData := url.Values{
+		"refresh_token": {refreshToken},
+	}
+	resp, err := http.PostForm(refreshURL, formData)
+	if err != nil {
+		return nil, err
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+	user := map[string]string{}
+	if err := decoder.Decode(&user); err != nil {
+		return nil, err
+	}
+
+	expiresIn, err := strconv.Atoi(user["expires_in"])
+	if err != nil {
+		return nil, err
+	}
+
+	res := &RefreshToken{
+		RefreshToken: user["refresh_token"],
+		AccessToken:  user["access_token"],
+		ExpiresIn:    expiresIn,
+	}
+
+	return res, nil
 }
