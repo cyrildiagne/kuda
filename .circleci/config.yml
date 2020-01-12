@@ -6,8 +6,8 @@ jobs:
     steps:
       - checkout
       - run: go test github.com/cyrildiagne/kuda/pkg/config
-      - run: go build cmd/api
-      - run: go build cmd/cli
+      - run: go build ./cmd/api
+      - run: go build ./cmd/cli
   release:
     docker:
       - image: circleci/golang:1.13
