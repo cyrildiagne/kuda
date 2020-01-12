@@ -58,7 +58,7 @@ var initCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(initCmd)
 
-	initCmd.Flags().StringP("provider", "p", "kuda.gpu.sh", "Knative namespace.")
+	initCmd.Flags().StringP("provider", "p", "kuda.cloud", "Knative namespace.")
 	initCmd.Flags().String("auth_url", "", "Authentication URL.")
 	initCmd.Flags().String("deployer_url", "", "Deployer URL.")
 }

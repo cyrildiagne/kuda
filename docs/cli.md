@@ -14,7 +14,7 @@ Initializes the local configuration.
 
 **Flags**
 
-- `[-p, --provider]` The provider root URL (default: `kuda.gpu.sh`).
+- `[-p, --provider]` The provider root URL (default: `kuda.cloud`).
 - `[--auth-url]` Specify which url to use for authentication when using a remote deployer. (default: `auth.<provider>`)
 - `[--deployer-url]` Specify which url to use for deployment when using a remote deployer. (default: `deployer.<provider>`)
 
