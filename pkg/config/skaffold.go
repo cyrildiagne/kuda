@@ -39,8 +39,10 @@ func GenerateSkaffoldConfig(service ServiceSummary, manifest latest.Config, knat
 
 	build := v1.BuildConfig{
 		Artifacts: []*v1.Artifact{&artifact},
-		BuildType: *service.BuildType,
 		TagPolicy: tagPolicy,
+	}
+	if service.BuildType != nil {
+		build.BuildType = *service.BuildType
 	}
 
 	deploy := v1.DeployConfig{
