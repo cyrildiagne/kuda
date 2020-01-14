@@ -24,9 +24,13 @@ var deployCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		published, _ := cmd.Flags().GetString("from")
 		if published != "" {
-			deployFromPublished(published)
+			if err := deployFromPublished(published); err != nil {
+				panic(err)
+			}
 		} else {
-			deployFromLocal()
+			if err := deployFromLocal(); err != nil {
+				panic(err)
+			}
 		}
 	},
 }
@@ -56,18 +60,19 @@ func deployFromPublished(published string) error {
 	return nil
 }
 
-func deployFromLocal() {
+func deployFromLocal() error {
 	// Load the manifest
 	manifestFile := "./kuda.yaml"
 	manifest, err := utils.LoadManifest(manifestFile)
 	if err != nil {
 		fmt.Println("Could not load manifest", manifestFile)
-		panic(err)
+		return err
 	}
 
 	if err := deploy(manifest); err != nil {
-		fmt.Println("ERROR:", err)
+		return err
 	}
+	return nil
 }
 
 func addContextFilesToRequest(source string, writer *multipart.Writer) error {
