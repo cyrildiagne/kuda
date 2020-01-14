@@ -17,10 +17,44 @@ It tries to reduce cold starts time (gpu nodes allocation and service instanciat
 
 ## Add GPU models to a webapp easily
 
+- Deploy a template from the registry
+
+```bash
+kuda deploy -f cyrildiagne/nvidiasmi-http
+```
+
+- Call it
+
+```bash
+$ curl -H 'x-api-key: $your_key' https://nvidiasmi.$your_namespace.kuda.cloud
+
+Hello GPU!
+
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 418.67       Driver Version: 418.67       CUDA Version: 10.1     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  Tesla K80           Off  | 00000000:00:04.0 Off |                    0 |
+| N/A   37C    P8    27W / 149W |      0MiB / 11441MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+
+```
+
+<!-- ## Add GPU models to a webapp easily
+
 - Deploy a template from github
 
 ```bash
-kuda deploy -f cyrildiagne/gpt2-http
+kuda deploy -f cyrildiagne/gpt2-small-http
 ```
 
 - Call your deployed API
@@ -40,6 +74,7 @@ $ curl \
 ```
 
 Checkout the full list of templates available in [the registry](#).
+-->
 
 ## Turn any model into a serverless API
 
@@ -87,31 +122,7 @@ deploy:
 ```
 
 Running `kuda deploy` in this example would build and deploy the API to a url
-such as `https://hello-gpu.my-namespace.kuda.cloud` which you can easily call:
-
-```
-$ curl https://hello-gpu.my-namespace.kuda.cloud
-
-Hello GPU!
-
-+-----------------------------------------------------------------------------+
-| NVIDIA-SMI 418.67       Driver Version: 418.67       CUDA Version: 10.1     |
-|-------------------------------+----------------------+----------------------+
-| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
-|===============================+======================+======================|
-|   0  Tesla K80           Off  | 00000000:00:04.0 Off |                    0 |
-| N/A   37C    P8    27W / 149W |      0MiB / 11441MiB |      0%      Default |
-+-------------------------------+----------------------+----------------------+
-
-+-----------------------------------------------------------------------------+
-| Processes:                                                       GPU Memory |
-|  GPU       PID   Type   Process name                             Usage      |
-|=============================================================================|
-|  No running processes found                                                 |
-+-----------------------------------------------------------------------------+
-
-```
+such as `https://hello-gpu.my-namespace.kuda.cloud`.
 
 Checkout the full example with annotations in
 [examples/hello-gpu-flask](examples/hello-gpu-flask).
