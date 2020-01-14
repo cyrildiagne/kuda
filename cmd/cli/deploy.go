@@ -44,7 +44,7 @@ func deployFromPublished(published string) error {
 	fmt.Println("Deploying from published API image", published)
 
 	params := url.Values{}
-	params.Set("from_published", published)
+	params.Set("from", published)
 	body := strings.NewReader(params.Encode())
 
 	url := cfg.Provider.ApiURL + "/deploy"

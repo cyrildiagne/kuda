@@ -71,21 +71,11 @@ func deployFromPublished(fromPublished string, env *api.Env, w http.ResponseWrit
 	return nil
 }
 
-// HandleDeploy handles deployments from tar archived in body & published images.
-func HandleDeploy(env *api.Env, w http.ResponseWriter, r *http.Request) error {
-	// Set maximum upload size to 2GB.
-	r.ParseMultipartForm((2 * 1000) << 20)
-
+func deployFromFiles(env *api.Env, w http.ResponseWriter, r *http.Request) error {
 	// Retrieve namespace.
 	namespace, err := api.GetAuthorizedNamespace(env, r)
 	if err != nil {
 		return err
-	}
-
-	// Check if deploying from published
-	fromPublished := r.FormValue("from_published")
-	if fromPublished != "" {
-		return deployFromPublished(fromPublished, env, w, r)
 	}
 
 	// Extract archive to temp folder.
@@ -130,4 +120,19 @@ func HandleDeploy(env *api.Env, w http.ResponseWriter, r *http.Request) error {
 
 	fmt.Fprintf(w, "Deployment successful!\n")
 	return nil
+}
+
+// HandleDeploy handles deployments from tar archived in body & published images.
+func HandleDeploy(env *api.Env, w http.ResponseWriter, r *http.Request) error {
+	// Set maximum upload size to 2GB.
+	r.ParseMultipartForm((2 * 1000) << 20)
+
+	fmt.Println("handle deploy")
+
+	// Check if deploying from published
+	from := r.FormValue("from")
+	if from != "" {
+		return deployFromPublished(from, env, w, r)
+	}
+	return deployFromFiles(env, w, r)
 }
