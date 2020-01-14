@@ -13,9 +13,9 @@ type UserConfig struct {
 
 // ProviderConfig stores a remote deployer config.
 type ProviderConfig struct {
-	AuthURL     string     `yaml:"auth"`
-	ApiURL string     `yaml:"deployer"`
-	User        *auth.User `yaml:"user"`
+	AuthURL string     `yaml:"auth"`
+	APIURL  string     `yaml:"api"`
+	User    *auth.User `yaml:"user"`
 }
 
 // Helpers
@@ -25,5 +25,5 @@ type ServiceSummary struct {
 	Name           string
 	Namespace      string
 	DockerArtifact string
-	BuildType      v1.BuildType
+	BuildType      *v1.BuildType
 }

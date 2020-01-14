@@ -1,115 +1,38 @@
 package deploy
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 
-	"cloud.google.com/go/firestore"
 	"github.com/cyrildiagne/kuda/pkg/api"
-	"github.com/cyrildiagne/kuda/pkg/manifest/latest"
 	"github.com/cyrildiagne/kuda/pkg/utils"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
-// APIVersion stores an API version.
-type APIVersion struct {
-	IsPublic bool             `firestore:"isPublic"`
-	Version  string           `firestore:"version"`
-	Manifest *latest.Manifest `firestore:"manifest"`
-	// Paths    openapi.Paths    `firestore:"paths,omitempty"`
-	// Paths    *openapi3.Swagger   `firestore:"openapi,omitempty"`
-	// Paths openapi3.Paths `firestore:"openapi,omitempty"`
-	// Paths    map[string]*openapi3.PathItem `firestore:"openapi,omitempty"`
-	// Paths    *map[string]interface{} `firestore:"openapi,omitempty"`
-}
-
-// API stores an API.
-type API struct {
-	Author   string
-	Name     string
-	Image    string
-	Versions []APIVersion
-}
-
-func registerAPI(env *api.Env, author string, template APIVersion) error {
+func registerAPI(env *api.Env, author string, template *api.Version) error {
 	im := api.ImageName{
 		Author:  author,
 		Name:    template.Manifest.Name,
 		Version: template.Version,
 	}
 
-	ctx := context.Background()
-
-	// Get API document.
-	templateDoc := env.DB.Collection("apis").Doc(im.GetID())
-
-	// Update API metadata.
-	_, err := templateDoc.Set(ctx, map[string]interface{}{
+	// Update API Metadata.
+	metadata := &map[string]interface{}{
 		"author": im.Author,
 		"name":   im.Name,
-		"image":  env.GetDockerImagePath(im),
-	}, firestore.MergeAll)
-	if err != nil {
+		"image":  env.ContainerRegistry.GetDockerImagePath(im),
+	}
+	if err := env.DB.UpdateAPIMetadata(im.GetID(), metadata); err != nil {
 		return err
 	}
 
-	// Retrieve api version document
-	versDoc := templateDoc.Collection("versions").Doc(im.Version)
-	vers, versDocErr := versDoc.Get(ctx)
-	if versDocErr != nil && status.Code(versDocErr) != codes.NotFound {
-		return versDocErr
-	}
-
-	if versDocErr == nil {
-		// Don't update if that API version exists and is public.
-		tplVersion := APIVersion{}
-		if err := vers.DataTo(&tplVersion); err != nil {
-			return err
-		}
-		if tplVersion.IsPublic {
-			err := fmt.Errorf("version %s already exists and is public", im.Version)
-			return api.StatusError{Code: 400, Err: err}
-		}
-	}
-
-	// Write version.
-	_, errS := versDoc.Set(ctx, template)
-	if errS != nil {
-		return errS
+	// Update api version document
+	if err := env.DB.UpdateVersionnedAPI(im.GetID(), im.Version, template); err != nil {
+		return err
 	}
 
 	return nil
-}
-
-// GetVersion retrieves an api version from the DB.
-func GetVersion(env *api.Env, im api.ImageName) (*APIVersion, error) {
-	// TODO: if "latest" retrieve all version of author/apiname and pick latest public.
-	if im.Version == "latest" {
-		return nil, errors.New("getting image tag 'latest' is not yet supported")
-	}
-
-	// Get API document.
-	apiDoc := env.DB.Collection("apis").Doc(im.GetID())
-
-	// Retrieve api version document.
-	versDoc := apiDoc.Collection("versions").Doc(im.Version)
-	vers, err := versDoc.Get(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	// Retrieve Data.
-	apiVersion := APIVersion{}
-	if err := vers.DataTo(&apiVersion); err != nil {
-		return nil, err
-	}
-
-	return &apiVersion, nil
 }
 
 // HandlePublish publishes from tar file in body.
@@ -152,7 +75,7 @@ func HandlePublish(env *api.Env, w http.ResponseWriter, r *http.Request) error {
 	}
 
 	// Register API.
-	apiVersion := APIVersion{
+	apiVersion := &api.Version{
 		IsPublic: true,
 		Version:  manifest.Version,
 		Manifest: manifest,

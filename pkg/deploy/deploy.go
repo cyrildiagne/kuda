@@ -26,7 +26,7 @@ func deployFromPublished(fromPublished string, env *api.Env, w http.ResponseWrit
 	}
 
 	// Check if image@version exists and is public.
-	template, err := GetVersion(env, im)
+	template, err := env.DB.GetVersionnedAPI(im)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func deployFromPublished(fromPublished string, env *api.Env, w http.ResponseWrit
 	service := config.ServiceSummary{
 		Name:           im.Name,
 		Namespace:      namespace,
-		DockerArtifact: env.GetDockerImagePath(im),
+		DockerArtifact: env.ContainerRegistry.GetDockerImagePath(im),
 	}
 	knativeCfg, err := config.GenerateKnativeConfig(service, template.Manifest.Deploy)
 	if err != nil {
@@ -107,7 +107,7 @@ func deployFromFiles(env *api.Env, w http.ResponseWriter, r *http.Request) error
 	}
 
 	// Register Template.
-	apiVersion := APIVersion{
+	apiVersion := &api.Version{
 		IsPublic: false,
 		Version:  manifest.Version,
 		Manifest: manifest,

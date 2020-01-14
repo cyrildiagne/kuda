@@ -4,23 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	"cloud.google.com/go/firestore"
-	firebaseAuth "firebase.google.com/go/auth"
 )
-
-// Error represents a handler error. It provides methods for a HTTP status
-// code and embeds the built-in error interface.
-type Error interface {
-	error
-	Status() int
-}
-
-// StatusError represents an error with an associated HTTP status code.
-type StatusError struct {
-	Code int
-	Err  error
-}
 
 // Allows StatusError to satisfy the error interface.
 func (se StatusError) Error() string {
@@ -30,19 +14,6 @@ func (se StatusError) Error() string {
 // Status returns our HTTP status code.
 func (se StatusError) Status() int {
 	return se.Code
-}
-
-// Env stores our application-wide configuration.
-type Env struct {
-	GCPProjectID   string
-	DockerRegistry string
-	DB             *firestore.Client
-	Auth           *firebaseAuth.Client
-}
-
-// GetDockerImagePath returns the fully qualified URL of a docker image on GCR
-func (e *Env) GetDockerImagePath(im ImageName) string {
-	return "gcr.io/" + e.GCPProjectID + "/" + im.GetID()
 }
 
 // Handler takes a configured Env and a function matching our signature.

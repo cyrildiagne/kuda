@@ -51,7 +51,7 @@ func publish(manifest *latest.Manifest) error {
 	writer.Close()
 
 	// Create request.
-	url := cfg.Provider.ApiURL + "/publish"
+	url := cfg.Provider.APIURL + "/publish"
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return err

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -36,32 +35,19 @@ func CheckAuthorized(env *Env, namespace string, accessToken string) error {
 	// Get bearer token.
 	accessToken = strings.Split(accessToken, "Bearer ")[1]
 	// Verify Token
-	token, err := env.Auth.VerifyIDToken(context.Background(), accessToken)
+	UID, err := env.Auth.VerifyIDToken(accessToken)
 	if err != nil {
 		err = fmt.Errorf("error verifying token %v", err)
 		return StatusError{401, err}
 	}
 
 	// Check if namespace has the user id as admin.
-	ctx := context.Background()
-	ns, err := env.DB.Collection("namespaces").Doc(namespace).Get(ctx)
+	isAdmin, err := env.DB.IsUserAdminOfNamespace(UID, namespace)
 	if err != nil {
-		err = fmt.Errorf("error getting namespace info %v", err)
-		return StatusError{500, err}
+		return err
 	}
-	if !ns.Exists() {
-		err := fmt.Errorf("namespace not found %v", namespace)
-		return StatusError{400, err}
-	}
-	nsData := ns.Data()
-	nsAdmins, hasAdmins := nsData["admins"]
-	if !hasAdmins {
-		err := fmt.Errorf("no admin found for namespace %v", namespace)
-		return StatusError{403, err}
-	}
-	_, isAdmin := nsAdmins.(map[string]interface{})[token.UID]
 	if !isAdmin {
-		err := fmt.Errorf("user %v must be admin of %v", token.UID, namespace)
+		err := fmt.Errorf("user %v must be admin of %v", UID, namespace)
 		return StatusError{403, err}
 	}
 

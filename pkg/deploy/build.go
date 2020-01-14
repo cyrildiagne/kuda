@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	v1 "github.com/GoogleContainerTools/skaffold/pkg/skaffold/schema/v1"
 	"github.com/cyrildiagne/kuda/pkg/api"
 	"github.com/cyrildiagne/kuda/pkg/config"
 	"github.com/cyrildiagne/kuda/pkg/utils"
@@ -25,19 +24,12 @@ func generate(namespace string, contextDir string, env *api.Env) error {
 		Name:   manifest.Name,
 	}
 
-	// TODO: replace namespace by user ID.
-	dockerArtifact := env.GetDockerImagePath(im)
-
 	// Generate Skaffold & Knative config files.
 	service := config.ServiceSummary{
 		Name:           manifest.Name,
 		Namespace:      namespace,
-		DockerArtifact: dockerArtifact,
-		BuildType: v1.BuildType{
-			GoogleCloudBuild: &v1.GoogleCloudBuild{
-				ProjectID: env.GCPProjectID,
-			},
-		},
+		DockerArtifact: env.ContainerRegistry.GetDockerImagePath(im),
+		BuildType:      env.ContainerBuilder.GetBuildType(),
 	}
 	// Export API version in an env var for Skaffold's tagger.
 	os.Setenv("API_VERSION", manifest.Version)

@@ -47,7 +47,7 @@ func deployFromPublished(published string) error {
 	params.Set("from", published)
 	body := strings.NewReader(params.Encode())
 
-	url := cfg.Provider.ApiURL + "/deploy"
+	url := cfg.Provider.APIURL + "/deploy"
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func deploy(manifest *latest.Manifest) error {
 	writer.Close()
 
 	// Create request.
-	url := cfg.Provider.ApiURL + "/deploy"
+	url := cfg.Provider.APIURL + "/deploy"
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return err

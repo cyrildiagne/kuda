@@ -37,7 +37,7 @@ var initCmd = &cobra.Command{
 		}
 		newCfg.Provider = config.ProviderConfig{
 			AuthURL: authURL,
-			ApiURL:  apiURL,
+			APIURL:  apiURL,
 		}
 
 		// Start login flow.

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -22,7 +23,7 @@ func main() {
 	if gcpProjectID == "" {
 		panic("cloud not load env var KUDA_GCP_PROJECT")
 	}
-	log.Println("Using project:", gcpProjectID)
+	log.Println("Using GCP project:", gcpProjectID)
 
 	if err := gcloud.AuthServiceAccount(); err != nil {
 		log.Fatalf("error authenticating with credentials. %v\n", err)
@@ -32,23 +33,11 @@ func main() {
 		log.Fatalf("could not retrieve kubectl credentials %v\n", err)
 	}
 
-	auth, fs, err := gcloud.InitFirebase(gcpProjectID)
+	ctx := context.Background()
+	env, err := gcloud.NewEnv(ctx, gcpProjectID)
 	if err != nil {
-		log.Fatalf("error initializing firebase: %v\n", err)
+		log.Fatalf("could not instanciate GCP environment %v\n", err)
 	}
-
-	env := &api.Env{
-		GCPProjectID: gcpProjectID,
-		DB:           fs,
-		Auth:         auth,
-	}
-
-	// user := "cyrildiagne"
-	// api := "hello-gpu"
-	// image := env.GetDockerImagePath(user, api)
-	// if err := gcloud.ListImageTags(image); err != nil {
-	// 	panic(err)
-	// }
 
 	port := "8080"
 	if value, ok := os.LookupEnv("port"); ok {
