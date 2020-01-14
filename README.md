@@ -20,7 +20,7 @@ It tries to reduce cold starts time (gpu nodes allocation and service instanciat
 - Deploy a template from github
 
 ```bash
-kuda deploy -f github.com/cyrildiagne/gpt2-http
+kuda deploy -f cyrildiagne/gpt2-http
 ```
 
 - Call your deployed API

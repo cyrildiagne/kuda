@@ -4,7 +4,7 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - main: ./cli/main.go
+  - main: ./cmd/cli/main.go
     env:
       - CGO_ENABLED=0
     ldflags:
