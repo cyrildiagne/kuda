@@ -108,6 +108,6 @@ func main() {
 		port = "8080"
 	}
 	fmt.Println("Listening on port", port)
-	err = http.ListenAndServe(":"+port, mux)
+	err = http.ListenAndServe("localhost:"+port, mux)
 	log.Fatal(err)
 }
