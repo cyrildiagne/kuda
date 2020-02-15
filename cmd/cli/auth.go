@@ -50,7 +50,7 @@ func startServer(port string) (*auth.User, error) {
 	r.HandleFunc("/", handleToken).Methods("POST")
 	r.HandleFunc("/", enableCORS).Methods("OPTIONS")
 
-	authRedirectServer = &http.Server{Addr: ":" + port, Handler: r}
+	authRedirectServer = &http.Server{Addr: "localhost:" + port, Handler: r}
 
 	if err := authRedirectServer.ListenAndServe(); err != nil {
 		if user != nil {
