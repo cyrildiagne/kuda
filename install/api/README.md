@@ -86,6 +86,27 @@ kubectl apply -f install/api/service.yaml
 Then check if your deployment is ready, `curl http://api.<your-domain>` and if
 see "hello!", you are all set.
 
+### 5) Create a Firestore Database.
+
+If you're using the Firestore DB as database,
+[create a database](https://console.cloud.google.com/firestore) for your project.
+
+For now, you must also initialize the database with the namespaces you want to use.
+So create a collection `namespaces`, add a document per namespace, each containing
+a map `admins` of `<UserID> : <Timestamp` for each user allowed to deploy to this namespace.
+
+For example:
+
+```
+COLLECTION   | DOCUMENTS   |
+----------------------------------------------------------------------
+namespaces > | default   > | > admins
+             |             |      SEfsefsfBRsvsgXdqefs: February 2,...
+```
+
+The UserID of each user can be found in the identity provider (for instance GCloud Identity Platform).
+Once they've logged in your service.
+
 ## Development
 
 See [DEVELOPMENT.md](./DEVELOPMENT.MD)
