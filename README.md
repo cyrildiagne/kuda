@@ -7,16 +7,16 @@
 
 ## Easily deploy GPU models as serverless APIs
 
-- Deploy a template from the registry
+- Deploy a template
 
 ```bash
-kuda deploy -f cyrildiagne/nvidiasmi-http
+$ kuda deploy -f https://raw.githubusercontent.com/cyrildiagne/kuda/releases/v0.4.0/example-hello-gpu-flask.yaml
 ```
 
 - Call it!
 
 ```bash
-$ curl -H 'x-api-key: $your_key' https://nvidiasmi.$your_namespace.example.com
+$ curl -H 'x-api-key: $your_key' https://nvidiasmi.default.$your_domain
 ```
 
 ```
@@ -28,8 +28,8 @@ Hello GPU!
 | GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
 | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
 |===============================+======================+======================|
-|   0  Tesla K80           Off  | 00000000:00:04.0 Off |                    0 |
-| N/A   37C    P8    27W / 149W |      0MiB / 11441MiB |      0%      Default |
+|   0  Tesla T4            Off  | 00000000:00:04.0 Off |                    0 |
+| N/A   37C    P8    10W /  70W |      0MiB / 15079MiB |      0%      Default |
 +-------------------------------+----------------------+----------------------+
 
 +-----------------------------------------------------------------------------+
@@ -70,11 +70,14 @@ Checkout the full list of templates available in [the registry](#).
 
 ## Serverless GPU inference
 
-Kuda builds on [Knative](#) to allocate cloud GPUs only when there is traffic to your app.
+Kuda builds on [Knative](#) to allocate cloud GPUs only when there is traffic
+to your app.
 
-This is ideal when you want to share ML projects online without keeping expensive GPUs allocated all the time.
+This is ideal when you want to share ML projects online without keeping
+expensive GPUs allocated all the time.
 
-It tries to reduce cold starts time (gpu nodes allocation and service instanciation) as much possible and to tries manage cooldown times intelligently.
+It tries to reduce cold starts time (gpu nodes allocation and service instanciation)
+as much possible and to tries manage cooldown times intelligently.
 
 ## Turn any model into a serverless API
 

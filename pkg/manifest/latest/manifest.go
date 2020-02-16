@@ -10,18 +10,25 @@ type Manifest struct {
 	ManivestVersion string `yaml:"kudaManifestVersion"`
 	Version         string `yaml:"version,omitempty"`
 	Name            string `yaml:"name"`
-	Meta            Meta   `yaml:"meta,omitempty"`
-	Deploy          Config `yaml:"deploy"`
-	Dev             Config `yaml:"dev,omitempty"`
+	License         string `yaml:"license,omitempty"`
+	// Meta            Meta   `yaml:"meta,omitempty"`
+
+	// The dev & deploy configs.
+	Deploy Config `yaml:"deploy"`
+	Dev    Config `yaml:"dev,omitempty"`
+
 	// Paths           *openapi.Paths `yaml:"paths,omitempty"`
+
+	// Release can contain the path to the deployed container.
+	Release string `yaml:"release,omitempty"`
 }
 
 // Meta stores the metadata.
-type Meta struct {
-	Author     string `yaml:"author,omitempty"`
-	Repository string `yaml:"repository,omitempty"`
-	License    string `yaml:"license,omitempty"`
-}
+// type Meta struct {
+// 	Author     string `yaml:"author,omitempty"`
+// 	Repository string `yaml:"repository,omitempty"`
+// 	License    string `yaml:"license,omitempty"`
+// }
 
 // Config stores a deployment config.
 type Config struct {
