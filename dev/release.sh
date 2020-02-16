@@ -42,6 +42,8 @@ rm scripts/*.bak
 git add scripts/get-cli.sh
 
 if git diff --exit-code; then
+  echo "nothing to commit"
+else
   git commit -m "update get script to version $VERSION"
 fi
 
