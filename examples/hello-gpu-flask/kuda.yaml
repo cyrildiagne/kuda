@@ -6,6 +6,9 @@ name: hello-gpu
 # (Optional) Version of the API.
 version: 0.1.0
 
+# (Optional) A license for the API.
+license: Apache-2.0
+
 # `deploy` is the config used when running `kuda deploy`.
 # It has sensible defaults but you can override all the properpties.
 deploy:
@@ -26,7 +29,7 @@ dev:
     - name: FLASK_ENV
       value: development
 
-# (Optional) `paths` lets you specify how clients interact with the API.
+# (Optional) `paths` lets you specify how client apps interact with the API.
 # It follows the OpenAPI 3.0 specification.
 # It is only required when publishing to a registry.
 paths:
