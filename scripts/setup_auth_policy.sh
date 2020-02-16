@@ -25,11 +25,11 @@ function setup_deployer_auth_policy() {
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
-  name: deployer-origin-auth
+  name: api-origin-auth
   namespace: kuda
 spec:
   targets:
-  - name: deployer
+  - name: api
     ports:
     - number: 80
     - number: 443
