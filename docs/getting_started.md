@@ -3,6 +3,8 @@
 Prerequisites:
 
 - Kuda installed & cluster setup ([Installation Guide](install.md))
+- Kuda initialized to point to the cluster `kuda init <your_namespace> -p <your_domain>`
+
 
 First, let's get a copy of the [`hello-gpu-flask`](/examples/hello-gpu-flask) example:
 ```
