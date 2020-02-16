@@ -14,7 +14,7 @@ Initializes the local configuration.
 
 **Flags**
 
-- `[-p, --provider]` The provider root URL (default: `kuda.cloud`).
+- `[-p, --provider]` The provider root URL (required).
 - `[--auth-url]` Specify which url to use for authentication. (default: `auth.<provider>`)
 - `[--api-url]` Specify which url to use as remote api. (default: `api.<provider>`)
 
