@@ -3,19 +3,9 @@
 [![](https://circleci.com/gh/cyrildiagne/kuda/tree/master.svg?style=shield&circle-token=b14f5838ae2acabe21a8255070507f7e36ba510b)](https://circleci.com/gh/cyrildiagne/kuda)
 [![](https://img.shields.io/github/v/release/cyrildiagne/kuda?include_prereleases)](https://github.com/cyrildiagne/kuda/releases)
 
-**Status:** 🧪Experimental
+**Status:** Experimental 🧪
 
-Kuda's goal is to make it **easy** and **inexpensive** to add cloud GPUs to any webapp.
-
-## Serverless GPU inference
-
-Kuda builds on [Knative](#) to allocate cloud GPUs only when there is traffic to your app.
-
-This is ideal when you want to share your prototypes online without keeping expensive GPUs allocated all the time.
-
-It tries to reduce cold starts time (gpu nodes allocation and service instanciation) as much possible and to tries manage cooldown times intelligently.
-
-## Add GPU models to a webapp easily
+## Easily deploy GPU models as serverless APIs
 
 - Deploy a template from the registry
 
@@ -23,11 +13,13 @@ It tries to reduce cold starts time (gpu nodes allocation and service instanciat
 kuda deploy -f cyrildiagne/nvidiasmi-http
 ```
 
-- Call it
+- Call it!
 
 ```bash
-$ curl -H 'x-api-key: $your_key' https://nvidiasmi.$your_namespace.kuda.cloud
+$ curl -H 'x-api-key: $your_key' https://nvidiasmi.$your_namespace.example.com
+```
 
+```
 Hello GPU!
 
 +-----------------------------------------------------------------------------+
@@ -63,7 +55,7 @@ kuda deploy -f cyrildiagne/gpt2-small-http
 $ curl \
     -H 'x-api-key: $your_key' \
     -F 'input=Kuda is' \
-    https://gpt2.<your-namespace>.kuda.cloud/generate
+    https://gpt2.<your-namespace>.example.com/generate
 ```
 
 ```json
@@ -75,6 +67,14 @@ $ curl \
 
 Checkout the full list of templates available in [the registry](#).
 -->
+
+## Serverless GPU inference
+
+Kuda builds on [Knative](#) to allocate cloud GPUs only when there is traffic to your app.
+
+This is ideal when you want to share ML projects online without keeping expensive GPUs allocated all the time.
+
+It tries to reduce cold starts time (gpu nodes allocation and service instanciation) as much possible and to tries manage cooldown times intelligently.
 
 ## Turn any model into a serverless API
 
@@ -122,7 +122,7 @@ deploy:
 ```
 
 Running `kuda deploy` in this example would build and deploy the API to a url
-such as `https://hello-gpu.my-namespace.kuda.cloud`.
+such as `https://hello-gpu.my-namespace.example.com`.
 
 Checkout the full example with annotations in
 [examples/hello-gpu-flask](examples/hello-gpu-flask).
