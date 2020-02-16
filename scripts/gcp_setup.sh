@@ -10,7 +10,6 @@
 # Exit on error.
 set -e
 
-
 red="\033[31m"
 reset="\033[0m"
 
@@ -48,12 +47,12 @@ export KUDA_CLUSTER_NAME="${KUDA_CLUSTER_NAME:-kuda}"
 export KUDA_CLUSTER_ZONE="${KUDA_CLUSTER_ZONE:-us-central1-a}"
 export KUDA_MASTER_MACHINE_TYPE="${KUDA_MASTER_MACHINE_TYPE:-n1-standard-2}"
 export KUDA_GPU_MACHINE_TYPE="${KUDA_GPU_MACHINE_TYPE:-n1-standard-2}"
-export KUDA_GPU_ACCELERATOR="${KUDA_GPU_ACCELERATOR:-nvidia-tesla-k80}"
+export KUDA_GPU_ACCELERATOR="${KUDA_GPU_ACCELERATOR:-nvidia-tesla-t4}"
 export KUDA_USE_PREEMPTIBLE_GPU="${KUDA_USE_PREEMPTIBLE_GPU:-true}"
 
 # The Knative version supported by this version of Kuda.
 # Changing it might lead to unexpected behaviors.
-KNATIVE_VERSION=0.11.0
+KNATIVE_VERSION=0.12.0
 
 # The user name to give RBAC admin role on the cluster.
 CLUSTER_USER_ADMIN=$(gcloud config get-value core/account)
