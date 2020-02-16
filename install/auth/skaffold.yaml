@@ -2,7 +2,7 @@ apiVersion: skaffold/v1
 kind: Config
 build:
   artifacts:
-  - image: gcr.io/kuda-cloud/auth
+  - image: gcr.io/kuda-project/auth
     docker:
       dockerfile: ./Dockerfile
 deploy:

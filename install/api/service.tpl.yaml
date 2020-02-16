@@ -11,7 +11,7 @@ spec:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
       containers:
-        - image: gcr.io/kuda-cloud/deployer
+        - image: gcr.io/kuda-project/deployer
           volumeMounts:
             - name: secret
               readOnly: true

@@ -7,7 +7,7 @@ spec:
   template:
     spec:
       containers:
-        - image: gcr.io/kuda-cloud/auth
+        - image: gcr.io/kuda-project/auth
           env:
             - name: KUDA_AUTH_API_KEY
               value: <your-auth-api-key>

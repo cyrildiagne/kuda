@@ -15,7 +15,7 @@ spec:
         app: api
     spec:
       containers:
-        - image: gcr.io/kuda-cloud/api
+        - image: gcr.io/kuda-project/api
           name: api
           volumeMounts:
             - name: secret

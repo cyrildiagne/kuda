@@ -2,7 +2,7 @@ apiVersion: skaffold/v1
 kind: Config
 build:
   artifacts:
-  - image: gcr.io/kuda-cloud/kuda-mixer-adapter
+  - image: gcr.io/kuda-project/kuda-mixer-adapter
     docker:
       dockerfile: ./Dockerfile
 deploy:
