@@ -40,7 +40,7 @@ func main() {
 	}
 
 	port := "8080"
-	if value, ok := os.LookupEnv("port"); ok {
+	if value, ok := os.LookupEnv("PORT"); ok {
 		port = value
 	}
 	fmt.Println("Starting api on port", port)
