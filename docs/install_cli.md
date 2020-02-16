@@ -24,9 +24,7 @@ kuda init <your_namespace>
 Replace <your_namespace> with your [kuda.cloud](#) username.
 -->
 
-
 ## Using [GCP](#)
-
 
 GCP provides a good environment for running Kuda.
 
@@ -36,5 +34,5 @@ Follow the installation guide for
 Then initialize your local configuration with your namespace.
 
 ```bash
-kuda init -n <your_namespace> -p <your_domain>
+kuda init <your_namespace> -p <your_domain>
 ```
