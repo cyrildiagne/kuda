@@ -2,7 +2,7 @@
 
 ```bash
 docker build \
-  -t gcr.io/kuda-cloud/deployer \
+  -t gcr.io/kuda-project/deployer \
   -f images/deployer/Dockerfile \
   .
 ```
@@ -16,7 +16,7 @@ docker run --rm \
   -v `dirname $GOOGLE_APPLICATION_CREDENTIALS`:/credentials \
   -e PORT=80 \
   -p 8080:80 \
-  gcr.io/kuda-cloud/deployer
+  gcr.io/kuda-project/deployer
 ```
 
 ## Deploy

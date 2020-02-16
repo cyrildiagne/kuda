@@ -143,7 +143,7 @@ docker run --rm \
     -p 44225:44225 \
     -e FIRESTORE_CREDENTIALS="/path/YOUR_CREDENTIALS.json" \
     -v /path/to/local/credentials/folder:/secret \
-    gcr.io/kuda-cloud/kuda-mixer-adapter
+    gcr.io/kuda-project/kuda-mixer-adapter
 ```
 
 Send a mock Authorization request:
