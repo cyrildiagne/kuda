@@ -40,7 +40,10 @@ fi
 sed -i'.bak' -e "s/\(VERSION=\)\(.*\)/\1$VERSION/" scripts/get-cli.sh
 rm scripts/*.bak
 git add scripts/get-cli.sh
-git commit -m "update get script to version $VERSION"
+
+if git diff --exit-code; then
+  git commit -m "update get script to version $VERSION"
+fi
 
 # Tag & push branch for CI release.
 git tag v$VERSION -m "Preview release."
