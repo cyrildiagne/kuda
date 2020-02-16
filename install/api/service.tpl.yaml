@@ -1,7 +1,7 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: deployer
+  name: api
   namespace: kuda
 spec:
   template:
@@ -11,17 +11,17 @@ spec:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
       containers:
-        - image: gcr.io/kuda-project/deployer
+        - image: gcr.io/kuda-project/api
           volumeMounts:
             - name: secret
               readOnly: true
               mountPath: "/secret"
           env:
             - name: KUDA_GCP_PROJECT
-              value: <your-project-id>
+              value: $KUDA_GCP_PROJECT
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /secret/key.json
       volumes:
         - name: secret
           secret:
-            secretName: deployer-credentials
+            secretName: api-credentials

@@ -1,51 +1,33 @@
-## Build
-
-```bash
-docker build \
-  -t gcr.io/kuda-project/deployer \
-  -f images/deployer/Dockerfile \
-  .
-```
-
-## Run
-
-```bash
-docker run --rm \
-  -e KUDA_GCP_PROJECT=`gcloud config get-value project` \
-  -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/`basename $GOOGLE_APPLICATION_CREDENTIALS` \
-  -v `dirname $GOOGLE_APPLICATION_CREDENTIALS`:/credentials \
-  -e PORT=80 \
-  -p 8080:80 \
-  gcr.io/kuda-project/deployer
-```
-
-## Deploy
+## Deploy on GCP
 
 ### 1) Create service account and bind roles.
 
 ```bash
+# Your GCP Project.
 export KUDA_GCP_PROJECT="your-project-id"
-export KUDA_DEPLOYER_SA=kuda-deployer
-export KUDA_DEPLOYER_SA_EMAIL=$KUDA_DEPLOYER_SA@$KUDA_GCP_PROJECT.iam.gserviceaccount.com
+# Name for the API service account that will be created.
+export KUDA_API_SERVICE_ACCOUNT=kuda-api
+# The full email for the service account.
+export KUDA_API_SERVICE_ACCOUNT_EMAIL=$KUDA_API_SERVICE_ACCOUNT@$KUDA_GCP_PROJECT.iam.gserviceaccount.com
 
 # Create the service account.
 gcloud --project $KUDA_GCP_PROJECT iam service-accounts \
-      create $KUDA_DEPLOYER_SA \
+      create $KUDA_API_SERVICE_ACCOUNT \
       --display-name "Service Account for the deployer."
 
 # Bind the role dns.admin to this service account, so it can be used to support
 # the ACME DNS01 challenge.
 gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
-  --member serviceAccount:$KUDA_DEPLOYER_SA_EMAIL \
+  --member serviceAccount:$KUDA_API_SERVICE_ACCOUNT_EMAIL \
   --role roles/container.developer
 gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
-  --member serviceAccount:$KUDA_DEPLOYER_SA_EMAIL \
+  --member serviceAccount:$KUDA_API_SERVICE_ACCOUNT_EMAIL \
   --role roles/storage.objectCreator
 gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
-  --member serviceAccount:$KUDA_DEPLOYER_SA_EMAIL \
+  --member serviceAccount:$KUDA_API_SERVICE_ACCOUNT_EMAIL \
   --role roles/cloudbuild.builds.builder
 gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
-  --member serviceAccount:$KUDA_DEPLOYER_SA_EMAIL \
+  --member serviceAccount:$KUDA_API_SERVICE_ACCOUNT_EMAIL \
   --role roles/firebase.admin
 ```
 
@@ -56,34 +38,54 @@ gcloud projects add-iam-policy-binding $KUDA_GCP_PROJECT \
 KEY_DIRECTORY=$(mktemp -d)
 
 # Download the secret key file for your service account.
-gcloud iam service-accounts keys create $KEY_DIRECTORY/deployer-credentials.json \
-  --iam-account=$KUDA_DEPLOYER_SA_EMAIL
+gcloud iam service-accounts keys create $KEY_DIRECTORY/api-credentials.json \
+  --iam-account=$KUDA_API_SERVICE_ACCOUNT_EMAIL
 
 # Upload that as a secret in your Kubernetes cluster.
-kubectl create secret -n kuda generic deployer-credentials \
-  --from-file=key.json=$KEY_DIRECTORY/deployer-credentials.json
+kubectl create secret -n kuda generic api-credentials \
+  --from-file=key.json=$KEY_DIRECTORY/api-credentials.json
 
 # Delete the local secret
 rm -rf $KEY_DIRECTORY
 ```
 
-### 3) Update the service.yaml with your GCP project id.
+### 3) Update the service.yaml with your GCP project id and project domain.
 
 ```bash
+export KUDA_GCP_PROJECT="your-gcp-project"
+export KUDA_DOMAIN="your-domain"
+```
+
+```bash
+cd install/api
+cp service-workaround.tpl.yaml service-workaround.yaml
+sed -i'.bak' "s/\$KUDA_GCP_PROJECT/$KUDA_GCP_PROJECT/g" service-workaround.yaml
+sed -i'.bak' "s/\$KUDA_DOMAIN/$KUDA_DOMAIN/g" service-workaround.yaml
+rm service-workaround.yaml.bak
+cd -
+```
+
+<!-- ```bash
+cd install/api
 cp service.tpl.yaml service.yaml
-sed -i'.bak' "s/value: <your-project-id>/value: $KUDA_GCP_PROJECT/g" service.yaml
+sed -i'.bak' "s/\$KUDA_GCP_PROJECT/$KUDA_GCP_PROJECT/g" service.yaml
+sed -i'.bak' "s/\$KUDA_DOMAIN/$KUDA_DOMAIN/g" service.yaml
 rm service.yaml.bak
-```
+cd - -->
 
-### 4) Deploy with skaffold.
-
-```bash
-skaffold run -f images/deployer/skaffold.yaml 
-```
-
-### 5) (Optional) If you want to start dev mode.
+### 4) Deploy.
 
 ```bash
-skaffold dev \
-  -f images/deployer/skaffold.yaml 
+kubectl apply -f install/api/service-workaround.yaml
 ```
+
+<!-- ```bash
+kubectl apply -f install/api/service.yaml
+``` -->
+
+Then check if your deployment is ready, `curl http://api.<your-domain>` and if
+see "hello!", you are all set.
+
+## Development
+
+See [DEVELOPMENT.md](./DEVELOPMENT.MD)

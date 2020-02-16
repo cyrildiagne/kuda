@@ -55,7 +55,7 @@ metadata:
   namespace: kuda
 spec:
   hosts:
-    - api.$KUDA_DOMAIN
+    - api.kuda.$KUDA_DOMAIN
     - api.kuda
     - api.kuda.svc
     - api.kuda.svc.cluster.local
@@ -82,7 +82,7 @@ spec:
         name: http
         protocol: HTTP
       hosts:
-        - api.$KUDA_DOMAIN
+        - api.kuda.$KUDA_DOMAIN
         - api.kuda
         - api.kuda.svc
         - api.kuda.svc.cluster.local
@@ -95,7 +95,7 @@ spec:
         privateKey: /etc/istio/ingressgateway-certs/tls.key
         serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
       hosts:
-        - api.$KUDA_DOMAIN
+        - api.kuda.$KUDA_DOMAIN
         - api.kuda
         - api.kuda.svc
         - api.kuda.svc.cluster.local
