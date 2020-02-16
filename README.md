@@ -10,7 +10,7 @@
 - Deploy a template
 
 ```bash
-$ kuda deploy -f https://raw.githubusercontent.com/cyrildiagne/kuda/0.4/examples/hello-gpu-flask/kuda.yaml
+$ kuda deploy -f https://raw.githubusercontent.com/cyrildiagne/kuda/releases/download/v0.4.0-preview/example-hello-gpu.yaml
 ```
 
 - Call it!
