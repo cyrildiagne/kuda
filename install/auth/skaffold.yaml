@@ -5,8 +5,6 @@ build:
   - image: gcr.io/kuda-project/auth
     docker:
       dockerfile: install/auth/Dockerfile
-  googleCloudBuild:
-    projectId: kuda-project
 deploy:
   kubectl:
     manifests:
