@@ -44,7 +44,25 @@ func deployFromPublished(published string) error {
 	fmt.Println("Deploying from published API image", published)
 
 	params := url.Values{}
-	params.Set("from", published)
+
+	if strings.HasPrefix(published, "http") {
+		// Download the file
+		resp, err := http.Get(published)
+		if err != nil {
+			return fmt.Errorf("error downloading %s: %w", published, err)
+		}
+		defer resp.Body.Close()
+
+		// Attach the file to the POST
+		contents, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("error reading %s: %w", published, err)
+		}
+		params.Set("from-release", string(contents))
+	} else {
+		params.Set("from", published)
+	}
+
 	body := strings.NewReader(params.Encode())
 
 	url := cfg.Provider.APIURL + "/deploy"

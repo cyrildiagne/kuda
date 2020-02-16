@@ -10,14 +10,18 @@
 - Deploy a template
 
 ```bash
-$ kuda deploy -f https://raw.githubusercontent.com/cyrildiagne/kuda/releases/v0.4.0/example-hello-gpu-flask.yaml
+$ kuda deploy -f https://raw.githubusercontent.com/cyrildiagne/kuda/0.4/examples/hello-gpu-flask/kuda.yaml
 ```
 
 - Call it!
 
 ```bash
-$ curl -H 'x-api-key: $your_key' https://nvidiasmi.default.$your_domain
+$ curl https://hello-gpu.default.$your_domain
 ```
+
+<!-- ```bash
+$ curl -H 'x-api-key: $your_key' https://hello-gpu.default.$your_domain
+``` -->
 
 ```
 Hello GPU!

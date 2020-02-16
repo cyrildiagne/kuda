@@ -6,11 +6,57 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cyrildiagne/kuda/pkg/api"
 	"github.com/cyrildiagne/kuda/pkg/config"
 	"github.com/cyrildiagne/kuda/pkg/utils"
+
+	"github.com/cyrildiagne/kuda/pkg/manifest/latest"
 )
+
+func deployFromReleaseManifest(manifest *latest.Manifest, env *api.Env, w http.ResponseWriter, r *http.Request) error {
+	// Retrieve namespace.
+	namespace, err := api.GetAuthorizedNamespace(env, r)
+	if err != nil {
+		return err
+	}
+
+	// Generate Knative YAML with appropriate namespace.
+	service := config.ServiceSummary{
+		Name:           manifest.Name,
+		Namespace:      namespace,
+		DockerArtifact: manifest.Release,
+	}
+	knativeCfg, err := config.GenerateKnativeConfig(service, manifest.Deploy)
+	if err != nil {
+		return err
+	}
+	knativeYAML, err := config.MarshalKnativeConfig(knativeCfg)
+	if err != nil {
+		return err
+	}
+	// Create new temp directory.
+	tempDir, err := ioutil.TempDir("", namespace+"__"+manifest.Name)
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tempDir)
+	knativeFile := filepath.FromSlash(tempDir + "/knative.yaml")
+	if err := utils.WriteYAML(knativeYAML, knativeFile); err != nil {
+		return err
+	}
+
+	// Run kubectl apply.
+	args := []string{"apply", "-f", knativeFile}
+	if err := RunCMD(w, "kubectl", args); err != nil {
+		return err
+	}
+
+	// TODO: Add to the namespaces' deployments.
+
+	return nil
+}
 
 func deployFromPublished(fromPublished string, env *api.Env, w http.ResponseWriter, r *http.Request) error {
 	// Retrieve namespace.
@@ -129,10 +175,22 @@ func HandleDeploy(env *api.Env, w http.ResponseWriter, r *http.Request) error {
 
 	fmt.Println("handle deploy")
 
-	// Check if deploying from published
+	// Check if deploying from published.
 	from := r.FormValue("from")
 	if from != "" {
 		return deployFromPublished(from, env, w, r)
 	}
+
+	// Otherwise check if deploying from a release manifest.
+	release := r.FormValue("from-release")
+	if release != "" {
+		manifest := latest.Manifest{}
+		if err := manifest.Load(strings.NewReader(release)); err != nil {
+			return err
+		}
+		return deployFromReleaseManifest(&manifest, env, w, r)
+	}
+
+	// Otherwise try to deploy from the files attached.
 	return deployFromFiles(env, w, r)
 }
