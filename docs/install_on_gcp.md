@@ -9,17 +9,7 @@ Requirements:
 - [gcloud](#)
 - [Kubectl](#)
 
-First, make sure you've enabled the API services using gcloud:
-
-```bash
-gcloud services enable \
-  cloudapis.googleapis.com \
-  container.googleapis.com \
-  containerregistry.googleapis.com \
-  cloudbuild.googleapis.com
-```
-
-Then override some of the defaults settings to your configuration.
+First, override some of the defaults settings to your configuration.
 You can find the full list of config values in the [setup_gcp](/scripts/setup_gcp.sh) script.
 
 ```bash

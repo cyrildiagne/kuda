@@ -129,6 +129,13 @@ function setup() {
 
   gcloud config set project $KUDA_GCP_PROJECT
 
+  # Ensure the required APIs are enabled.
+  gcloud services enable \
+    cloudapis.googleapis.com \
+    container.googleapis.com \
+    containerregistry.googleapis.com \
+    cloudbuild.googleapis.com
+
   # Check if cluster already exists otherwise create one.
   if gcloud container clusters list | grep -q $KUDA_CLUSTER_NAME; then
     echo "→ Cluster already exists."
