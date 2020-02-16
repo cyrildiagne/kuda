@@ -15,7 +15,8 @@ First, make sure you've enabled the API services using gcloud:
 gcloud services enable \
   cloudapis.googleapis.com \
   container.googleapis.com \
-  containerregistry.googleapis.com
+  containerregistry.googleapis.com \
+  cloudbuild.googleapis.com
 ```
 
 Then override some of the defaults settings to your configuration.
@@ -38,23 +39,10 @@ sh scripts/setup_gcp.sh
 kubectl get pods --all-namespaces
 ```
 
-## Enable HTTPS
-
-You must have a real domain name (not xip.io auto-domain) to enable HTTPS.
-
-The helper script enables HTTPS using [CloudDNS](#), [Let's Encrypt](#) and [cert-manager](#). Adapt the ClusterIssuer manifest if you are using a different DNS.
-
-```bash
-export KUDA_DOMAIN="example.com"
-export KUDA_NAMESPACE="default"
-export KUDA_LETSENCRYPT_EMAIL="you@example.com"
-sh scripts/gcp_enable_https.sh
-```
-
 ## Authentication
 
 Install the authentication service, by following the instruction in
-[/images/deployer](/images/auth).
+[/install/auth](/install/auth/README.md).
 
 Then install Istio's authentication policy:
 
@@ -62,7 +50,21 @@ Then install Istio's authentication policy:
 sh scripts/setup_auth_policy.sh
 ```
 
-## Deployer
+## API
 
-Install the remote deployer service, by following the instructions in
-[/images/deployer](/images/deployer).
+Install the remote deployer API, by following the instructions in
+[/install/api](/install/api).
+
+## Enable HTTPS
+
+You must have a real domain name (not xip.io auto-domain) to enable HTTPS.
+
+The helper script enables HTTPS using [CloudDNS](#), [Let's Encrypt](#) and [cert-manager](#).
+Adapt the ClusterIssuer manifest if you are using a different DNS.
+
+```bash
+export KUDA_DOMAIN="example.com"
+export KUDA_NAMESPACE="default"
+export KUDA_LETSENCRYPT_EMAIL="you@example.com"
+sh scripts/gcp_enable_https.sh
+```

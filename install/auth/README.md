@@ -1,23 +1,33 @@
 The authentication service serves a simple static page that lets user
-authenticate using [firebase auth](https://firebase.google.com/docs/auth).
+authenticate using [Cloud Identity Platform / Firebase Auth](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity).
+
+## Setup
+
+First enable the [Cloud Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) on your project and configure at least one provider.
+
+Add your domain to the list of authorized domain with the prefix `auth.kuda`.
+For example:`auth.kuda.12.34.56.78.xip.io`.
+
+If you're using the Google Auth Provider, you also have to configure the Oauth content screen.
+
+Then click on "Application setup details" to find out values of the following variables.
+ToS (Terms of Service) and PP (Privacy policy) urls can be left blank.
 
 ```bash
-export KUDA_AUTH_API_KEY="your auth API key"
+export KUDA_AUTH_API_KEY="your Firebase Auth API key"
 export KUDA_AUTH_DOMAIN="your auth domain"
 export KUDA_AUTH_TOS_URL="your terms and service url"
 export KUDA_AUTH_PP_URL="your privacy policy url"
 ```
 
-## Build
+## Build and run locally (optional)
 
 ```bash
 docker build \
-  -t gcr.io/kuda-cloud/auth \
+  -t gcr.io/kuda-project/auth \
   -f install/auth/Dockerfile \
   .
 ```
-
-## Run
 
 ```bash
 docker run --rm \
@@ -27,10 +37,10 @@ docker run --rm \
   -e KUDA_AUTH_PP_URL=$KUDA_AUTH_PP_URL \
   -e PORT=80 \
   -p 8080:80 \
-  gcr.io/kuda-cloud/auth
+  gcr.io/kuda-project/auth
 ```
 
-## Deploy
+## Deply
 
 ```bash
 KUDA_AUTH_TOS_URL=$(echo $KUDA_AUTH_TOS_URL | sed 's/\//\\\//g')
@@ -43,6 +53,20 @@ sed -i'.bak' "s/value: <your-pp-url>/value: $KUDA_AUTH_PP_URL/g" service.yaml
 rm service.yaml.bak
 ```
 
+### Dev with Skaffold
+
+To dev:
+```
+skaffold dev -f install/auth/skaffold.yaml
+```
+
+To run:
 ```bash
-skaffold run
+skaffold run -f install/auth/skaffold.yaml
+```
+
+### Deploy with kubectl
+
+```bash
+kubectl apply -f install/auth/service.yaml
 ```

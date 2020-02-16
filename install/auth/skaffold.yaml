@@ -4,8 +4,10 @@ build:
   artifacts:
   - image: gcr.io/kuda-project/auth
     docker:
-      dockerfile: ./Dockerfile
+      dockerfile: install/auth/Dockerfile
+  googleCloudBuild:
+    projectId: kuda-project
 deploy:
   kubectl:
     manifests:
-      - service.yaml
+      - install/auth/service.yaml
