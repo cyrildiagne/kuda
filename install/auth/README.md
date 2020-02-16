@@ -56,11 +56,13 @@ rm service.yaml.bak
 ### Dev with Skaffold
 
 To dev:
+
 ```
 skaffold dev -f install/auth/skaffold.yaml
 ```
 
 To run:
+
 ```bash
 skaffold run -f install/auth/skaffold.yaml
 ```
@@ -70,3 +72,21 @@ skaffold run -f install/auth/skaffold.yaml
 ```bash
 kubectl apply -f install/auth/service.yaml
 ```
+
+## Try it
+
+To check if your authentication module is working, first retrieve the URL of the
+service:
+
+```
+kubectl get ksvc auth --namespace kuda
+```
+
+If the service was deployed successfully, you should see a ligne similar to:
+
+```
+NAME   URL                                     LATESTCREATED   LATESTREADY   READY   REASON
+auth   http://auth.kuda.12.34.56.78.xip.io     auth-w4lrk      auth-w4lrk    True
+```
+
+You can then click on the URL and try to login.
