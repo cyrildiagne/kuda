@@ -26,24 +26,26 @@ sh scripts/setup_gcp.sh
 ## Make sure Kubectl is connected to your cluster
 
 ```
-kubectl get pods --all-namespaces
+kubectl get nodes --all-namespaces
 ```
+
+## API
+
+Install the remote deployement API, by following the instructions in
+[/install/api](/install/api).
 
 ## Authentication
 
 Install the authentication service, by following the instruction in
 [/install/auth](/install/auth/README.md).
 
-Then install Istio's authentication policy:
+Then deploy the [authentication policy](/scripts/setup_auth_policy.sh):
 
 ```
 sh scripts/setup_auth_policy.sh
 ```
 
-## API
-
-Install the remote deployer API, by following the instructions in
-[/install/api](/install/api).
+This policy will require a login token to access the `api` service.
 
 ## Enable HTTPS
 
