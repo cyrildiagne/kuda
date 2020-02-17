@@ -7,7 +7,7 @@
 
 ## Easily deploy GPU models as serverless APIs
 
-- Deploy a template
+- Deploy an API from a template
 
 ```bash
 $ kuda deploy -f https://github.com/cyrildiagne/kuda/releases/download/v0.4.0-preview/example-hello-gpu.yaml
@@ -74,18 +74,14 @@ Checkout the full list of templates available in [the registry](#).
 
 ## Serverless GPU inference
 
-Kuda builds on [Knative](#) to allocate cloud GPUs only when there is traffic
-to your app.
+Kuda builds on [Knative](https://knative.dev) to allocate cloud GPUs only when there is traffic.
 
 This is ideal when you want to share ML projects online without keeping
 expensive GPUs allocated all the time.
 
-It tries to reduce cold starts time (gpu nodes allocation and service instanciation)
-as much possible and to tries manage cooldown times intelligently.
-
 ## Turn any model into a serverless API
 
-Kuda deploys APIs as a docker containers, so you can use any language, any
+Kuda deploys APIs as containers, so you can use any language, any
 framework, and there is no library to import in your code.
 
 All you need is a Dockerfile.
