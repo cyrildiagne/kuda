@@ -25,7 +25,7 @@ require (
 	gopkg.in/yaml.v2 v2.2.7
 	gotest.tools v2.2.0+incompatible
 	k8s.io/api v0.0.0-20190831074750-7364b6bdad65
-	k8s.io/apimachinery v0.0.0-20190831074630-461753078381
+	k8s.io/apimachinery v0.15.7
 	knative.dev/pkg v0.0.0-20191230041935-400dfb9ff95a // indirect
 	knative.dev/serving v0.11.1
 	sigs.k8s.io/yaml v1.1.0
